@@ -27,24 +27,19 @@ function loadJobsFromDatabase() {
 
 	let tempJobs = [];
 	let dbConnection = connectToDatabase();
-	let dbQuery = null;
 	let dbAssoc;
 
 	if(dbConnection) {
-		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_main WHERE job_enabled = 1 AND job_server = ${getServerId()}`);
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempJobData = new JobData(dbAssoc);
-					tempJobData.locations = loadJobLocationsFromDatabase(tempJobData.databaseId);
-					tempJobData.equipment = loadJobEquipmentsFromDatabase(tempJobData.databaseId);
-					tempJobData.uniforms = loadJobUniformsFromDatabase(tempJobData.databaseId);
-					tempJobData.routes = loadJobRoutesFromDatabase(tempJobData.databaseId);
-					tempJobs.push(tempJobData);
-					logToConsole(LOG_DEBUG, `[VRR.Job]: Job '${tempJobData.name}' loaded from database successfully!`);
-				}
-			}
-			freeDatabaseQuery(dbQuery);
+		dbQuery = queryDatabase(dbConnection, );
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM job_main WHERE job_enabled = 1 AND job_server = ${getServerId()}`);
+		for(let i in dbAssoc) {
+			let tempJobData = new JobData(dbAssoc[i]);
+			tempJobData.locations = loadJobLocationsFromDatabase(tempJobData.databaseId);
+			tempJobData.equipment = loadJobEquipmentsFromDatabase(tempJobData.databaseId);
+			tempJobData.uniforms = loadJobUniformsFromDatabase(tempJobData.databaseId);
+			tempJobData.routes = loadJobRoutesFromDatabase(tempJobData.databaseId);
+			tempJobs.push(tempJobData);
+			logToConsole(LOG_DEBUG, `[VRR.Job]: Job '${tempJobData.name}' loaded from database successfully!`);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -92,21 +87,15 @@ function loadJobRoutesFromDatabase(jobDatabaseId) {
 
 	let tempJobRoutes = [];
 	let dbConnection = connectToDatabase();
-	let dbQuery = null;
 	let dbAssoc;
 
 	if(dbConnection) {
-		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_route WHERE job_route_enabled = 1 AND job_route_job = ${jobDatabaseId}`);
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempJobRouteData = new JobRouteData(dbAssoc);
-					tempJobRouteData.locations = loadJobRouteLocationsFromDatabase(tempJobRouteData.databaseId);
-					tempJobRoutes.push(tempJobRouteData);
-					logToConsole(LOG_DEBUG, `[VRR.Job]: Job route '${tempJobRouteData.name}' loaded from database successfully!`);
-				}
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM job_route WHERE job_route_enabled = 1 AND job_route_job = ${jobDatabaseId}`);
+		for(let i in dbAssoc) {
+			let tempJobRouteData = new JobRouteData(dbAssoc[i]);
+			tempJobRouteData.locations = loadJobRouteLocationsFromDatabase(tempJobRouteData.databaseId);
+			tempJobRoutes.push(tempJobRouteData);
+			logToConsole(LOG_DEBUG, `[VRR.Job]: Job route '${tempJobRouteData.name}' loaded from database successfully!`);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -122,20 +111,14 @@ function loadJobRouteLocationsFromDatabase(jobRouteId) {
 
 	let tempJobRouteLocations = [];
 	let dbConnection = connectToDatabase();
-	let dbQuery = null;
 	let dbAssoc;
 
 	if(dbConnection) {
-		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_route_loc WHERE job_route_loc_enabled = 1 AND job_route_loc_route = ${jobRouteId}`);
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempJobRouteLocationData = new JobRouteLocationData(dbAssoc);
-					tempJobRouteLocations.push(tempJobRouteLocationData);
-					logToConsole(LOG_DEBUG, `[VRR.Job]: Job route location '${tempJobRouteLocationData.databaseId}' loaded from database successfully!`);
-				}
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM job_route_loc WHERE job_route_loc_enabled = 1 AND job_route_loc_route = ${jobRouteId}`);
+		for(let i in dbAssoc) {
+			let tempJobRouteLocationData = new JobRouteLocationData(dbAssoc[i]);
+			tempJobRouteLocations.push(tempJobRouteLocationData);
+			logToConsole(LOG_DEBUG, `[VRR.Job]: Job route location '${tempJobRouteLocationData.databaseId}' loaded from database successfully!`);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -151,21 +134,15 @@ function loadJobEquipmentsFromDatabase(jobDatabaseId) {
 
 	let tempJobEquipments = [];
 	let dbConnection = connectToDatabase();
-	let dbQuery = null;
 	let dbAssoc;
 
 	if(dbConnection) {
-		dbQuery = queryDatabase(dbConnection, "SELECT * FROM `job_equip` WHERE `job_equip_enabled` = 1 AND `job_equip_job` = " + toString(jobDatabaseId));
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempJobEquipmentData = new JobEquipmentData(dbAssoc);
-					tempJobEquipmentData.items = loadJobEquipmentItemsFromDatabase(tempJobEquipmentData.databaseId);
-					tempJobEquipments.push(tempJobEquipmentData);
-					logToConsole(LOG_DEBUG, `[VRR.Job]: Job equipment '${tempJobEquipmentData.name}' loaded from database successfully!`);
-				}
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM job_equip WHERE job_equip_enabled = 1 AND job_equip_job = ${jobDatabaseId}`);
+		for(let i in dbAssoc) {
+			let tempJobEquipmentData = new JobEquipmentData(dbAssoc[i]);
+			tempJobEquipmentData.items = loadJobEquipmentItemsFromDatabase(tempJobEquipmentData.databaseId);
+			tempJobEquipments.push(tempJobEquipmentData);
+			logToConsole(LOG_DEBUG, `[VRR.Job]: Job equipment '${tempJobEquipmentData.name}' loaded from database successfully!`);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -181,20 +158,14 @@ function loadJobLocationsFromDatabase(jobDatabaseId) {
 
 	let tempJobLocations = [];
 	let dbConnection = connectToDatabase();
-	let dbQuery = null;
 	let dbAssoc;
 
 	if(dbConnection) {
-		dbQuery = queryDatabase(dbConnection, "SELECT * FROM `job_loc` WHERE `job_loc_enabled` = 1 AND `job_loc_job` = " + toString(jobDatabaseId));
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempJobLocationData = new JobLocationData(dbAssoc);
-					tempJobLocations.push(tempJobLocationData);
-					logToConsole(LOG_DEBUG, `[VRR.Job]: Job location '${tempJobLocationData.databaseId}' loaded from database successfully!`);
-				}
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM job_loc WHERE job_loc_enabled = 1 AND job_loc_job = ${jobDatabaseId}`);
+		for(let i in dbAssoc) {
+			let tempJobLocationData = new JobLocationData(dbAssoc[i]);
+			tempJobLocations.push(tempJobLocationData);
+			logToConsole(LOG_DEBUG, `[VRR.Job]: Job location '${tempJobLocationData.databaseId}' loaded from database successfully!`);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -210,20 +181,14 @@ function loadJobUniformsFromDatabase(jobDatabaseId) {
 
 	let tempJobUniforms = [];
 	let dbConnection = connectToDatabase();
-	let dbQuery = null;
 	let dbAssoc;
 
 	if(dbConnection) {
-		dbQuery = queryDatabase(dbConnection, "SELECT * FROM `job_uniform` WHERE `job_uniform_enabled` = 1 AND `job_uniform_job` = " + toString(jobDatabaseId));
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempJobUniformData = new JobUniformData(dbAssoc);
-					tempJobUniforms.push(tempJobUniformData);
-					logToConsole(LOG_DEBUG, `[VRR.Job]: Job uniform '${tempJobUniformData.databaseId}' loaded from database successfully!`);
-				}
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM job_uniform WHERE job_uniform_enabled = 1 AND job_uniform_job = ${jobDatabaseId}`);
+		for(let i in dbAssoc) {
+			let tempJobUniformData = new JobUniformData(dbAssoc[i]);
+			tempJobUniforms.push(tempJobUniformData);
+			logToConsole(LOG_DEBUG, `[VRR.Job]: Job uniform '${tempJobUniformData.databaseId}' loaded from database successfully!`);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -239,20 +204,14 @@ function loadJobEquipmentItemsFromDatabase(jobEquipmentDatabaseId) {
 
 	let tempJobEquipmentItems = [];
 	let dbConnection = connectToDatabase();
-	let dbQuery = null;
 	let dbAssoc;
 
 	if(dbConnection) {
-		dbQuery = queryDatabase(dbConnection, "SELECT * FROM `job_equip_item` WHERE `job_equip_item_enabled` = 1 AND `job_equip_item_equip` = " + toString(jobEquipmentDatabaseId));
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempJobEquipmentItemData = new JobEquipmentItemData(dbAssoc);
-					tempJobEquipmentItems.push(tempJobEquipmentItemData);
-					logToConsole(LOG_DEBUG, `[VRR.Job]: Job equipment item '${tempJobEquipmentItemData.databaseId}' loaded from database successfully!`);
-				}
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM job_equip_item WHERE job_equip_item_enabled = 1 AND job_equip_item_equip = ${jobEquipmentDatabaseId}`);
+		for(let i in dbAssoc) {
+			let tempJobEquipmentItemData = new JobEquipmentItemData(dbAssoc[i]);
+			tempJobEquipmentItems.push(tempJobEquipmentItemData);
+			logToConsole(LOG_DEBUG, `[VRR.Job]: Job equipment item '${tempJobEquipmentItemData.databaseId}' loaded from database successfully!`);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -265,6 +224,14 @@ function loadJobEquipmentItemsFromDatabase(jobEquipmentDatabaseId) {
 
 function createAllJobBlips() {
 	if(!getServerConfig().createJobBlips) {
+		return false;
+	}
+
+	if(areServerElementsSupported()) {
+		return false;
+	}
+
+	if(areBlipsSupported()) {
 		return false;
 	}
 
@@ -285,6 +252,14 @@ function createAllJobBlips() {
 
 function createAllJobPickups() {
 	if(!getServerConfig().createJobPickups) {
+		return false;
+	}
+
+	if(areServerElementsSupported()) {
+		return false;
+	}
+
+	if(arePickupsSupported()) {
 		return false;
 	}
 
@@ -1987,7 +1962,6 @@ function saveJobRouteToDatabase(jobRouteData) {
 			["job_route_detail", jobRouteData.detail],
 		];
 
-		let dbQuery = null;
 		if(jobRouteData.databaseId == 0) {
 			let queryString = createDatabaseInsertQuery("job_route", data);
 			dbQuery = queryDatabase(dbConnection, queryString);
@@ -2036,7 +2010,6 @@ function saveJobRouteLocationToDatabase(jobRouteLocationData) {
 
 		];
 
-		let dbQuery = null;
 		if(jobRouteLocationData.databaseId == 0) {
 			let queryString = createDatabaseInsertQuery("job_route_loc", data);
 			dbQuery = queryDatabase(dbConnection, queryString);
@@ -2082,7 +2055,6 @@ function saveJobLocationToDatabase(jobLocationData) {
 			["job_loc_vw", jobLocationData.dimension],
 		];
 
-		let dbQuery = null;
 		if(jobLocationData.databaseId == 0) {
 			let queryString = createDatabaseInsertQuery("job_loc", data);
 			dbQuery = queryDatabase(dbConnection, queryString);
@@ -2127,7 +2099,6 @@ function saveJobEquipmentToDatabase(jobEquipmentData) {
 			["job_equip_name", safeName],
 		];
 
-		let dbQuery = null;
 		if(tempJobRouteData.databaseId == 0) {
 			let queryString = createDatabaseInsertQuery("job_equip", data);
 			dbQuery = queryDatabase(dbConnection, queryString);
@@ -2170,7 +2141,6 @@ function saveJobEquipmentItemToDatabase(jobEquipmentItemData) {
 			["job_equip_item_value", jobEquipmentItemData.value],
 		];
 
-		let dbQuery = null;
 		if(tempJobRouteData.databaseId == 0) {
 			let queryString = createDatabaseInsertQuery("job_equip_item", data);
 			dbQuery = queryDatabase(dbConnection, queryString);
@@ -2214,7 +2184,6 @@ function saveJobUniformToDatabase(jobUniformData) {
 			["job_uniform_name", safeName],
 		];
 
-		let dbQuery = null;
 		if(tempJobRouteData.databaseId == 0) {
 			let queryString = createDatabaseInsertQuery("job_uniform", data);
 			dbQuery = queryDatabase(dbConnection, queryString);

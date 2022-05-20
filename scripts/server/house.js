@@ -35,15 +35,11 @@ function loadHousesFromDatabase() {
 	let dbAssoc;
 
 	if(dbConnection) {
-		let dbQuery = queryDatabase(dbConnection, `SELECT * FROM house_main WHERE house_server = ${getServerId()}`);
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempHouseData = new HouseData(dbAssoc);
-					tempHouses.push(tempHouseData);
-					logToConsole(LOG_VERBOSE, `[VRR.House]: House '${tempHouseData.description}' (ID ${tempHouseData.databaseId}) loaded!`);
-				}
-			}
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM house_main WHERE house_server = ${getServerId()}`);
+		for(let i in dbAssoc) {
+			let tempHouseData = new HouseData(dbAssoc[i]);
+			tempHouses.push(tempHouseData);
+			logToConsole(LOG_VERBOSE, `[VRR.House]: House '${tempHouseData.description}' (ID ${tempHouseData.databaseId}) loaded!`);
 			freeDatabaseQuery(dbQuery);
 		}
 		disconnectFromDatabase(dbConnection);

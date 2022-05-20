@@ -28,17 +28,12 @@ function initItemScript() {
 function loadItemsFromDatabase() {
 	let tempItems = [];
 	let dbConnection = connectToDatabase();
-	let dbFetchAssoc;
+	let dbAssoc;
 	if(dbConnection) {
-		let dbQuery = queryDatabase(dbConnection, `SELECT * FROM item_main WHERE item_server = ${getServerId()}`);
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbFetchAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempItemData = new ItemData(dbFetchAssoc);
-					tempItems.push(tempItemData);
-				}
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM item_main WHERE item_server = ${getServerId()}`);
+		for(let i in dbAssoc) {
+			let tempItemData = new ItemData(dbAssoc[i]);
+			tempItems.push(tempItemData);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -50,17 +45,12 @@ function loadItemsFromDatabase() {
 function loadItemTypesFromDatabase() {
 	let tempItemTypes = [];
 	let dbConnection = connectToDatabase();
-	let dbFetchAssoc;
+	let dbAssoc;
 	if(dbConnection) {
-		let dbQuery = queryDatabase(dbConnection, `SELECT * FROM item_type WHERE item_type_enabled = 1 AND item_type_server = ${getServerId()}`);
-		if(dbQuery) {
-			if(getQueryNumRows(dbQuery) > 0) {
-				while(dbFetchAssoc = fetchQueryAssoc(dbQuery)) {
-					let tempItemTypeData = new ItemTypeData(dbFetchAssoc);
-					tempItemTypes.push(tempItemTypeData);
-				}
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM item_type WHERE item_type_enabled = 1 AND item_type_server = ${getServerId()}`);
+		for(let i in dbAssoc) {
+			let tempItemTypeData = new ItemTypeData(dbAssoc[i]);
+			tempItemTypes.push(tempItemTypeData);
 		}
 		disconnectFromDatabase(dbConnection);
 	}

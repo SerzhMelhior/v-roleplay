@@ -627,7 +627,9 @@ function onPlayerSpawn(client) {
 
 // ===========================================================================
 
-function onPlayerCommand(event, client, command, params) {
+// Only used for MP mods without an "add command handler" ability
+// Not bound on GTA Connected or RageMP
+function onPlayerCommand(client, command, params) {
 	if(!doesCommandExist(command)) {
 		processPlayerCommand(command, params, client);
 	}

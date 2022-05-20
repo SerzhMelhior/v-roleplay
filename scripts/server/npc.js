@@ -59,14 +59,11 @@ function loadNPCsFromDatabase() {
 	let dbAssoc;
 	if(dbConnection) {
 		let dbQueryString = `SELECT * FROM npc_main WHERE npc_server = ${getServerId()} AND npc_enabled = 1`;
-		let dbQuery = queryDatabase(dbConnection, dbQueryString);
-		if(dbQuery) {
-			while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-				let tempNPCData = new NPCData(dbAssoc);
-				tempNPCData.triggers = loadNPCTriggersFromDatabase();
-				tempNPCs.push(tempNPCData);
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, dbQueryString);
+		for(let i in dbAssoc) {
+			let tempNPCData = new NPCData(dbAssoc[i]);
+			tempNPCData.triggers = loadNPCTriggersFromDatabase();
+			tempNPCs.push(tempNPCData);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -84,15 +81,12 @@ function loadNPCTriggersFromDatabase(npcDatabaseId) {
 	let dbAssoc;
 	if(dbConnection) {
 		let dbQueryString = `SELECT * FROM npc_trig WHERE npc_trig_npc = ${npcDatabaseId} AND npc_trig_enabled = 1`;
-		let dbQuery = queryDatabase(dbConnection, dbQueryString);
-		if(dbQuery) {
-			while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-				let tempNPCTriggerData = new NPCTriggerData(dbAssoc);
-				tempNPCTriggerData.conditions = loadNPCTriggerConditionsFromDatabase(tempNPCTriggerData.databaseId);
-				tempNPCTriggerData.responses = loadNPCTriggerResponsesFromDatabase(tempNPCTriggerData.databaseId);
-				tempNPCTriggers.push(tempNPCTriggerData);
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, dbQueryString);
+		for(let i in dbAssoc) {
+			let tempNPCTriggerData = new NPCTriggerData(dbAssoc[i]);
+			tempNPCTriggerData.conditions = loadNPCTriggerConditionsFromDatabase(tempNPCTriggerData.databaseId);
+			tempNPCTriggerData.responses = loadNPCTriggerResponsesFromDatabase(tempNPCTriggerData.databaseId);
+			tempNPCTriggers.push(tempNPCTriggerData);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -110,13 +104,10 @@ function loadNPCTriggerConditionsFromDatabase(npcTriggerDatabaseId) {
 	let dbAssoc;
 	if(dbConnection) {
 		let dbQueryString = `SELECT * FROM npc_cond WHERE npc_cond_trig = ${npcTriggerDatabaseId} AND npc_cond_enabled = 1`;
-		let dbQuery = queryDatabase(dbConnection, dbQueryString);
-		if(dbQuery) {
-			while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-				let tempNPCTriggerConditionData = new NPCTriggerConditionData(dbAssoc);
-				tempNPCTriggerConditions.push(tempNPCTriggerConditionData);
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, dbQueryString);
+		for(let i in dbAssoc) {
+			let tempNPCTriggerConditionData = new NPCTriggerConditionData(dbAssoc[i]);
+			tempNPCTriggerConditions.push(tempNPCTriggerConditionData);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
@@ -134,13 +125,10 @@ function loadNPCTriggerResponsesFromDatabase(npcTriggerDatabaseId) {
 	let dbAssoc;
 	if(dbConnection) {
 		let dbQueryString = `SELECT * FROM npc_resp WHERE npc_resp_trig = ${npcTriggerDatabaseId} AND npc_resp_enabled = 1`;
-		let dbQuery = queryDatabase(dbConnection, dbQueryString);
-		if(dbQuery) {
-			while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-				let tempNPCTriggerResponseData = new NPCTriggerResponseData(dbAssoc);
-				tempNPCTriggerResponses.push(tempNPCTriggerResponseData);
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, dbQueryString);
+		for(let i in dbAssoc) {
+			let tempNPCTriggerResponseData = new NPCTriggerResponseData(dbAssoc[i]);
+			tempNPCTriggerResponses.push(tempNPCTriggerResponseData);
 		}
 		disconnectFromDatabase(dbConnection);
 	}

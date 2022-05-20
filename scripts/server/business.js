@@ -48,10 +48,10 @@ function loadBusinessesFromDatabase() {
 
 	let tempBusinesses = [];
 	let dbConnection = connectToDatabase();
-	let dbQuery = null;
-	let dbAssoc;
+	let dbAssoc = [];
 
 	if(dbConnection) {
+<<<<<<< Updated upstream
 		dbQuery = queryDatabase(dbConnection, `SELECT * FROM biz_main WHERE biz_server = ${getServerId()}`);
 		if(dbQuery) {
 			if(dbQuery.numRows > 0) {
@@ -64,6 +64,15 @@ function loadBusinessesFromDatabase() {
 				}
 			}
 			freeDatabaseQuery(dbQuery);
+=======
+		dbAssoc = await fetchQueryAssoc(dbConnection, `SELECT * FROM biz_main WHERE biz_server = ${getServerId()}`);
+		for(let i in dbAssoc) {
+			let tempBusinessData = new BusinessData(dbAssoc[i]);
+			//tempBusinessData.locations = loadBusinessLocationsFromDatabase(tempBusinessData.databaseId);
+			//tempBusinessData.gameScripts = loadBusinessGameScriptsFromDatabase(tempBusinessData.databaseId);
+			tempBusinesses.push(tempBusinessData);
+			logToConsole(LOG_VERBOSE, `[VRR.Business]: Business '${tempBusinessData.name}' (ID ${tempBusinessData.databaseId}) loaded from database successfully!`);
+>>>>>>> Stashed changes
 		}
 		disconnectFromDatabase(dbConnection);
 	}

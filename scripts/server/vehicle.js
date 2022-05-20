@@ -28,13 +28,10 @@ function loadVehiclesFromDatabase() {
 	let dbAssoc;
 	if(dbConnection) {
 		let dbQueryString = `SELECT * FROM veh_main WHERE veh_server = ${getServerId()} AND veh_deleted = 0`;
-		let dbQuery = queryDatabase(dbConnection, dbQueryString);
-		if(dbQuery) {
-			while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-				let tempVehicleData = new VehicleData(dbAssoc);
-				tempVehicles.push(tempVehicleData);
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, dbQueryString);
+		for(let i in dbAssoc) {
+			let tempVehicleData = new VehicleData(dbAssoc[i]);
+			tempVehicles.push(tempVehicleData);
 		}
 		disconnectFromDatabase(dbConnection);
 	}

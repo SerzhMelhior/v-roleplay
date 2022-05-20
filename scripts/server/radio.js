@@ -27,13 +27,10 @@ function loadRadioStationsFromDatabase() {
 	let dbAssoc;
 	if(dbConnection) {
 		let dbQueryString = `SELECT * FROM radio_main`;
-		let dbQuery = queryDatabase(dbConnection, dbQueryString);
-		if(dbQuery) {
-			while(dbAssoc = fetchQueryAssoc(dbQuery)) {
-				let tempRadioStationData = new RadioStationData(dbAssoc);
-				tempRadioStations.push(tempRadioStationData);
-			}
-			freeDatabaseQuery(dbQuery);
+		dbAssoc = await fetchQueryAssoc(dbConnection, dbQueryString);
+		for(let i in dbAssoc) {
+			let tempRadioStationData = new RadioStationData(dbAssoc[i]);
+			tempRadioStations.push(tempRadioStationData);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
