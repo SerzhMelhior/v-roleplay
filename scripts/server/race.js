@@ -8,11 +8,8 @@
 // ===========================================================================
 
 function initRaceScript() {
-	if(!getServerConfig().devServer) {
-		getServerData().races = loadRacesFromDatabase();
-	}
-
-	setRaceDataIndexes();
+	logToConsole(LOG_INFO, "[VRR.Race]: Initializing race script ...");
+	logToConsole(LOG_INFO, "[VRR.Race]: Race script initialized successfully!");
 }
 
 // ===========================================================================
@@ -26,6 +23,58 @@ function getRaceData(raceId) {
 		return getServerData().races[raceId];
 	}
 	return false;
+}
+
+// ===========================================================================
+
+function setAllRaceDataIndexes() {
+	for(let i in getServerData().races) {
+		getServerData().races[i].index = i;
+	}
+}
+
+// ===========================================================================
+
+function loadRacesFromDatabase() {
+	// To-do
+	return [];
+}
+
+// ===========================================================================
+
+function saveRacesToDatabase() {
+	if(getServerConfig().devServer) {
+		return false;
+	}
+
+	for(let i in getServerData().races) {
+		saveRaceToDatabase(getServerData().races[i]);
+	}
+}
+
+// ===========================================================================
+
+function saveRaceToDatabase(raceData) {
+	return true;
+}
+
+// ===========================================================================
+
+function createRaceCommand(command, params, client) {
+	if(areParamsEmpty(params)) {
+		messagePlayerSyntax(client, getCommandSyntaxText(command));
+		return false;
+	}
+
+	let raceId = getRaceFromParams(params);
+
+	if(raceId == false) {
+		messagePlayerError(client, "A race with that name already exists!");
+		return false;
+	}
+
+	createRace(params);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created race {ALTCOLOUR}${params}`);
 }
 
 // ===========================================================================

@@ -59,8 +59,13 @@ function addAllEventHandlers() {
 
 function onResourceStart(event, resource) {
 	sendResourceStartedSignalToServer();
-	setUpInitialGame();
-	garbageCollectorInterval = setInterval(collectAllGarbage, 1000*60);
+	//setUpInitialGame();
+	//garbageCollectorInterval = setInterval(collectAllGarbage, 1000*60);
+
+	resourceStarted = true;
+	if(resourceReady == true) {
+		initClient();
+	}
 }
 
 // ===========================================================================
@@ -73,6 +78,10 @@ function onResourceStop(event, resource) {
 
 function onResourceReady(event, resource) {
 	sendResourceReadySignalToServer();
+	resourceReady = true;
+	if(resourceStarted == true) {
+		initClient();
+	}
 }
 
 // ===========================================================================
@@ -97,6 +106,7 @@ function onProcess(event, deltaTime) {
 	processGameSpecifics();
 	processNearbyPickups();
 	processVehiclePurchasing();
+	processVehicleBurning();
 	//checkChatBoxAutoHide(); // Will be uncommented on 1.4.0 GTAC update
 	//processVehicleFires();
 }
@@ -163,13 +173,13 @@ function onLocalPlayerEnteredVehicle(event, vehicle, seat) {
 
 	sendNetworkEventToServer("vrr.onPlayerEnterVehicle", getVehicleForNetworkEvent(vehicle), seat);
 
-	if(inVehicleSeat == 0) {
-		inVehicle.engine = false;
-		if(!inVehicle.engine) {
-			parkedVehiclePosition = inVehicle.position;
-			parkedVehicleHeading = inVehicle.heading;
-		}
-	}
+	//if(inVehicleSeat == 0) {
+		//setVehicleEngine(vehicle, false);
+		//if(!inVehicle.engine) {
+		//	parkedVehiclePosition = inVehicle.position;
+		//	parkedVehicleHeading = inVehicle.heading;
+		//}
+	//}
 }
 
 // ===========================================================================
@@ -182,7 +192,7 @@ function onPedInflictDamage(event, damagedEntity, damagerEntity, weaponId, healt
 		if(damagedEntity.isType(ELEMENT_PLAYER)) {
 			if(damagedEntity == localPlayer) {
 				//if(!weaponDamageEnabled[damagerEntity.name]) {
-					event.preventDefault();
+					preventDefaultEventAction(event);
 					sendNetworkEventToServer("vrr.weaponDamage", damagerEntity.name, weaponId, pedPiece, healthLoss);
 				//}
 			}

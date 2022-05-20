@@ -11,7 +11,6 @@ let login = {
 	window: null,
 	logoImage: null,
 	messageLabel: null,
-	passwordLabel: null,
 	passwordInput: null,
 	loginButton: null,
 	forgotPasswordButton: null,
@@ -23,7 +22,7 @@ let login = {
 let loginHTML =
 `<html>
     <head>
-        <title>Connected RP: Login</title>
+        <title>Asshat Gaming Roleplay: Login</title>
         <style type="text/css" rel="stylesheet">
             .input-box
             {
@@ -63,8 +62,9 @@ function initLoginGUI() {
 	});
 	login.window.titleBarIconSize = toVector2(0,0);
 	login.window.titleBarHeight = 0;
+	login.window.titleBarShown = false;
 
-	login.logoImage = login.window.image(5, 20, 290, 100, mainLogoPath, {
+	login.logoImage = login.window.image(100, 20, 100, 100, mainLogoPath, {
 		focused: {
 			borderColour: toColour(0, 0, 0, 0),
 		},
@@ -156,6 +156,8 @@ function showLoginGUI() {
 	login.window.shown = true;
 	mexui.focusedControl = login.passwordInput;
 	guiSubmitKey = checkLogin;
+
+	showLocaleChooserGUI();
 	//showSmallGameMessage(`If you don't have a mouse cursor, press ${toUpperCase(getKeyNameFromId(disableGUIKey))} to disable GUI`, COLOUR_WHITE, 7500);
 }
 

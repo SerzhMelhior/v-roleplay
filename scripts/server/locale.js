@@ -7,22 +7,8 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
-let translateURL = "http://api.mymemory.translated.net/get?de={3}&q={0}&langpair={1}|{2}";
-
-// ===========================================================================
-
 function initLocaleScript() {
 	logToConsole(LOG_INFO, "[VRR.Locale]: Initializing locale script ...");
-	getServerData().localeStrings = loadAllLocaleStrings();
-
-	// Translation Cache
-	getServerData().cachedTranslations = new Array(getGlobalConfig().locale.locales.length);
-	getServerData().cachedTranslationFrom = new Array(getGlobalConfig().locale.locales.length);
-	getServerData().cachedTranslationFrom.fill([]);
-	getServerData().cachedTranslations.fill(getServerData().cachedTranslationFrom);
-
-	getGlobalConfig().locale.defaultLanguageId = getLocaleFromParams(getGlobalConfig().locale.defaultLanguageId);
-
 	logToConsole(LOG_INFO, "[VRR.Locale]: Locale script initialized!");
 }
 
@@ -30,8 +16,10 @@ function initLocaleScript() {
 
 function getLocaleString(client, stringName, ...args) {
 	let tempString = getRawLocaleString(stringName, getPlayerData(client).locale);
-	if(tempString == "") {
+	if(tempString == "" || tempString == null || typeof tempString == "undefined") {
+		logToConsole(LOG_WARN, `[VRR.Locale] Locale string missing for ${stringName} on language ${getLocaleData(getPlayerData(client).locale).englishName}`);
 		submitBugReport(client, `(AUTOMATED REPORT) Locale string "${stringName}" is missing for "${getPlayerLocaleName(client)}"`);
+		return "";
 	}
 
 	for(let i = 1; i <= args.length; i++) {
@@ -45,7 +33,8 @@ function getLocaleString(client, stringName, ...args) {
 
 function getLanguageLocaleString(localeId, stringName, ...args) {
 	let tempString = getRawLocaleString(stringName, localeId);
-	if(tempString == "") {
+	if(tempString == "" || tempString == null || typeof tempString == "undefined") {
+		logToConsole(LOG_WARN, `[VRR.Locale] Locale string missing for ${stringName} on language ${getLocaleData(getPlayerData(client).locale).englishName}`);
 		submitBugReport(client, `(AUTOMATED REPORT) Locale string "${stringName}" is missing for "${getPlayerLocaleName(client)}"`);
 	}
 
@@ -163,7 +152,7 @@ function setLocaleCommand(command, params, client) {
 	getPlayerData(client).accountData.locale = localeId;
 	getPlayerData(client).locale = localeId;
 	messagePlayerSuccess(client, getLocaleString(client, "LocaleChanged1", getLocaleString(client, "LocaleNativeName")));
-	sendPlayerLocaleStrings(client);
+	sendPlayerLocaleId(client, localeId);
 }
 
 // ===========================================================================
@@ -188,9 +177,7 @@ function reloadLocaleConfigurationCommand(command, params, client) {
 	getServerData().cachedTranslationFrom.fill([]);
 	getServerData().cachedTranslations.fill(getServerData().cachedTranslationFrom);
 
-	getGlobalConfig().locale.defaultLanguageId = getLocaleFromParams(getGlobalConfig().locale.defaultLanguage);
-
-	messageAdmins(`${client.name}{MAINCOLOUR} has reloaded the locale settings and texts`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} has reloaded the locale settings and texts`);
 }
 
 // ===========================================================================
@@ -209,7 +196,7 @@ async function translateMessage(messageText, translateFrom = getGlobalConfig().l
 			}
 		}
 
-		let thisTranslationURL = translateURL.format(encodeURI(messageText), toUpperCase(getGlobalConfig().locale.locales[translateFrom].isoCode), toUpperCase(getGlobalConfig().locale.locales[translateTo].isoCode), getGlobalConfig().locale.apiEmail);
+		let thisTranslationURL = getGlobalConfig().locale.translateURL.format(encodeURI(messageText), toUpperCase(getGlobalConfig().locale.locales[translateFrom].isoCode), toUpperCase(getGlobalConfig().locale.locales[translateTo].isoCode), getGlobalConfig().locale.apiEmail);
 		httpGet(
 			thisTranslationURL,
 			"",

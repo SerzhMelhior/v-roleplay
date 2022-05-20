@@ -12,7 +12,7 @@ var app = {};
 let mainFont = "Roboto"; // "Arial"
 
 //let mainLogoPath = (typeof gta == "undefined") ? "files/images/mafiac-logo.png" : "files/images/gtac-logo.png";
-let mainLogoPath = "files/images/server-logo.png";
+let mainLogoPath = "files/images/asshat-logo.png";
 
 let primaryColour = [200, 200, 200];
 let secondaryColour = [16, 16, 16];
@@ -60,12 +60,17 @@ function initGUI() {
 	initListGUI();
 	initResetPasswordGUI();
 	initChangePasswordGUI();
+	initLocaleChooserGUI();
 
 	closeAllWindows();
 	guiReady = true;
 
 	logToConsole(LOG_DEBUG, `[VRR.GUI] All GUI created successfully!`);
 	sendNetworkEventToServer("vrr.guiReady", true);
+
+	loadAllLocaleStrings();
+	resetGUIStrings();
+	resetLocaleChooserOptions();
 };
 
 // ===========================================================================
@@ -81,8 +86,9 @@ function closeAllWindows() {
 	characterSelect.window.shown = false;
 	twoFactorAuth.window.shown = false;
 	listDialog.window.shown = false;
-	resetPassword.window.shown = false;
+	passwordReset.window.shown = false;
 	passwordChange.window.shown = false;
+	localeChooser.window.shown = false;
 
 	mexui.setInput(false);
 	mexui.focusedControl = false;
@@ -137,11 +143,15 @@ function isAnyGUIActive() {
 		return true;
 	}
 
-	if(resetPassword.window.shown == true) {
+	if(passwordReset.window.shown == true) {
 		return true;
 	}
 
 	if(passwordChange.window.shown == true) {
+		return true;
+	}
+
+	if(localeChooser.window.shown == true) {
 		return true;
 	}
 
@@ -242,6 +252,13 @@ addNetworkEventHandler("vrr.showResetPasswordCodeInput", function() {
 
 // ===========================================================================
 
+addNetworkEventHandler("vrr.showLocaleChooser", function() {
+	logToConsole(LOG_DEBUG, `[VRR.GUI] Received signal to show locale chooser from server`);
+	showLocaleChooserGUI();
+});
+
+// ===========================================================================
+
 addNetworkEventHandler("vrr.guiColour", function(red1, green1, blue1, red2, green2, blue2, red3, green3, blue3) {
 	logToConsole(LOG_DEBUG, `[VRR.GUI] Received new GUI colours from server: ${red1}, ${green1}, ${blue1} / ${red2}, ${green2}, ${blue2} / ${red3}, ${green3}, ${blue3}`);
 	primaryColour = [red1, green1, blue1];
@@ -320,3 +337,49 @@ function processToggleGUIKeyPress(keyCode) {
 }
 
 // ===========================================================================
+
+function resetGUIStrings() {
+	// Login GUI
+	login.messageLabel.text = getLocaleString("GUILoginWindowLabelEnterPassword");
+	login.passwordInput.placeholder = getLocaleString("GUILoginWindowPasswordPlaceholder");
+	login.loginButton.text = toUpperCase(getLocaleString("GUILoginWindowSubmitButton"));
+	login.forgotPasswordButton.text = toUpperCase(getLocaleString("GUILoginWindowResetPasswordButton"));
+	login.resetPasswordLabel.text = getLocaleString("GUILoginWindowForgotPasswordLabel");
+
+	// Register GUI
+	register.messageLabel.text = getLocaleString("GUIRegisterWindowLabelCreateAccount");
+	register.passwordInput.placeholder = getLocaleString("GUIRegisterWindowPasswordPlaceholder");
+	register.confirmPasswordInput.placeholder = getLocaleString("GUIRegisterWindowConfirmPasswordPlaceholder");
+	register.emailInput.placeholder = getLocaleString("GUIRegisterWindowEmailPlaceholder");
+	register.registerButton.text = toUpperCase(getLocaleString("GUIRegisterWindowSubmitButton"));
+
+	// Change Password GUI
+	passwordChange.window.title = toUpperCase(getLocaleString("GUIChangePasswordWindowTitle"));
+	passwordChange.messageLabel.text = getLocaleString("GUIChangePasswordPasswordLabel");
+	passwordChange.passwordInput.placeholder = getLocaleString("GUIChangePasswordPasswordPlaceholder");
+	passwordChange.confirmPasswordInput.placeholder = getLocaleString("GUIChangePasswordConfirmPasswordPlaceholder");
+	passwordChange.submitButton.text = toUpperCase(getLocaleString("GUIChangePasswordSubmitButton"));
+
+	// Reset Password GUI
+	passwordReset.messageLabel.text = toUpperCase(getLocaleString("GUIResetPasswordConfirmEmailLabel"));
+	passwordReset.emailInput.placeholder = getLocaleString("GUIResetPasswordEmailPlaceholder");
+	passwordReset.resetPasswordButton.text = toUpperCase(getLocaleString("GUIResetPasswordSubmitButton"));
+	passwordReset.backToLoginButton.text = toUpperCase(getLocaleString("GUIResetPasswordLoginButton"));
+	passwordReset.backToLoginLabel.text = getLocaleString("GUIResetPasswordRememberMessage");
+
+	// Character Selection GUI
+	characterSelect.window.title = toUpperCase(getLocaleString("GUICharacterSelectWindowTitle"));
+	characterSelect.cashText.text = getLocaleString("GUICharacterSelectMoneyLabel", "0");
+	characterSelect.clanText.text = getLocaleString("GUICharacterSelectClanLabel", "None");
+	characterSelect.lastPlayedText.text = getLocaleString("GUICharacterSelectLastPlayedLabel", "Never");
+	characterSelect.previousCharacterButton.text = toUpperCase(getLocaleString("GUIPreviousCharacterButton"));
+	characterSelect.nextCharacterButton.text = toUpperCase(getLocaleString("GUINextCharacterButton"));
+	characterSelect.selectCharacterButton.text = toUpperCase(getLocaleString("GUIPlayAsCharacterButton"));
+	characterSelect.newCharacterButton.text = toUpperCase(getLocaleString("GUINewCharacterButton"));
+
+	// Character Creation GUI
+	newCharacter.messageLabel.text = getLocaleString("GUINewCharacterMessageLabel");
+	newCharacter.firstNameInput.placeholder = getLocaleString("GUINewCharacterFirstNamePlaceholder");
+	newCharacter.lastNameInput.placeholder = getLocaleString("GUINewCharacterLastNamePlaceholder");
+	newCharacter.createCharacterButton.text = toUpperCase(getLocaleString("GUINewCharacterSubmitButton"));
+}

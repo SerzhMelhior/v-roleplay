@@ -15,35 +15,7 @@ function initEventScript() {
 
 // ===========================================================================
 
-function addAllEventHandlers() {
-	addEventHandler("onResourceStart", onResourceStart);
-	addEventHandler("onResourceStop", onResourceStop);
-	addEventHandler("onServerStop", onResourceStop);
-
-	addEventHandler("onProcess", onProcess);
-	addEventHandler("onEntityProcess", onEntityProcess);
-
-	addEventHandler("onPlayerConnect", onPlayerConnect);
-	addEventHandler("onPlayerJoin", onPlayerJoin);
-	addEventHandler("onPlayerJoined", onPlayerJoined);
-	addEventHandler("onPlayerChat", onPlayerChat);
-	addEventHandler("onPlayerQuit", onPlayerQuit);
-	addEventHandler("onElementStreamIn", onElementStreamIn);
-	addEventHandler("onElementStreamOut", onElementStreamOut);
-
-	addEventHandler("onPedSpawn", onPedSpawn);
-	addEventHandler("onPedEnterVehicle", onPedEnteringVehicle);
-	addEventHandler("onPedExitVehicle", onPedExitingVehicle);
-
-	addEventHandler("onPedEnteringVehicle", onPedEnteringVehicle);
-	addEventHandler("onPedExitingVehicle", onPedExitingVehicle);
-
-	//addEventHandler("OnPlayerCommand", onPlayerCommand);
-}
-
-// ===========================================================================
-
-function onPlayerConnect(event, ipAddress, port) {
+function onInitialConnectionToServer(ipAddress, port) {
 	logToConsole(LOG_INFO, `[VRR.Event] Client connecting (IP: ${ipAddress})`);
 	//if(isIpAddressBanned(ipAddress)) {
 	//    messagePlayerError(client, "You are banned from this server!");
@@ -53,26 +25,33 @@ function onPlayerConnect(event, ipAddress, port) {
 
 // ===========================================================================
 
-function onPlayerJoin(event, client) {
-	logToConsole(LOG_INFO, `[VRR.Event] Client ${client.name}[${client.index}] joining from ${client.ip}`);
+function onPlayerJoin(client) {
+	logToConsole(LOG_INFO, `[VRR.Event] Client ${getPlayerName(client)}[${getPlayerId(client)}] joining from ${getPlayerIP(client)}`);
 
 	if(isFadeCameraSupported()) {
 		fadeCamera(client, true, 1.0);
 	}
 
-	messageDiscordEventChannel(`👋 ${client.name} is connecting to the server ...`);
+	let messageText = `👋 ${getPlayerName(client)} is connecting to the server ...`;
+	messageDiscordEventChannel(messageText);
+
+	let clients = getClients();
+	for(let i in clients) {
+		messagePlayerNormal(clients[i], getLocaleString(clients[i], "PlayerConnecting", getPlayerName(client)));
+	}
+
 	//messageDiscordEventChannel(`👋 ${getPlayerDisplayForConsole(client)} has joined the server.`);
 }
 
 // ===========================================================================
 
-function onPlayerJoined(event, client) {
+function onPlayerJoined(client) {
 
 }
 
 // ===========================================================================
 
-function onElementStreamIn(event, element, client) {
+function onElementStreamIn(element, client) {
 	//if(getPlayerDimension(client) != getElementDimension(element)) {
 	//    event.preventDefault();
 	//}
@@ -87,29 +66,33 @@ function onElementStreamIn(event, element, client) {
 
 // ===========================================================================
 
-function onElementStreamOut(event, element, client) {
+function onElementStreamOut(element, client) {
 
 }
 
 // ===========================================================================
 
-function onPlayerQuit(event, client, quitReasonId) {
+function onPlayerQuit(client, quitReasonId) {
 	logToConsole(LOG_INFO, `👋 Client ${getPlayerDisplayForConsole(client)} disconnected (${disconnectReasons[quitReasonId]}[${quitReasonId}])`);
 	updateConnectionLogOnQuit(client, quitReasonId);
 
-	if(isPlayerLoggedIn(client)) {
-		let reasonText = disconnectReasons[quitReasonId];
-		if(getPlayerData(client).customDisconnectReason != "") {
-			reasonText = getPlayerData(client).customDisconnectReason;
-		}
-		messagePlayerNormal(null, `👋 ${getPlayerName(client)} has left the server (${reasonText})`, getColourByName("softYellow"));
-		messageDiscordEventChannel(`👋 ${client.name} has left the server (${reasonText})`);
+	let reasonText = disconnectReasons[quitReasonId];
+	if(getPlayerData(client).customDisconnectReason != "" && getPlayerData(client).customDisconnectReason != undefined && getPlayerData(client).customDisconnectReason != false && getPlayerData(client).customDisconnectReason != null) {
+		reasonText = getPlayerData(client).customDisconnectReason;
+	}
 
+	messageDiscordEventChannel(`👋 ${getPlayerName(client)} has left the server (${reasonText})`);
+
+	getClients().forEach(forClient => {
+		let reasonText = getGroupedLocaleString(forClient, "DisconnectReasons", quitReasonId);
+		messagePlayerNormal(forClient, getLocaleString(forClient, "PlayerLeftServer", getPlayerName(client), reasonText));
+	});
+	//messagePlayerNormal(null, `👋 ${getPlayerName(client)} has left the server (${reasonText})`, getColourByName("softYellow"));
+
+	if(isPlayerLoggedIn(client)) {
 		savePlayerToDatabase(client);
 		resetClientStuff(client);
-		getServerData().clients[client.index] = null;
-	} else {
-		messageDiscordEventChannel(`👋 ${client.name} has left the server (${disconnectReasons[quitReasonId]}[${quitReasonId}])`);
+		getServerData().clients[getPlayerId(client)] = null;
 	}
 
 	clearTemporaryVehicles();
@@ -118,14 +101,14 @@ function onPlayerQuit(event, client, quitReasonId) {
 
 // ===========================================================================
 
-async function onPlayerChat(event, client, messageText) {
+async function onPlayerChat(client, messageText) {
 	processPlayerChat(client, messageText);
 	event.preventDefault();
 }
 
 // ===========================================================================
 
-function onProcess(event, deltaTime) {
+function onProcess(deltaTime = 0) {
 	updateServerGameTime();
 	//checkPlayerSpawning();
 	//checkPlayerPedState();
@@ -136,12 +119,12 @@ function onProcess(event, deltaTime) {
 
 // ===========================================================================
 
-function onEntityProcess(event, entity) {
+function onEntityProcess(entity) {
 }
 
 // ===========================================================================
 
-function onPedEnteringVehicle(event, ped, vehicle, seat) {
+function onPedEnteringVehicle(ped, vehicle, seat) {
 	if(ped.isType(ELEMENT_PLAYER)) {
 		let client = getClientFromPlayerElement(ped);
 		getPlayerData(client).pedState = VRR_PEDSTATE_ENTERINGVEHICLE;
@@ -161,8 +144,8 @@ function onPedEnteringVehicle(event, ped, vehicle, seat) {
 				messagePlayerNormal(client, `🔒 This ${getVehicleName(vehicle)} is locked and you don't have the keys to unlock it`);
 			}
 
-			getPlayerData(client).enteringVehicle = null;
-			makePlayerStopAnimation(client);
+			//getPlayerData(client).enteringVehicle = null;
+			//makePlayerStopAnimation(client);
 			return false;
 		}
 
@@ -172,7 +155,7 @@ function onPedEnteringVehicle(event, ped, vehicle, seat) {
 
 // ===========================================================================
 
-function onPedExitingVehicle(event, ped, vehicle) {
+function onPedExitingVehicle(ped, vehicle) {
 	if(!getVehicleData(vehicle)) {
 		return false;
 	}
@@ -191,40 +174,28 @@ function onPedExitingVehicle(event, ped, vehicle) {
 
 // ===========================================================================
 
-function onResourceStart(event, resource) {
-	logToConsole(LOG_WARN, `[VRR.Event] ${resource.name} started!`);
+function onResourceStart(resource) {
+	logToConsole(LOG_WARN, `[VRR.Event] Resource ${resource.name} started!`);
 
 	if(resource != thisResource) {
-		messageAdmins(`{MAINCOLOUR}Resource {ALTCOLOUR}${resource.name} {MAINCOLOUR}started!`);
+		messageAdmins(`{MAINCOLOUR}Resource {ALTCOLOUR}${resource.name}{MAINCOLOUR} started!`);
 	}
 }
 
 // ===========================================================================
 
-function onResourceStop(event, resource) {
-	logToConsole(LOG_WARN, `[VRR.Event] ${resource.name} stopped!`);
+function onResourceStop(resource) {
+	logToConsole(LOG_WARN, `[VRR.Event] Resource ${resource.name} stopped!`);
 
 	if(resource != thisResource) {
-		messageAdmins(`{MAINCOLOUR}Resource {ALTCOLOUR}${resource.name} {MAINCOLOUR}stopped!`);
+		messageAdmins(`{MAINCOLOUR}Resource {ALTCOLOUR}${resource.name}{MAINCOLOUR} stopped!`);
 	}
 
 	if(resource == thisResource) {
-		saveServerDataToDatabase();
-		clearArray(getServerData().vehicles);
-		clearArray(getServerData().clients);
-		clearArray(getServerData().businesses);
-		clearArray(getServerData().houses);
-		clearArray(getServerData().factions);
-		clearArray(getServerData().jobs);
-		clearArray(getServerData().clans);
-		clearArray(getServerData().items);
-		clearArray(getServerData().itemTypes);
-		clearArray(getServerData().groundItemCache);
-		clearArray(getServerData().groundPlantCache);
 		kickAllClients();
+		saveServerDataToDatabase();
+		collectAllGarbage();
 	}
-
-	collectAllGarbage();
 }
 
 // ===========================================================================
@@ -395,7 +366,7 @@ function onPlayerDeath(client, position) {
 		setTimeout(function() {
 			if(getPlayerCurrentSubAccount(client).inJail) {
 				let closestJail = getClosestPoliceStation(getPlayerPosition(client));
-				client.despawnPlayer();
+				despawnPlayer(client);
 				getPlayerCurrentSubAccount(client).interior = closestJail.interior;
 				getPlayerCurrentSubAccount(client).dimension = closestJail.dimension;
 
@@ -417,7 +388,7 @@ function onPlayerDeath(client, position) {
 				setPlayerControlState(client, true);
 			} else {
 				let closestHospital = getClosestHospital(getPlayerPosition(client));
-				client.despawnPlayer();
+				despawnPlayer(client);
 				getPlayerCurrentSubAccount(client).interior = closestHospital.interior;
 				getPlayerCurrentSubAccount(client).dimension = closestHospital.dimension;
 
@@ -441,6 +412,17 @@ function onPlayerDeath(client, position) {
 			}
 		}, 2000);
 	}, 1000);
+
+	let queryData = [
+		["log_death_server", getServerId()]
+		["log_death_who_died", getPlayerCurrentSubAccount(client).databaseId],
+		["log_death_when_died", "{UNIXTIMESTAMP}"],
+		["log_death_pos_x", position.x],
+		["log_death_pos_y", position.y],
+		["log_death_pos_z", position.x],
+	];
+	let queryString = createDatabaseInsertQuery("log_death", data);
+	addToQueryQueue(queryString);
 }
 
 // ===========================================================================
@@ -467,27 +449,27 @@ function onPlayerSpawn(client) {
 	logToConsole(LOG_DEBUG, `[VRR.Event] Checking ${getPlayerDisplayForConsole(client)}'s player data`);
 	if(!getPlayerData(client)) {
 		logToConsole(LOG_DEBUG, `[VRR.Event] ${getPlayerDisplayForConsole(client)}'s player data is invalid. Kicking them from server.`);
-		client.disconnect();
+		disconnectPlayer(client);
 		return false;
 	}
 
 	logToConsole(LOG_DEBUG, `[VRR.Event] Checking ${getPlayerDisplayForConsole(client)}'s login status`);
 	if(!isPlayerLoggedIn(client)) {
 		logToConsole(LOG_DEBUG, `[VRR.Event] ${getPlayerDisplayForConsole(client)} is NOT logged in. Despawning their player.`);
-		client.disconnect();
+		disconnectPlayer(client);
 		return false;
 	}
 
 	logToConsole(LOG_DEBUG, `[VRR.Event] Checking ${getPlayerDisplayForConsole(client)}'s selected character status`);
 	if(getPlayerData(client).currentSubAccount == -1) {
 		logToConsole(LOG_DEBUG, `[VRR.Event] ${getPlayerDisplayForConsole(client)} has NOT selected a character. Despawning their player.`);
-		client.disconnect();
+		disconnectPlayer(client);
 		return false;
 	}
 
 	logToConsole(LOG_DEBUG, `[VRR.Event] ${getPlayerDisplayForConsole(client)}'s player data is valid. Continuing spawn processing ...`);
 
-	if(getServerGame() == VRR_GAME_GTA_IV) {
+	if(getGame() == VRR_GAME_GTA_IV) {
 		logToConsole(LOG_DEBUG, `[VRR.Event] Setting ${getPlayerDisplayForConsole(client)}'s ped body parts and props`);
 		setEntityData(getPlayerPed(client), "vrr.bodyParts", getPlayerCurrentSubAccount(client).bodyParts, true);
 		setEntityData(getPlayerPed(client), "vrr.bodyProps", getPlayerCurrentSubAccount(client).bodyProps, true);
@@ -545,7 +527,7 @@ function onPlayerSpawn(client) {
 		updatePlayerSnowState(client);
 	}
 
-	if(areServerElementsSupported() && getServerGame() == VRR_GAME_GTA_SA) {
+	if(areServerElementsSupported() && getGame() == VRR_GAME_GTA_SA) {
 		logToConsole(LOG_DEBUG, `[VRR.Event] Setting player walk and fightstyle for ${getPlayerDisplayForConsole(client)}`);
 		setEntityData(getPlayerPed(client), "vrr.walkStyle", getPlayerCurrentSubAccount(client).walkStyle, true);
 
@@ -571,8 +553,6 @@ function onPlayerSpawn(client) {
 		logToConsole(LOG_DEBUG, `[VRR.Event] Sending custom enter property key ID (${keyId.key}, ${toUpperCase(getKeyNameFromId(keyId.key))}) to ${getPlayerDisplayForConsole(client)}`);
 		sendPlayerEnterPropertyKey(client, keyId.key);
 	}
-
-	sendPlayerLocaleStrings(client);
 
 	//if(isGTAIV()) {
 	//    setEntityData(getPlayerPed(client), "vrr.bodyPartHair", getPlayerCurrentSubAccount(client).bodyParts.hair, true);
@@ -611,6 +591,9 @@ function onPlayerSpawn(client) {
 	logToConsole(LOG_DEBUG, `[VRR.Event] Updating all player name tags`);
 	updateAllPlayerNameTags();
 
+	logToConsole(LOG_DEBUG, `[VRR.Event] Sending player nametag distance to ${getPlayerDisplayForConsole(client)}`);
+	sendNameTagDistanceToClient(client, getServerConfig().nameTagDistance);
+
 	if(!areServerElementsSupported()) {
 		sendAllBusinessesToPlayer(client);
 		sendAllHousesToPlayer(client);
@@ -622,7 +605,7 @@ function onPlayerSpawn(client) {
 
 	getPlayerData(client).payDayTickStart = sdl.ticks;
 
-	messageDiscordEventChannel(`🧍 ${client.name} spawned as ${getCharacterFullName(client)}`);
+	messageDiscordEventChannel(`🧍 ${getPlayerName(client)} spawned as ${getCharacterFullName(client)}`);
 }
 
 // ===========================================================================

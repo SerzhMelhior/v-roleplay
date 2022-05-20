@@ -39,8 +39,9 @@ function initRegisterGUI() {
 	});
 	register.window.titleBarIconSize = toVector2(0,0);
 	register.window.titleBarHeight = 0;
+	register.window.titleBarShown = false;
 
-	register.window.image(5, 20, 290, 100, mainLogoPath, {
+	register.window.image(100, 20, 100, 100, mainLogoPath, {
 		focused: {
 			borderColour: toColour(0, 0, 0, 0),
 		},
@@ -160,6 +161,9 @@ function showRegistrationGUI() {
 	register.window.shown = true;
 	mexui.focusedControl = register.passwordInput;
 	guiSubmitKey = checkRegistration;
+
+	showLocaleChooserGUI();
+
 	//showSmallGameMessage(`If you don't have a mouse cursor, press ${toUpperCase(getKeyNameFromId(disableGUIKey))} to disable GUI`, COLOUR_WHITE, 7500);
 }
 

@@ -178,6 +178,7 @@ let serverColours = {
 			clanOrange: "FF9900",
 			vehiclePurple: "960096",
 			jobYellow: "FFFF00",
+			adminOrange: "ED4337",
 		},
 	},
 
@@ -193,6 +194,22 @@ let serverColours = {
 		alertMessage: toColour(255, 255, 0, 255),
 		successMessage: toColour(0, 180, 0, 255),
 		clanChatMessage: toColour(0, 190, 0, 255),
+		policeBlue: toColour(50, 80, 200, 255),
+		medicPink: toColour(219, 112, 147, 255),
+		firefighterRed: toColour(205, 60, 60, 255),
+		busDriverGreen: toColour(50, 160, 50, 255),
+		taxiDriverYellow: toColour(240, 230, 100, 255),
+		deliveryPurple: toColour(177, 156, 217, 255),
+		civilianWhite: toColour(200, 200, 200, 255),
+		burntYellow: toColour(210, 210, 0, 255),
+		burntOrange: toColour(210, 120, 0, 255),
+		bankGreen: toColour(0, 150, 0, 255),
+		softYellow: toColour(234, 198, 126, 255),
+		businessBlue: toColour(0, 153, 255, 255),
+		houseGreen: toColour(17, 204, 17, 255),
+		clanOrange: toColour(255, 153, 0, 255),
+		npcPink: toColour(219, 112, 147, 255),
+		adminOrange: toColour(205, 60, 60, 255),
 	},
 	byName: {
 		white: toColour(255, 255, 255, 255),
@@ -223,6 +240,7 @@ let serverColours = {
 		houseGreen: toColour(17, 204, 17, 255),
 		clanOrange: toColour(255, 153, 0, 255),
 		npcPink: toColour(219, 112, 147, 255),
+		adminOrange: toColour(205, 60, 60, 255),
 	},
 };
 
@@ -1341,19 +1359,17 @@ function getDistance(vec1, vec2) {
 // ===========================================================================
 
 function logToConsole(tempLogLevel, text) {
-	if(typeof server != "undefined") {
-		text = removeColoursInMessage(text);
-	}
+	text = removeColoursInMessage(text);
 
-	if((logLevel & tempLogLevel)) {
+	if(hasBitFlag(logLevel|LOG_WARN|LOG_ERROR, tempLogLevel)) {
 		if(tempLogLevel & LOG_ERROR) {
-			console.error(text);
+			consoleError(text);
 			return true;
 		} else if(tempLogLevel & LOG_WARN) {
-			console.warn(text);
+			consoleWarn(text);
 			return true;
 		} else {
-			console.log(text);
+			consolePrint(text);
 			return true;
 		}
 	}
@@ -1373,9 +1389,7 @@ function Enum(constantsList) {
 // ===========================================================================
 
 function clearArray(array) {
-	if(array != null) {
-		array.splice(0, array.length);
-	}
+	array.length = 0;
 }
 
 // ===========================================================================
@@ -1394,16 +1408,6 @@ function getPercentage(num, per) {
 
 function getMultiplayerMod() {
 	return (getGame() >= 10) ? VRR_MPMOD_MAFIAC : VRR_MPMOD_GTAC;
-}
-
-// ===========================================================================
-
-function getGame() {
-	if(isServerScript()) {
-		return server.game;
-	} else {
-		return game.game;
-	}
 }
 
 // ===========================================================================
@@ -1493,6 +1497,7 @@ function getAllowedSkins(gameId = getGame()) {
 // ===========================================================================
 
 function getAllowedSkinIndexFromSkin(skin) {
+	let allowedSkins = getAllowedSkins();
 	for(let i in allowedSkins) {
 		if(allowedSkins[i][0] == skin) {
 			return i;
@@ -1722,11 +1727,9 @@ function getObjectModelFromName(name, gameId = getGame()) {
 
 // ===========================================================================
 
-// ===========================================================================
-
 function getPosToRightOfPos(pos, angle, distance) {
-	let x = (pos.x+((Math.cos((-angle+1.57)+(Math.PI/2)))*distance));
-	let y = (pos.y+((Math.sin((-angle+1.57)+(Math.PI/2)))*distance));
+	let x = (pos.x+((Math.cos((angle-1.57)+(Math.PI/2)))*distance));
+	let y = (pos.y+((Math.sin((angle-1.57)+(Math.PI/2)))*distance));
 
 	let rightPos = toVector3(x, y, pos.z);
 
@@ -2687,6 +2690,14 @@ function removeColoursInMessage(messageText) {
 		return "";
 	}
 
+	if(typeof messageText != "string") {
+		return "";
+	}
+
+	if(messageText == "") {
+		return "";
+	}
+
 	let tempFind = `{RESETCOLOUR}`;
 	let tempRegex = new RegExp(tempFind, 'g');
 	messageText = messageText.replace(tempRegex, "");
@@ -2785,6 +2796,52 @@ function isPosInPoly(poly, position) {
 		&& (position.x < (poly[j].x - poly[i].x) * (position[1] - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)
 		&& (c = !c);
 	return c;
+}
+
+// ===========================================================================
+
+function createBitFlagTable(keyNames) {
+	let bitVal = 0;
+	let bitTable = {};
+	let incVal = 1;
+
+	for(let i in keyNames) {
+		let key = keyNames[i];
+		bitTable[key] = bitVal;
+		bitVal = 1 << incVal;
+		incVal++;
+	}
+	return bitTable;
+}
+
+// ===========================================================================
+
+function hasBitFlag(allFlags, checkForFlag) {
+	if(allFlags == 0) {
+		return false;
+	}
+
+	if(allFlags == -1) {
+		return true;
+	}
+
+	if((allFlags & checkForFlag) == checkForFlag) {
+		return true;
+	}
+
+	return false;
+}
+
+// ===========================================================================
+
+function addBitFlag(allFlags, flagValue) {
+	return allFlags | flagValue;
+}
+
+// ===========================================================================
+
+function removeBitFlag(allFlags, flagValue) {
+	return allFlags ^ flagValue;
 }
 
 // ===========================================================================

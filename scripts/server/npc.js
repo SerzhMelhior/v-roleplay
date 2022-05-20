@@ -8,12 +8,8 @@
 // ===========================================================================
 
 function initNPCScript() {
-	if(!getServerConfig().devServer) {
-		getServerData().npcs = loadNPCsFromDatabase();
-	}
-
-	setNPCDataIndexes();
-	spawnNPCs();
+	logToConsole(LOG_INFO, "[VRR.NPC]: Initializing NPC script ...");
+	logToConsole(LOG_INFO, "[VRR.NPC]: NPC script initialized successfully!");
 }
 
 // ===========================================================================
@@ -46,8 +42,8 @@ function createNPCCommand(client, command, params) {
 
 	let position = getPosInFrontOfPos(getPlayerPosition(client), getPlayerHeading(client), 3);
 
-	let npcId = createNPC(skinId, position, getPlayerHeading(client));
-	messageAdmins(`${client.name}{MAINCOLOUR} created a ${getSkinNameFromIndex(getNPCData(npcId).skin)} NPC!`);
+	let npcId = createNPC(skinId, position, getPlayerHeading(client), getPlayerInterior(client), getPlayerDimension());
+	messageAdmins(`${getPlayerName(client)}{MAINCOLOUR} created a ${getSkinNameFromIndex(getNPCData(npcId).skin)} NPC!`);
 }
 
 // ===========================================================================
@@ -139,7 +135,7 @@ function loadNPCTriggerResponsesFromDatabase(npcTriggerDatabaseId) {
 
 // ===========================================================================
 
-function saveNPCsToDatabase() {
+function saveAllNPCsToDatabase() {
 	if(getServerConfig().devServer) {
 		return false;
 	}
@@ -152,6 +148,10 @@ function saveNPCsToDatabase() {
 // ===========================================================================
 
 function saveNPCToDatabase(npcDataId) {
+	if(getServerConfig().devServer) {
+		return false;
+	}
+
 	if(getNPCData(npcDataId) == null) {
 		// Invalid NPC data
 		return false;
@@ -175,11 +175,11 @@ function saveNPCToDatabase(npcDataId) {
 		if(tempNPCData.ped != false) {
 			if(!tempNPCData.spawnLocked) {
 				if(areServerElementsSupported()) {
-					tempNPCData.spawnPosition = tempNPCData.vehicle.position;
-					tempNPCData.spawnRotation = tempNPCData.vehicle.heading;
+					tempNPCData.position = tempNPCData.ped.position;
+					tempNPCData.heading = tempNPCData.ped.heading;
 				} else {
-					tempNPCData.spawnPosition = tempNPCData.syncPosition;
-					tempNPCData.spawnRotation = tempNPCData.syncHeading;
+					tempNPCData.position = tempNPCData.syncPosition;
+					tempNPCData.heading = tempNPCData.syncHeading;
 				}
 			}
 		}
@@ -273,7 +273,7 @@ function spawnNPC(npcIndex) {
 
 // ===========================================================================
 
-function spawnNPCs() {
+function spawnAllNPCs() {
 	for(let i in getServerData().npcs) {
 		spawnNPC(npcIndex);
 	}
@@ -297,7 +297,7 @@ function deleteNPCCommand(command, params, client) {
 	let npcName = getNPCData(closestNPC).name;
 
 	deleteNPC(closestNPC);
-	messageAdmins(`${client.name}{MAINCOLOUR} deleted NPC {npcPink}${npcName}`);
+	messageAdmins(`${getPlayerName(client)}{MAINCOLOUR} deleted NPC {npcPink}${npcName}`);
 }
 
 // ===========================================================================
@@ -365,17 +365,19 @@ function getClosestNPC(position) {
 
 // ===========================================================================
 
-function createNPC(skinIndex, position, heading) {
+function createNPC(skinIndex, position, heading, interior, dimension) {
 	let tempNPCData = new NPCData(false);
 	tempNPCData.position = position;
 	tempNPCData.heading = heading;
 	tempNPCData.skin = skinIndex;
+	tempNPCData.interior = interior;
+	tempNPCData.dimension = dimension;
 	tempNPCData.animationName = "";
 
 	let npcIndex = getServerData().npcs.push(tempNPCData);
+	setNPCDataIndexes();
 
 	spawnNPC(npcIndex-1);
-	setNPCDataIndexes();
 
 	return npcIndex-1;
 }

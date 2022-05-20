@@ -7,8 +7,6 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
-// ===========================================================================
-
 function initClassScript() {
 	logToConsole(LOG_INFO, "[VRR.Class]: Initializing class script ...");
 	logToConsole(LOG_INFO, "[VRR.Class]: Class script initialized successfully!");
@@ -59,6 +57,7 @@ class ServerConfigData {
 		this.inflationMultiplier = 1;
 		this.testerOnly = false;
 		this.devServer = false;
+		this.nameTagDistance = 50.0;
 
 		this.antiCheat = {
 			enabled: false,
@@ -89,7 +88,7 @@ class ServerConfigData {
 		this.discordConfig = {
 			sendEvents: true,
 			sendChat: true,
-			sendAdminEvents: true,
+			sendAdmin: true,
 		};
 
 		if(dbAssoc) {
@@ -109,27 +108,22 @@ class ServerConfigData {
 			this.minute = toInteger(dbAssoc["svr_start_time_min"]);
 			this.minuteDuration = toInteger(dbAssoc["svr_time_min_duration"]);
 			this.weather = toInteger(dbAssoc["svr_start_weather"]);
-			//this.fallingSnow = intToBool(toInteger(dbAssoc["svr_start_snow_falling"]));
-			//this.groundSnow = intToBool(toInteger(dbAssoc["svr_start_snow_ground"]));
-			//this.useGUI = intToBool(toInteger(dbAssoc["svr_gui_enabled"]));
-			//this.showLogo = intToBool(toInteger(dbAssoc["svr_logo_enabled"]));
-			//this.testerOnly = intToBool(toInteger(dbAssoc["svr_tester_only"]));
-
-			/*
-			this.createJobPickups = intToBool(toInteger(dbAssoc["svr_job_pickups_enabled"]));
-			this.createBusinessPickups = intToBool(toInteger(dbAssoc["svr_biz_pickups_enabled"]));
-			this.createHousePickups = intToBool(toInteger(dbAssoc["svr_house_pickups_enabled"]));
-			this.createJobBlips = intToBool(toInteger(dbAssoc["svr_job_blips_enabled"]));
-			this.createBusinessBlips = intToBool(toInteger(dbAssoc["svr_biz_blips_enabled"]));
-			this.createHouseBlips = intToBool(toInteger(dbAssoc["svr_house_blips_enabled"]));
-			*/
-
+			this.fallingSnow = intToBool(toInteger(dbAssoc["svr_snow_falling"]));
+			this.groundSnow = intToBool(toInteger(dbAssoc["svr_snow_ground"]));
+			this.useGUI = intToBool(toInteger(dbAssoc["svr_gui"]));
+			this.showLogo = intToBool(toInteger(dbAssoc["svr_logo"]));
+			this.createJobPickups = intToBool(toInteger(dbAssoc["svr_job_pickups"]));
+			this.createBusinessPickups = intToBool(toInteger(dbAssoc["svr_biz_pickups"]));
+			this.createHousePickups = intToBool(toInteger(dbAssoc["svr_house_pickups"]));
+			this.createJobBlips = intToBool(toInteger(dbAssoc["svr_job_blips"]));
+			this.createBusinessBlips = intToBool(toInteger(dbAssoc["svr_biz_blips"]));
+			this.createHouseBlips = intToBool(toInteger(dbAssoc["svr_house_blips"]));
 			this.guiColourPrimary = [toInteger(dbAssoc["svr_gui_col1_r"]), toInteger(dbAssoc["svr_gui_col1_g"]), toInteger(dbAssoc["svr_gui_col1_b"])];
 			this.guiColourSecondary = [toInteger(dbAssoc["svr_gui_col2_r"]), toInteger(dbAssoc["svr_gui_col2_g"]), toInteger(dbAssoc["svr_gui_col2_b"])];
 			this.guiTextColourPrimary = [toInteger(dbAssoc["svr_gui_textcol1_r"]), toInteger(dbAssoc["svr_gui_textcol1_g"]), toInteger(dbAssoc["svr_gui_textcol1_b"])];
 			//this.guiTextColourSecondary = [toInteger(dbAssoc["svr_gui_textcol2_r"]), toInteger(dbAssoc["svr_gui_textcol2_g"]), toInteger(dbAssoc["svr_gui_textcol2_b"])];
 			this.inflationMultiplier = toFloat(dbAssoc["svr_inflation_multiplier"]);
-
+			this.nameTagDistance = toFloat(dbAssoc["svr_nametag_distance"]);
 			this.discordBotToken = intToBool(dbAssoc["svr_discord_bot_token"]);
 			this.introMusicURL = dbAssoc["svr_intro_music"];
 
@@ -137,9 +131,9 @@ class ServerConfigData {
 			//this.realTimeZone = dbAssoc["svr_real_time_timezone"];
 
 			this.discord = {
-				sendEvents: true,
-				sendChat: true,
-				sendAdmin: true,
+				sendEvents: intToBool(dbAssoc["svr_discord_send_events"]),
+				sendChat: intToBool(dbAssoc["svr_discord_send_chat"]),
+				sendAdmin: intToBool(dbAssoc["svr_discord_send_admin"]),
 			};
 		}
 	}
@@ -252,7 +246,7 @@ class ClientData {
 
 		this.customDisconnectReason = "";
 
-		this.interiorCutscene = "";
+		this.interiorCutscene = -1;
 	}
 };
 
@@ -540,7 +534,7 @@ class BusinessData {
 		this.entranceBlipModel = -1;
 		this.entrancePickup = null;
 		this.entranceBlip = null;
-		this.entranceCutscene = "";
+		this.entranceCutscene = -1;
 
 		this.exitPosition = false;
 		this.exitRotation = 0.0;
@@ -550,7 +544,7 @@ class BusinessData {
 		this.exitBlipModel = -1;
 		this.exitPickup = null;
 		this.exitBlip = null;
-		this.exitCutscene = "";
+		this.exitCutscene = -1;
 
 		this.entranceFee = 0;
 		this.till = 0;
@@ -560,6 +554,8 @@ class BusinessData {
 		this.labelHelpType = VRR_PROPLABEL_INFO_NONE;
 
 		this.triggers = [];
+
+		this.customInterior = false;
 
 		if(dbAssoc) {
 			this.databaseId = toInteger(dbAssoc["biz_id"]);
@@ -577,7 +573,7 @@ class BusinessData {
 			this.entranceDimension = toInteger(dbAssoc["biz_entrance_vw"]);
 			this.entrancePickupModel = toInteger(dbAssoc["biz_entrance_pickup"]);
 			this.entranceBlipModel = toInteger(dbAssoc["biz_entrance_blip"]);
-			this.entranceCutscene = toString(dbAssoc["biz_entrance_cutscene"]);
+			this.entranceCutscene = toInteger(dbAssoc["biz_entrance_cutscene"]);
 
 			this.exitPosition = toVector3(dbAssoc["biz_exit_pos_x"], dbAssoc["biz_exit_pos_y"], dbAssoc["biz_exit_pos_z"]);
 			this.exitRotation = toInteger(dbAssoc["biz_exit_rot_z"]);
@@ -585,14 +581,14 @@ class BusinessData {
 			this.exitDimension = toInteger(dbAssoc["biz_exit_vw"]);
 			this.exitPickupModel = toInteger(dbAssoc["biz_exit_pickup"]);
 			this.exitBlipModel = toInteger(dbAssoc["biz_exit_blip"]);
-			this.exitCutscene = toString(dbAssoc["biz_exit_cutscene"]);
+			this.exitCutscene = toInteger(dbAssoc["biz_exit_cutscene"]);
 
 			this.entranceFee = toInteger(dbAssoc["biz_entrance_fee"]);
 			this.till = toInteger(dbAssoc["biz_till"]);
 
 			this.labelHelpType = toInteger(dbAssoc["biz_label_help_type"]);
 			this.streamingRadioStation = toInteger(dbAssoc["biz_radiostation"]);
-
+			this.customInterior = intToBool(toInteger(dbAssoc["biz_custom_interior"]));
 		}
 	};
 };
@@ -681,7 +677,6 @@ class HouseData {
 		this.entranceBlipModel = -1;
 		this.entrancePickup = null;
 		this.entranceBlip = null;
-		this.entranceCutscene = "";
 
 		this.exitPosition = false;
 		this.exitRotation = 0.0;
@@ -691,11 +686,12 @@ class HouseData {
 		this.exitBlipModel = -1;
 		this.exitPickup = null;
 		this.exitBlip = null;
-		this.exitCutscene = "";
 
 		this.streamingRadioStation = -1;
 
 		this.triggers = [];
+
+		this.customInterior = false;
 
 		if(dbAssoc) {
 			this.databaseId = toInteger(dbAssoc["house_id"]);
@@ -715,7 +711,7 @@ class HouseData {
 			this.entranceDimension = toInteger(dbAssoc["house_entrance_vw"]);
 			this.entrancePickupModel = toInteger(dbAssoc["house_entrance_pickup"]);
 			this.entranceBlipModel = toInteger(dbAssoc["house_entrance_blip"]);
-			this.entranceCutscene = toString(dbAssoc["house_entrance_cutscene"]);
+			this.entranceCutscene = toInteger(dbAssoc["house_entrance_cutscene"]);
 
 			this.exitPosition = toVector3(toFloat(dbAssoc["house_exit_pos_x"]), toFloat(dbAssoc["house_exit_pos_y"]), toFloat(dbAssoc["house_exit_pos_z"]));
 			this.exitRotation = toFloat(dbAssoc["house_exit_rot_z"]);
@@ -723,7 +719,9 @@ class HouseData {
 			this.exitDimension = toInteger(dbAssoc["house_exit_vw"]);
 			this.exitPickupModel = toInteger(dbAssoc["house_exit_pickup"]);
 			this.exitBlipModel = toInteger(dbAssoc["house_exit_blip"]);
-			this.exitCutscene = toString(dbAssoc["house_exit_cutscene"]);
+			this.exitCutscene = toInteger(dbAssoc["house_exit_cutscene"]);
+
+			this.customInterior = intToBool(toInteger(dbAssoc["house_custom_interior"]));
 		}
 	}
 };
@@ -1259,14 +1257,12 @@ class JobLocationData {
 		this.routeCache = [];
 
 		if(dbAssoc) {
-			this.databaseId = dbAssoc["job_loc_id"];
-			this.jobId = dbAssoc["job_loc_job"];
-			this.position = toVector3(dbAssoc["job_loc_pos_x"], dbAssoc["job_loc_pos_y"], dbAssoc["job_loc_pos_z"]);
-			this.blip = false;
-			this.pickup = false;
-			this.enabled = dbAssoc["job_loc_enabled"];
-			this.interior = dbAssoc["job_loc_int"];
-			this.dimension = dbAssoc["job_loc_vw"];
+			this.databaseId = toInteger(dbAssoc["job_loc_id"]);
+			this.jobId = toInteger(dbAssoc["job_loc_job"]);
+			this.position = toVector3(toFloat(dbAssoc["job_loc_pos_x"]), toFloat(dbAssoc["job_loc_pos_y"]), toFloat(dbAssoc["job_loc_pos_z"]));
+			this.enabled = toInteger(dbAssoc["job_loc_enabled"]);
+			this.interior = toInteger(dbAssoc["job_loc_int"]);
+			this.dimension = toInteger(dbAssoc["job_loc_vw"]);
 		}
 	}
 };
@@ -1719,3 +1715,26 @@ class JobRouteLocationData {
 		}
 	}
 };
+
+class GateData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.scriptName = "";
+		this.enabled = false;
+		this.position = toVector3(0.0, 0.0, 0.0);
+		this.locked = true;
+		this.ownerType = VRR_GATEOWNER_NONE;
+		this.ownerId = 0;
+
+		if(dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["gate_id"]);
+			this.name = toString(dbAssoc["gate_name"]);
+			this.scriptName = toString(dbAssoc["gate_script_name"]);
+			this.enabled = intToBool(toInteger(dbAssoc["gate_enabled"]));
+			this.position = toVector3(toFloat(dbAssoc["gate_pos_x"]), toFloat(dbAssoc["gate_pos_y"]), toFloat(dbAssoc["gate_pos_z"]));
+			this.ownerType = toInteger(dbAssoc["gate_owner_type"]);
+			this.ownerId = toInteger(dbAssoc["gate_owner_id"]);
+		}
+	}
+}

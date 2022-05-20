@@ -25,7 +25,7 @@ function playPlayerAnimationCommand(command, params, client) {
 
 	if(!animationSlot) {
 		messagePlayerError(client, getLocaleString(client, "InvalidAnimation"));
-		messagePlayerInfo(client, getLocaleString(client, "AnimationHelpTip"), `{ALTCOLOUR}/animlist{MAINCOLOUR}`);
+		messagePlayerInfo(client, getLocaleString(client, "AnimationCommandTip", `{ALTCOLOUR}/animlist{MAINCOLOUR}`));
 		return false;
 	}
 
@@ -64,13 +64,13 @@ function stopPlayerAnimationCommand(command, params, client) {
 	getPlayerData(client).animationStart = 0;
 	getPlayerData(client).animationForced = false;
 
-	setPlayerMouseCameraState(client, false);
+	//setPlayerMouseCameraState(client, false);
 }
 
 // ===========================================================================
 
 function showAnimationListCommand(command, params, client) {
-	let animList = getGameConfig().animations[getServerGame()].map(function(x) { return x.name; });
+	let animList = getGameConfig().animations[getGame()].map(function(x) { return x.name; });
 
 	let chunkedList = splitArrayIntoChunks(animList, 10);
 
@@ -87,7 +87,7 @@ function showAnimationListCommand(command, params, client) {
  * @param {number} animationSlot - The slot index of the animation
  * @return {Array} The animation's data (array)
  */
-function getAnimationData(animationSlot, gameId = getServerGame()) {
+function getAnimationData(animationSlot, gameId = getGame()) {
 	return getGameConfig().animations[gameId][animationSlot];
 }
 
@@ -144,7 +144,7 @@ function makePlayerStopAnimation(client) {
 // ===========================================================================
 
 function getAnimationFromParams(params) {
-	let animations = getGameConfig().animations[getServerGame()];
+	let animations = getGameConfig().animations[getGame()];
 	if(isNaN(params)) {
 		for(let i in animations) {
 			if(toLowerCase(animations[i].name).indexOf(toLowerCase(params)) != -1) {
@@ -152,7 +152,7 @@ function getAnimationFromParams(params) {
 			}
 		}
 	} else {
-		if(typeof getGameConfig().animations[getServerGame()][params] != "undefined") {
+		if(typeof getGameConfig().animations[getGame()][params] != "undefined") {
 			return toInteger(params);
 		}
 	}

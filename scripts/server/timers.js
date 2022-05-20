@@ -19,51 +19,63 @@ function saveServerDataToDatabase() {
 	logToConsole(LOG_DEBUG, "[VRR.Utilities]: Saving all server data to database ...");
 
 	try {
-		saveClientsToDatabase();
+		saveAllPlayersToDatabase();
 	} catch(error) {
-		logToConsole(LOG_ERROR, `Could not save clients to database: ${error}`);
+		logToConsole(LOG_ERROR, `Could not save players to database: ${error}`);
 	}
 
 	try {
-		saveClansToDatabase();
+		saveAllClansToDatabase();
 	} catch(error) {
 		logToConsole(LOG_ERROR, `Could not save clans to database: ${error}`);
 	}
 
 	try {
-		saveHousesToDatabase();
+		saveAllHousesToDatabase();
 	} catch(error) {
 		logToConsole(LOG_ERROR, `Could not save houses to database: ${error}`);
 	}
 
 	try {
-		saveBusinessesToDatabase();
+		saveAllBusinessesToDatabase();
 	} catch(error) {
 		logToConsole(LOG_ERROR, `Could not save businesses to database: ${error}`);
 	}
 
 	try {
-		saveVehiclesToDatabase();
+		saveAllVehiclesToDatabase();
 	} catch(error) {
 		logToConsole(LOG_ERROR, `Could not save vehicles to database: ${error}`);
 	}
 
 	try {
-		saveItemTypesToDatabase();
+		saveAllItemTypesToDatabase();
 	} catch(error) {
 		logToConsole(LOG_ERROR, `Could not save item types to database: ${error}`);
 	}
 
 	try {
-		saveItemsToDatabase();
+		saveAllItemsToDatabase();
 	} catch(error) {
 		logToConsole(LOG_ERROR, `Could not save items to database: ${error}`);
 	}
 
 	try {
-		saveJobsToDatabase();
+		saveAllJobsToDatabase();
 	} catch(error) {
 		logToConsole(LOG_ERROR, `Could not save jobs to database: ${error}`);
+	}
+
+	try {
+		saveAllNPCsToDatabase();
+	} catch(error) {
+		logToConsole(LOG_ERROR, `Could not save NPCs to database: ${error}`);
+	}
+
+	try {
+		saveAllGatesToDatabase();
+	} catch(error) {
+		logToConsole(LOG_ERROR, `Could not save gates to database: ${error}`);
 	}
 
 	try {
@@ -93,7 +105,7 @@ function oneMinuteTimerFunction() {
 	checkServerGameTime();
 
 	logToConsole(LOG_DEBUG, `[VRR.Event] Checking rentable vehicles`);
-	vehicleRentCheck();
+	checkVehicleRenting();
 
 	logToConsole(LOG_DEBUG, `[VRR.Event] Updating all player name tags`);
 	updateAllPlayerNameTags();
@@ -118,19 +130,18 @@ function thirtyMinuteTimerFunction() {
 
 // ===========================================================================
 
-function vehicleRentCheck() {
-	// Loop through players, not vehicles. Much more efficient (and doesn't consume resources when no players are connected)
-	let clients = getClients();
-	for(let i in clients) {
-		if(isClientInitialized(clients[i])) {
-			if(getPlayerData(clients[i]) != false) {
-				if(isPlayerLoggedIn(clients[i] && isPlayerSpawned(clients[i]))) {
-					if(getPlayerData(clients[i]).rentingVehicle != false) {
-						if(getPlayerCurrentSubAccount(clients[i]).cash < getServerData().vehicles[getPlayerData(clients[i]).rentingVehicle].rentPrice) {
-							messagePlayerAlert(clients[i], `You do not have enough money to continue renting this vehicle!`);
-							stopRentingVehicle(clients[i]);
+function checkVehicleRenting() {
+	let renting = getServerData().rentingVehicleCache;
+	for(let i in renting) {
+		if(isClientInitialized(renting[i])) {
+			if(getPlayerData(renting[i]) != false) {
+				if(isPlayerLoggedIn(renting[i] && isPlayerSpawned(renting[i]))) {
+					if(getPlayerData(renting[i]).rentingVehicle != false) {
+						if(getPlayerCurrentSubAccount(renting[i]).cash < getServerData().vehicles[getPlayerData(renting[i]).rentingVehicle].rentPrice) {
+							messagePlayerAlert(renting[i], `You do not have enough money to continue renting this vehicle!`);
+							stopRentingVehicle(renting[i]);
 						} else {
-							takePlayerCash(clients[i], getServerData().vehicles[getPlayerData(clients[i]).rentingVehicle].rentPrice);
+							takePlayerCash(renting[i], getServerData().vehicles[getPlayerData(renting[i]).rentingVehicle].rentPrice);
 						}
 					}
 				}

@@ -63,7 +63,7 @@ function listAccentsCommand(command, params, client) {
 
 	let chunkedList = splitArrayIntoChunks(accentList, 8);
 
-	messagePlayerInfo(client, makeChatBoxSectionHeader(getLocaleString(client, "AccentList")));
+	messagePlayerInfo(client, makeChatBoxSectionHeader(getLocaleString(client, "AccentsListHeader")));
 	for(let i in chunkedList) {
 		messagePlayerInfo(client, chunkedList[i].join(", "));
 	}
@@ -91,7 +91,7 @@ function getAccentFromParams(params) {
 
 function reloadAccentConfigurationCommand(command, params, client) {
 	getGlobalConfig().accents = loadAccentConfig();
-	messageAdmins(`${client.name} {MAINCOLOUR}has reloaded the accent list`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)} {MAINCOLOUR}has reloaded the accent list`);
 }
 
 // ===========================================================================
@@ -111,7 +111,7 @@ function addAccentCommand(command, params, client) {
 
 	getGlobalConfig().accents.push(newAccentName);
 	saveAccentConfig();
-	messageAdmins(`${client.name}{MAINCOLOUR} added a new accent: ${newAccentName}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} added a new accent: {ALTCOLOUR}${newAccentName}{MAINCOLOUR}`);
 }
 
 // ===========================================================================
@@ -131,7 +131,7 @@ function removeAccentCommand(command, params, client) {
 
 	getGlobalConfig().accents.push(newAccentName);
 	saveAccentConfig();
-	messageAdmins(`${client.name}{MAINCOLOUR} added a new accent: ${newAccentName}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} removed an accent: {ALTCOLOUR}${newAccentName}{MAINCOLOUR}`);
 }
 
 // ===========================================================================

@@ -9,11 +9,6 @@
 
 function initRadioScript() {
 	logToConsole(LOG_INFO, "[VRR.Radio]: Initializing radio script ...");
-	if(!getServerConfig().devServer) {
-		getServerData().radioStations = loadRadioStationsFromDatabase();
-	}
-
-	setRadioStationIndexes();
 	logToConsole(LOG_INFO, "[VRR.Radio]: Radio script initialized successfully!");
 	return true;
 }
@@ -65,13 +60,16 @@ function playStreamingRadioCommand(command, params, client) {
 	}
 
 	if(isPlayerInAnyVehicle(client)) {
-		if(!getVehicleData(getPlayerVehicle(client))) {
+		let vehicle = getPlayerVehicle(client);
+
+		if(!getVehicleData(vehicle)) {
 			messagePlayerError(client, getLocaleString(client, "RandomVehicleCommandsDisabled"));
 			return false;
 		}
 
 		if(radioStationId == 0) {
-			getVehicleData(getPlayerVehicle(client)).streamingRadioStation = -1;
+			getVehicleData(vehicle).streamingRadioStation = -1;
+			getVehicleData(vehicle).needsSaved = true;
 			getPlayerData(client).streamingRadioStation = -1;
 			meActionToNearbyPlayers(client, `turns off their vehicle's radio`);
 
@@ -84,13 +82,13 @@ function playStreamingRadioCommand(command, params, client) {
 			return false;
 		}
 
-		getVehicleData(getPlayerVehicle(client)).streamingRadioStation = radioStationId-1;
+		getVehicleData(vehicle).streamingRadioStation = radioStationId-1;
 		getPlayerData(client).streamingRadioStation = radioStationId-1;
 		meActionToNearbyPlayers(client, getLocaleString(client, "ActionVehicleRadioStationChange", getRadioStationData(radioStationId-1).name, getRadioStationData(radioStationId-1).genre));
 
 		let clients = getClients();
 		for(let i in clients) {
-			if(getPlayerVehicle(client) == getPlayerVehicle(clients[i])) {
+			if(vehicle == getPlayerVehicle(clients[i])) {
 				playRadioStreamForPlayer(clients[i], getRadioStationData(radioStationId-1).url, true, getPlayerStreamingRadioVolume(client));
 			}
 		}
@@ -99,6 +97,7 @@ function playStreamingRadioCommand(command, params, client) {
 			let houseId = getEntityData(client, "vrr.inHouse");
 			if(radioStationId == 0) {
 				getHouseData(houseId).streamingRadioStation = -1;
+				getHouseData(houseId).needsSaved = true;
 				getPlayerData(client).streamingRadioStation = -1;
 				meActionToNearbyPlayers(client, `turns off the house radio`);
 
@@ -110,6 +109,7 @@ function playStreamingRadioCommand(command, params, client) {
 				}
 			} else {
 				getHouseData(houseId).streamingRadioStation = radioStationId-1;
+				getHouseData(houseId).needsSaved = true;
 				getPlayerData(client).streamingRadioStation = radioStationId-1;
 				meActionToNearbyPlayers(client, getLocaleString(client, "ActionHouseRadioStationChange", getRadioStationData(radioStationId-1).name, getRadioStationData(radioStationId-1).genre));
 
@@ -124,6 +124,7 @@ function playStreamingRadioCommand(command, params, client) {
 			let businessId = getPlayerBusiness(client);
 			if(radioStationId == 0) {
 				getBusinessData(businessId).streamingRadioStation = -1;
+				getBusinessData(businessId).needsSaved = true;
 				getPlayerData(client).streamingRadioStation = -1;
 				meActionToNearbyPlayers(client, `turns off the business radio`);
 
@@ -135,6 +136,7 @@ function playStreamingRadioCommand(command, params, client) {
 				}
 			} else {
 				getBusinessData(businessId).streamingRadioStation = radioStationId-1;
+				getBusinessData(businessId).needsSaved = true;
 				getPlayerData(client).streamingRadioStation = radioStationId-1;
 				meActionToNearbyPlayers(client, getLocaleString(client, "ActionBusinessRadioStationChange", getRadioStationData(radioStationId-1).name, getRadioStationData(radioStationId-1).genre));
 
@@ -226,7 +228,7 @@ function showRadioStationListCommand(command, params, client) {
 
 // ===========================================================================
 
-function setRadioStationIndexes() {
+function setAllRadioStationIndexes() {
 	for(let i in getServerData().radioStations) {
 		getServerData().radioStations[i].index = i;
 	}

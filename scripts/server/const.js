@@ -11,7 +11,11 @@
 const VRR_PROMPT_NONE = 0;
 const VRR_PROMPT_CREATEFIRSTCHAR = 1;
 const VRR_PROMPT_BIZORDER = 2;
-const VRR_PROMPT_GIVEVEHTOCLAN = 3;
+const VRR_PROMPT_VEHGIVETOCLAN = 3;
+const VRR_PROMPT_HOUSEGIVETOCLAN = 4;
+const VRR_PROMPT_BIZGIVETOCLAN = 5;
+const VRR_PROMPT_HOUSEBUY = 6;
+const VRR_PROMPT_BIZBUY = 7;
 
 // Job Types
 const VRR_JOB_NONE = 0;
@@ -59,6 +63,7 @@ const VRR_HOUSEOWNER_JOB = 2;                    // Owned by a job
 const VRR_HOUSEOWNER_CLAN = 3;                   // Owned by a clan
 const VRR_HOUSEOWNER_FACTION = 4;                // Owned by a faction
 const VRR_HOUSEOWNER_PUBLIC = 5;                 // Is a public house. Technically not owned. This probably won't be used.
+const VRR_HOUSEOWNER_BIZ = 6;	                 // Owned by a business. Used for apartment buildings where rent goes to business.
 
 // Gate Owner Types
 const VRR_GATEOWNER_NONE = 0;                   // Not owned
@@ -205,8 +210,8 @@ const VRR_ITEM_USETYPE_ARMOUR = 28;              //
 const VRR_ITEM_USETYPE_HEALTH = 29;              //
 const VRR_ITEM_USETYPE_AED = 30;                 //
 const VRR_ITEM_USETYPE_WALKIETALKIE = 31;        //
-const VRR_ITEM_USETYPE_BOOMBOX = 32;             //
-const VRR_ITEM_USETYPE_EARBUDS = 33;             //
+const VRR_ITEM_USETYPE_AREARADIO = 32;           //
+const VRR_ITEM_USETYPE_PERSONALRADIO = 33;       //
 const VRR_ITEM_USETYPE_BADGE = 34;               //
 const VRR_ITEM_USETYPE_DRINK = 35;               // Drinkable item. Action output shows "Player_Name drinks some (drink name)"
 const VRR_ITEM_USETYPE_EXTINGUISHER = 36;        // Extinguisher item. Allows putting out fires
@@ -227,6 +232,7 @@ const VRR_ITEM_USETYPE_PLANT = 50;               // Plantable item. Pot plants, 
 const VRR_ITEM_USETYPE_MEGAPHONE = 51;           // Megaphone item. Allows shouting over greater distances. Also called a bullhorn
 const VRR_ITEM_USETYPE_INJECTDRUG = 52;          // Injectable drug. Action output shows "Player_Name injects some (drug)"
 const VRR_ITEM_USETYPE_ALCOHOL = 53;             // Alcohol. Applies an intoxication/drunkness effect
+const VRR_ITEM_USETYPE_LOTTOTICKET = 54;         // Lotto ticket. Allows a character to enter the lottery
 
 // Item Drop Types
 const VRR_ITEM_DROPTYPE_NONE = 0;                // Can't be dropped

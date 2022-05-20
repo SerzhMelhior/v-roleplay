@@ -85,6 +85,7 @@ function addAllNetworkHandlers() {
 	addNetworkEventHandler("vrr.showRegistration", showRegistrationGUI);
 	addNetworkEventHandler("vrr.showNewCharacter", showNewCharacterGUI);
 	addNetworkEventHandler("vrr.showLogin", showLoginGUI);
+	addNetworkEventHandler("vrr.2fa", showTwoFactorAuthGUI);
 
 	// Business
 	addNetworkEventHandler("vrr.business", receiveBusinessFromServer);
@@ -92,8 +93,12 @@ function addAllNetworkHandlers() {
 	// House
 	addNetworkEventHandler("vrr.house", receiveHouseFromServer);
 
+	// GPS
+	addNetworkEventHandler("vrr.showGPSBlip", showGPSLocation);
+
 	// Locale
-	addNetworkEventHandler("vrr.localeString", receiveLocaleStringFromServer);
+	addNetworkEventHandler("vrr.locale", setLocale);
+	addNetworkEventHandler("vrr.localeChooser", toggleLocaleChooserGUI);
 
 	// Misc
 	addNetworkEventHandler("vrr.mouseCursor", toggleMouseCursor);
@@ -114,6 +119,7 @@ function addAllNetworkHandlers() {
 	addNetworkEventHandler("vrr.logLevel", setLogLevel);
 	addNetworkEventHandler("vrr.hideAllGUI", hideAllGUI);
 	addNetworkEventHandler("vrr.nametag", updatePlayerNameTag);
+	addNetworkEventHandler("vrr.nametagDistance", setNameTagDistance);
 	addNetworkEventHandler("vrr.ping", updatePlayerPing);
 	addNetworkEventHandler("vrr.pedAnim", makePedPlayAnimation);
 	addNetworkEventHandler("vrr.pedStopAnim", makePedStopAnimation);
@@ -256,20 +262,6 @@ function forceSyncElementProperties(elementId) {
 
 // ===========================================================================
 
-function setElementPosition(elementId, position) {
-	if(getElementFromId(elementId) == null) {
-		return false;
-	}
-
-	if(!getElementFromId(elementId).isSyncer) {
-		return false;
-	}
-
-	getElementFromId(elementId).position = position;
-}
-
-// ===========================================================================
-
 function setElementCollisionsEnabled(elementId, state) {
 	if(getElementFromId(elementId) == null) {
 		return false;
@@ -311,15 +303,9 @@ function setLocalPlayerInfiniteRun(state) {
 // ===========================================================================
 
 function setLocalPlayerSkin(skinId) {
-	logToConsole(LOG_INFO, skinId);
+	logToConsole(LOG_INFO, `[VRR.Server] Setting locale player skin to ${skinId}`);
 	if(getGame() == VRR_GAME_GTA_IV) {
-		if(natives.isModelInCdimage(skinId)) {
-			natives.requestModel(skinId);
-			natives.loadAllObjectsNow();
-			if(natives.hasModelLoaded(skinId)) {
-				natives.changePlayerModel(natives.getPlayerId(), skinId);
-			}
-		}
+		natives.changePlayerModel(natives.getPlayerId(), skinId);
 	} else {
 		localPlayer.skin = skinId;
 	}
@@ -390,6 +376,12 @@ function serverRequestedLocalPlayerSpawn(skinId, position) {
 		//	game.restoreCamera(true);
 		//}
 	}
+}
+
+// ===========================================================================
+
+function sendLocaleSelectToServer(localeId) {
+	sendNetworkEventToServer("vrr.localeSelect", localeId);
 }
 
 // ===========================================================================

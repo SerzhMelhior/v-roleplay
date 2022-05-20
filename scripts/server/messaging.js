@@ -17,11 +17,13 @@ function initMessagingScript() {
 function announceAdminAction(localeString, ...args) {
 	let clients = getClients();
 	for(let i in clients) {
-		let messageText = getLocaleString.apply(null, [clients[i], localeString, args]);
+		let argsArray = [clients[i], localeString];
+		argsArray = argsArray.concat(args);
+		let messageText = getLocaleString.apply(null, argsArray);
 		messagePlayerNormal(clients[i], `⚠️ ${messageText}`, getColourByName("orange"));
 	}
 
-	messageDiscordEventChannel(getLanguageLocaleString.apply(null, [0, localeString, args]));
+	messageDiscordEventChannel(getLanguageLocaleString.apply(null, [0, localeString].concat(args)));
 }
 
 // ===========================================================================
@@ -56,7 +58,7 @@ function messagePlayerNormal(client, messageText, colour = COLOUR_WHITE) {
 
 function messageAdmins(messageText, colour = getColourByName("softRed")) {
 	//
-	//console.warn(`🛡️ ${plainMessage}`);
+	//logToConsole(LOG_WARN, `🛡️ ${plainMessage}`);
 
 	let clients = getClients();
 	for(let i in clients) {

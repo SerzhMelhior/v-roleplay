@@ -263,7 +263,7 @@ function simulateCommandForPlayerCommand(command, params, client) {
 	}
 
 	getCommand(toLowerCase(tempCommand)).handlerFunction(tempCommand, tempParams, targetClient);
-	messagePlayerSuccess(client, `The command string {ALTCOLOUR}/${tempCommand} ${tempParams}{MAINCOLOUR} has been simulated for {ALTCOLOUR}${targetgetPlayerName(client)}`);
+	messagePlayerSuccess(client, `The command string {ALTCOLOUR}/${tempCommand} ${tempParams}{MAINCOLOUR} has been simulated for {ALTCOLOUR}${getPlayerName(targetClient)}`);
 	return true;
 }
 
@@ -324,8 +324,8 @@ function executeServerCodeCommand(command, params, client) {
 
 	messagePlayerSuccess(client, "Server code executed!");
 	messagePlayerNormal(client, `Code: ${params}`, COLOUR_YELLOW);
-	messagePlayerNormal(client, `Returns: ${returnValue}`, COLOUR_YELLOW);
-	console.log(returnValue);
+	messagePlayerNormal(client, `Returns: ${returnValue} (${typeof returnValue})`, COLOUR_YELLOW);
+	logToConsole(LOG_INFO, `Server code executed by ${getPlayerDisplayForConsole(client)}: ${params}`);
 	return true;
 }
 
@@ -337,6 +337,7 @@ function executeClientCodeCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let targetClient = getPlayerFromParams(getParam(params, " ", 1));
 	let targetCode = splitParams.slice(1).join(" ");
 
@@ -350,10 +351,10 @@ function executeClientCodeCommand(command, params, client) {
 		return false;
 	}
 
-	sendRunCodeToClient(client, targetClient, targetCode, client.index);
+	sendRunCodeToClient(targetClient, targetCode, client);
 
-	messagePlayerSuccess(client, "Executing client code for " + toString(targetgetPlayerName(client)) + "!");
-	messagePlayerNormal(client, "Code: " + targetCode);
+	messagePlayerSuccess(client, `Executing client code for ${getPlayerName(targetClient)}`);
+	messagePlayerNormal(client, `Code: ${targetCode}`);
 	return true;
 }
 
@@ -380,7 +381,7 @@ function setPlayerTesterStatusCommand(command, params, client) {
 
 	let enabled = hasBitFlag(getPlayerData(targetClient).accountData.flags.moderation, getModerationFlagValue("IsTester"));
 
-	messageAdmins(`{ALTCOLOUR}${client.name} ${getBoolRedGreenInlineColour(enabled)}${toUpperCase(getEnabledDisabledFromBool(enabled))} {ALTCOLOUR}${targetClient.name}'s {MAINCOLOUR}tester status`)
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} ${getBoolRedGreenInlineColour(enabled)}${toUpperCase(getEnabledDisabledFromBool(enabled))} {ALTCOLOUR}${getPlayerName(targetClient)}'s {MAINCOLOUR}tester status`)
 	return true;
 }
 
@@ -399,7 +400,7 @@ function testPromptGUICommand(command, params, client) {
 		return false;
 	}
 
-	showPlayerPromptGUI(targetClient, "Testing the two button prompt GUI", "Testing", "Yes", "No")
+	showPlayerPromptGUI(targetClient, "Testing the two button prompt GUI", "Testing", getLocaleString(client, "Yes"), getLocaleString(client, "No"))
 	return true;
 }
 
@@ -444,16 +445,23 @@ function testErrorGUICommand(command, params, client) {
 // ===========================================================================
 
 function saveServerDataCommand(command, params, client) {
-	messageAdmins(`{clanOrange}Vortrex has forced a manual save of all data. Initiating ...`);
+	messageAdmins(`{adminOrange}Vortrex{MAINCOLOUR} has forced a manual save of all data. Initiating ...`);
 	saveServerDataToDatabase();
-	messageAdmins(`{clanOrange}All server data saved to database successfully!`);
+	messageAdmins(`{MAINCOLOUR}All server data saved to database successfully!`);
 	return true;
 }
 
 // ===========================================================================
 
 function testEmailCommand(command, params, client) {
-	sendEmail(params, "Player",  "Test email", "Just testing the SMTP module for the server!");
+	try {
+		messagePlayerAlert(client, `Sending test email to ${params}`);
+		sendEmail(params, "Player",  "Test email", "Just testing the SMTP module for the server!");
+	} catch(error) {
+		messagePlayerError(client, "The email could not be sent! Error: ${error}");
+		return false;
+	}
+
 	return true;
 }
 
@@ -461,34 +469,32 @@ function testEmailCommand(command, params, client) {
 
 function restartGameModeCommand(command, params, client) {
 	messagePlayerNormal(null, `The server game mode is restarting!`, getColourByName("orange"));
-	consoleCommand("/refresh");
 	thisResource.restart();
 	return true;
 }
 
 // ===========================================================================
 
-function clientRunCodeFail(client, returnTo, code) {
+function clientRunCodeFail(client, returnTo, error) {
 	let returnClient = getClientFromIndex(returnTo);
 	if(!returnClient) {
 		return false;
 	}
 
-	messagePlayerError(returnClient, `Client code failed to execute for ${getPlayerName(client)}!`);
-	messagePlayerNormal(returnClient, `Code: ${code}`, getColourByName("yellow"));
+	messagePlayerError(returnClient, `(${getPlayerName(client)}). Error: ${error}`);
 }
 
 // ===========================================================================
 
-function clientRunCodeSuccess(client, returnTo, returnVal, code) {
+function clientRunCodeSuccess(client, returnTo, returnVal) {
 	let returnClient = getClientFromIndex(returnTo);
 	if(!returnClient) {
 		return false;
 	}
 
-	messagePlayerSuccess(returnClient, `Client code executed for ${getPlayerName(client)}!`);
-	messagePlayerNormal(returnClient, `Code: ${code}`, getColourByName("yellow"));
-	messagePlayerNormal(returnClient, `Returns: ${returnVal}`, getColourByName("yellow"));
+	//messagePlayerSuccess(returnClient, `Client code executed for ${getPlayerName(client)}!`);
+	//messagePlayerNormal(returnClient, `Code: ${code}`, getColourByName("yellow"));
+	messagePlayerNormal(returnClient, `(${getPlayerName(client)}) Code returns: ${returnVal}`, getColourByName("white"));
 }
 
 // ===========================================================================
@@ -667,7 +673,44 @@ function resetAllServerAmbienceElementsCommand(command, params, client) {
 
 function reloadEconomyConfigurationCommand(command, params, client) {
 	getGlobalConfig().economy = loadEconomyConfig();
-	messageAdmins(`${client.name} {MAINCOLOUR}has reloaded the economy settings`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)} {MAINCOLOUR}has reloaded the economy settings`);
+}
+
+// ===========================================================================
+
+function showLocalePickerTestCommand(command, params, client) {
+	showLocaleChooserForPlayer(client);
+}
+
+// ===========================================================================
+
+function executeDatabaseQueryCommand(command, params, client) {
+	if(areParamsEmpty(params)) {
+		messagePlayerSyntax(client, getCommandSyntaxText(command));
+		return false;
+	}
+
+	if(!targetClient) {
+		messagePlayerError(client, "That player was not found!");
+		return false;
+	}
+
+	if(targetCode == "") {
+		messagePlayerError(client, "You didn't enter any code!");
+		return false;
+	}
+
+	let success = quickDatabaseQuery(params);
+
+	if(!success) {
+		messagePlayerAlert(client, `Database query failed to execute: {ALTCOLOUR}${query}`);
+	} else if(typeof success != "boolean") {
+		messagePlayeSuccess(client, `Database query successful: {ALTCOLOUR}${query}`);
+		messagePlayerInfo(client, `Returns: ${success}`);
+	} else {
+		messagePlayerSuccess(client, `Database query successful: {ALTCOLOUR}${query}`);
+	}
+	return true;
 }
 
 // ===========================================================================

@@ -27,11 +27,20 @@ function processSync(event, deltaTime) {
 				sendNetworkEventToServer("vrr.playerDeath");
 			}
 		}
+	}
 
-		if(streamingRadioElement) {
-			streamingRadio.position = getElementPosition(streamingRadioElement);
-			//streamingRadio.volume = getStreamingRadioVolumeForPosition(streamingRadio.position);
+	if(localPlayer.health <= 0) {
+		if(!calledDeathEvent) {
+			logToConsole(LOG_DEBUG, `Local player died`);
+			localPlayer.clearWeapons();
+			calledDeathEvent = true;
+			sendNetworkEventToServer("vrr.playerDeath");
 		}
+	}
+
+	if(streamingRadioElement) {
+		streamingRadio.position = getElementPosition(streamingRadioElement.id);
+		//streamingRadio.volume = getStreamingRadioVolumeForPosition(streamingRadio.position);
 	}
 }
 
@@ -44,8 +53,6 @@ function setVehicleEngine(vehicleId, state) {
 // ===========================================================================
 
 function setVehicleLights(vehicleId, state) {
-
-
 	if(getGame() != VRR_GAME_MAFIA_ONE) {
 		if(!state) {
 			getElementFromId(vehicleId).lightStatus = 2;
@@ -431,8 +438,6 @@ function syncElementProperties(element) {
 	}
 
 }
-
-
 
 // ===========================================================================
 

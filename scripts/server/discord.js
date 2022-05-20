@@ -89,7 +89,11 @@ function getDiscordUserData(discordUserId) {
 // ===========================================================================
 
 function messageDiscordChatChannel(messageString) {
-	if(getServerConfig().devServer) {
+	if(getServerConfig().devServer == true) {
+		return false;
+	}
+
+	if(!getGlobalConfig().discord.sendChat) {
 		return false;
 	}
 
@@ -108,6 +112,10 @@ function messageDiscordEventChannel(messageString) {
 		return false;
 	}
 
+	if(!getGlobalConfig().discord.sendEvents) {
+		return false;
+	}
+
 	if(!getServerConfig().discord.sendEvents) {
 		return false;
 	}
@@ -120,6 +128,10 @@ function messageDiscordEventChannel(messageString) {
 
 function messageDiscordAdminChannel(messageString) {
 	if(getServerConfig().devServer == true) {
+		return false;
+	}
+
+	if(!getGlobalConfig().discord.sendAdmin) {
 		return false;
 	}
 

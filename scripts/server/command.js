@@ -7,15 +7,8 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
-let serverCommands = [];
-
-// ===========================================================================
-
 function initCommandScript() {
 	logToConsole(LOG_INFO, "[VRR.Command]: Initializing commands script ...");
-	serverCommands = loadCommands();
-	cacheAllCommandsAliases(serverCommands);
-	addAllCommandHandlers();
 	logToConsole(LOG_INFO, "[VRR.Command]: Initialized commands script!");
 }
 
@@ -33,7 +26,6 @@ function loadCommands() {
 			new CommandData("register", registerCommand, "<password>", getStaffFlagValue("None"), false, false, "Creates an account"),
 			new CommandData("changepass", changeAccountPasswordCommand, "<old password> <new password>", getStaffFlagValue("None"), true, false, "Change an account password"),
 			new CommandData("iplogin", toggleAutoLoginByIPCommand, "", getStaffFlagValue("None"), true, false, "Toggle whether to automatically login if you join with the same IP as your last join"),
-			new CommandData("autolastchar", toggleAutoSelectLastCharacterCommand, "", getStaffFlagValue("None"), true, false, "Toggle whether to automatically spawn with the last character you played as"),
 			new CommandData("gui", toggleAccountGUICommand, "", getStaffFlagValue("None"), false, false, "Toggle whether to use GUI. If GUI is disabled on the server, it won't show even if you have GUI enabled."),
 			new CommandData("2fa", toggleAccountTwoFactorAuthCommand, "", getStaffFlagValue("None"), true, false, "Set up and use two-factor authentication."),
 			new CommandData("setemail", setAccountEmailCommand, "<email address>", getStaffFlagValue("None"), true, false, "Sets your email. To reset your password, you must have a valid email set and verified."),
@@ -75,8 +67,8 @@ function loadCommands() {
 			//new CommandData("delbizloc", deleteBusinessLocationCommand, "[id]", getStaffFlagValue("ManageBusinesses"), true, false),
 			new CommandData("bizreloadall", reloadAllBusinessesCommand, "", getStaffFlagValue("ManageBusinesses"), true, false, "Reloads all businesses from the database"),
 
-			new CommandData("bizlock", lockUnlockBusinessCommand, "", getStaffFlagValue("None"), true, true, "Locks a business"),
-			new CommandData("bizlights", toggleBusinessInteriorLightsCommand, "", getStaffFlagValue("None"), true, true, "Turns on/off a business's interior lights"),
+			//new CommandData("bizlock", lockUnlockBusinessCommand, "", getStaffFlagValue("None"), true, true, "Locks a business"),
+			//new CommandData("bizlights", toggleBusinessInteriorLightsCommand, "", getStaffFlagValue("None"), true, true, "Turns on/off a business's interior lights"),
 			new CommandData("bizbuy", buyBusinessCommand, "", getStaffFlagValue("None"), true, true, "Purchases a business"),
 			new CommandData("bizfee", setBusinessEntranceFeeCommand, "<amount>", getStaffFlagValue("None"), true, true, "Sets a fee to charge players when they enter the business."),
 			new CommandData("biztill", viewBusinessTillAmountCommand, "", getStaffFlagValue("None"), true, true, "Shows the business's till (cash register) amount"),
@@ -131,15 +123,11 @@ function loadCommands() {
 			new CommandData("clans", listClansCommand, "[search text]", getStaffFlagValue("None"), true, true, "List clans (search by partial name, if provided)"),
 			new CommandData("clanranks", listClanRanksCommand, "[clan name]", getStaffFlagValue("None"), true, true, "Shows a list of a clan's ranks"),
 			new CommandData("clanflags", showClanFlagListCommand, "", getStaffFlagValue("None"), true, true, "Shows a list of clan permission flags"),
-
 			new CommandData("addclan", createClanCommand, "<name>", getStaffFlagValue("ManageClans"), true, true, "Creates an new empty, unowned clan."),
 			new CommandData("delclan", deleteClanCommand, "<clan id>", getStaffFlagValue("ManageClans"), true, true, "Deletes a clan by ID or name"),
-
 			new CommandData("clanaddrank", createClanRankCommand, "<rank id> <name>", getStaffFlagValue("None"), true, true, "Adds a clan rank"),
 			new CommandData("clandelrank", deleteClanRankCommand, "<rank name>", getStaffFlagValue("None"), true, true, "Removes a clan rank"),
-
 			new CommandData("clansetrank", setClanMemberRankCommand, "<player name/id> <rank name>", getStaffFlagValue("None"), true, true, "Sets the rank of a clan member"),
-
 			new CommandData("clanowner", setClanOwnerCommand, "<player name/id>", getStaffFlagValue("None"), true, true, "Gives ownership of the clan to a player"),
 			new CommandData("clantag", setClanTagCommand, "<tag>", getStaffFlagValue("None"), true, true, "Sets a clan's main tag"),
 			new CommandData("clanranktag", setClanRankTagCommand, "<rank name/id> <tag>", getStaffFlagValue("None"), true, true, "Sets a clan rank's custom tag"),
@@ -181,11 +169,14 @@ function loadCommands() {
 			new CommandData("reloadaccentcfg", reloadAccentConfigurationCommand, "", getStaffFlagValue("Developer"), true, true, "Loads and applies the accent configuration and texts"),
 
 			new CommandData("setbizblips", toggleServerBusinessBlipsCommand, "<0/1 state>", getStaffFlagValue("ManageServer"), true, true, "Toggles all business blips on/off"),
+			new CommandData("setbusinessblips", toggleServerBusinessBlipsCommand, "<0/1 state>", getStaffFlagValue("ManageServer"), true, true, "Toggles all business blips on/off"),
 			new CommandData("sethouseblips", toggleServerHouseBlipsCommand, "<0/1 state>", getStaffFlagValue("ManageServer"), true, true, "Toggles all house blips on/off"),
 			new CommandData("setjobblips", toggleServerJobBlipsCommand, "<0/1 state>", getStaffFlagValue("ManageServer"), true, true, "Toggles all job blips on/off"),
 			new CommandData("setbizpickups", toggleServerBusinessPickupsCommand, "<0/1 state>", getStaffFlagValue("ManageServer"), true, true, "Toggles all business pickups on/off"),
+			new CommandData("setbusinesspickups", toggleServerBusinessPickupsCommand, "<0/1 state>", getStaffFlagValue("ManageServer"), true, true, "Toggles all business pickups on/off"),
 			new CommandData("sethousepickups", toggleServerHousePickupsCommand, "<0/1 state>", getStaffFlagValue("ManageServer"), true, true, "Toggles all house pickups on/off"),
 			new CommandData("setjobpickups", toggleServerJobPickupsCommand, "<0/1 state>", getStaffFlagValue("ManageServer"), true, true, "Toggles all job pickups on/off"),
+			new CommandData("nametagdistance", setServerNameTagDistanceCommand, "<distance>", getStaffFlagValue("ManageServer"), true, true, "Sets the distance at which name tags are displayed"),
 		],
 		core: [],
 		database: [
@@ -224,6 +215,20 @@ function loadCommands() {
 		email: [
 			new CommandData("testemail", testEmailCommand, "<email address>", getStaffFlagValue("Developer"), true, true),
 		],
+		gate: [
+			new CommandData("gate", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("opengate", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("closegate", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("housegate", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("bizgate", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("businessgate", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("door", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("opengate", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("closegate", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("opendoor", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("closedoor", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+			new CommandData("garagedoor", triggerGateCommand, "", getStaffFlagValue("None"), true, true, "Opens/closes the nearest gate"),
+		],
 		help: [
 			new CommandData("help", helpCommand, "", getStaffFlagValue("None"), false, false, "Shows help messages for information"),
 			new CommandData("commands", helpCommand, "", getStaffFlagValue("None"), false, false, "Shows help messages for information"),
@@ -250,8 +255,9 @@ function loadCommands() {
 			new CommandData("housebuy", buyHouseCommand, "", getStaffFlagValue("None"), true, false, "Purchases a house"),
 			new CommandData("houseclan", setHouseClanCommand, "", getStaffFlagValue("None"), true, false, "Gives a house to your clan"),
 			new CommandData("housedesc", setHouseDescriptionCommand, "", getStaffFlagValue("ManageHouses"), true, false, "Sets a house's description"),
-			new CommandData("houselock", lockUnlockHouseCommand, "", getStaffFlagValue("None"), true, false, "Locks/unlocks a house door"),
-			new CommandData("houselights", toggleHouseInteriorLightsCommand, "", getStaffFlagValue("None"), true, false, "Turns on and off the lights inside a house"),
+			//new CommandData("houselock", lockUnlockHouseCommand, "", getStaffFlagValue("None"), true, false, "Locks/unlocks a house door"),
+			//new CommandData("houselights", toggleHouseInteriorLightsCommand, "", getStaffFlagValue("None"), true, false, "Turns on and off the lights inside a house"),
+			new CommandData("housedelowner", removeHouseOwnerCommand, "", getStaffFlagValue("ManageHouse"), true, true, "Removes the owner of a house, making the house unowned"),
 			new CommandData("houseowner", setHouseOwnerCommand, "", getStaffFlagValue("None"), true, false, "Gives a house to a player"),
 			new CommandData("housebuyprice", setHouseBuyPriceCommand, "", getStaffFlagValue("None"), true, false, "Sets the purchase price of a house so people can buy it"),
 			new CommandData("houserentprice", setHouseRentPriceCommand, "", getStaffFlagValue("None"), true, false, "Sets the rent price of a house so people can rent it"),
@@ -279,6 +285,8 @@ function loadCommands() {
 			new CommandData("houseitems", listHouseInventoryCommand, "", getStaffFlagValue("None"), true, false, "Shows the items in the house's storage"),
 			new CommandData("bizstorage", listBusinessStorageInventoryCommand, "", getStaffFlagValue("None"), true, false, "Shows the items in the business's extra storage (not buyable)"),
 			new CommandData("bizfloor", listBusinessFloorInventoryCommand, "", getStaffFlagValue("None"), true, false, "Shows the items that can be bought from the business"),
+			new CommandData("businessstorage", listBusinessStorageInventoryCommand, "", getStaffFlagValue("None"), true, false, "Shows the items in the business's extra storage (not buyable)"),
+			new CommandData("businessfloor", listBusinessFloorInventoryCommand, "", getStaffFlagValue("None"), true, false, "Shows the items that can be bought from the business"),
 			new CommandData("buylist", listBusinessFloorInventoryCommand, "", getStaffFlagValue("None"), true, false, "Shows the items that can be bought from the business"),
 
 			new CommandData("power", toggleItemEnabledCommand, "", getStaffFlagValue("None"), true, false, "Turns on or off an item"),
@@ -308,6 +316,10 @@ function loadCommands() {
 			new CommandData("uniform", jobUniformCommand, "[uniform]", getStaffFlagValue("None"), true, false, "Use a job uniform"),
 			new CommandData("equip", jobEquipmentCommand, "[equipment]", getStaffFlagValue("None"), true, false, "Get equipment for your job"),
 
+			new CommandData("jobs", jobListCommand, "", getStaffFlagValue("None"), true, false, "Shows a list of all jobs"),
+			new CommandData("joblist", jobListCommand, "", getStaffFlagValue("None"), true, false, "Shows a list of all jobs"),
+			new CommandData("alljobs", jobListCommand, "", getStaffFlagValue("None"), true, false, "Shows a list of all jobs"),
+
 			// Emergency Services (Police, Fire, EMS, etc)
 			new CommandData("department", jobDepartmentRadioCommand, "", getStaffFlagValue("None"), true, false, "Communicate with all emergency services (radio must be on and able to transmit)"),
 			new CommandData("d", jobDepartmentRadioCommand, "", getStaffFlagValue("None"), true, false, "Communicate with all emergency services (radio must be on and able to transmit)"),
@@ -327,11 +339,18 @@ function loadCommands() {
 			// Admin Job Stuff
 			new CommandData("addjob", createJobCommand, "<name>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("addjobloc", createJobLocationCommand, "<job name/id>", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("addjoblocation", createJobLocationCommand, "<job name/id>", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("addjobuniform", createJobUniformCommand, "<job name/id> <skin name/id>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("deljobloc", deleteJobLocationCommand, "", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("deljoblocation", deleteJobLocationCommand, "", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("deljobuniform", deleteJobUniformCommand, "<job name/id> <skin name/id>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("addjobroute", createJobRouteCommand, "<name>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("addjobrouteloc", createJobRouteLocationCommand, "<name>", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("addjobroutelocation", createJobRouteLocationCommand, "<name>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("deljobroute", deleteJobRouteCommand, "", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("deljobrouteloc", deleteJobRouteLocationCommand, "", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("deljobroutelocation", deleteJobRouteLocationCommand, "", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("jobroutelocpos", setJobRouteLocationPositionCommand, "", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobroutename", setJobRouteNameCommand, "<name>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobroutepay", setJobRoutePayCommand, "<amount>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobroutestartmsg", setJobRouteStartMessageCommand, "<new message>", getStaffFlagValue("ManageJobs"), true, false),
@@ -341,7 +360,6 @@ function loadCommands() {
 			new CommandData("jobrouteenabled", toggleJobRouteEnabledCommand, "", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobroutevehcolours", setJobRouteVehicleColoursCommand, "<colour 1> <colour 2>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobroutedelays", setJobRouteAllLocationDelaysCommand, "<time in milliseconds>", getStaffFlagValue("ManageJobs"), true, false),
-
 			new CommandData("jobcolour", setJobColourCommand, "<job id/name> <red> <green> <blue>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobblip", setJobBlipCommand, "<job id/name> <blip id/name>", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobpickup", setJobPickupCommand, "<job id/name> <pickup id/name>", getStaffFlagValue("ManageJobs"), true, false),
@@ -354,8 +372,11 @@ function loadCommands() {
 			new CommandData("jobaddplayerbl", addPlayerToJobBlackListCommand, "<player name/id> [job id]", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobdelplayerbl", removePlayerFromJobBlackListCommand, "<player name/id> [job id]", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobdelplayerbl", removePlayerFromJobWhiteListCommand, "<player name/id> [job id]", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("jobaddplrwl", addPlayerToJobWhiteListCommand, "<player name/id> [job id]", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("jobaddplayerbl", addPlayerToJobBlackListCommand, "<player name/id> [job id]", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("jobdelplayerbl", removePlayerFromJobBlackListCommand, "<player name/id> [job id]", getStaffFlagValue("ManageJobs"), true, false),
+			new CommandData("jobdelplrbl", removePlayerFromJobWhiteListCommand, "<player name/id> [job id]", getStaffFlagValue("ManageJobs"), true, false),
 			new CommandData("jobreloadall", reloadAllJobsCommand, "", getStaffFlagValue("ManageJobs"), true, false),
-
 			new CommandData("jobinfo", getJobInfoCommand, "", getStaffFlagValue("None"), true, true, "Get info for nearest or specified job"),
 			new CommandData("joblocinfo", getJobLocationInfoCommand, "", getStaffFlagValue("None"), true, true, "Get info for nearest or specified job location"),
 		],
@@ -384,6 +405,8 @@ function loadCommands() {
 			new CommandData("stuck", stuckPlayerCommand, "", getStaffFlagValue("None"), true, false, "Fixes your position and virtual world if bugged"),
 			new CommandData("gps", gpsCommand, "[item or place name]", getStaffFlagValue("None"), true, false, "Shows you locations for special places or where to buy items"),
 			new CommandData("speak", playerPedSpeakCommand, "<speech name>", getStaffFlagValue("None"), true, false, "Makes your ped say something in their game voice (IV only)"),
+			new CommandData("lock", lockCommand, "", getStaffFlagValue("None"), true, false, "Locks and unlocks your vehicle, house, or business"),
+			new CommandData("lights", lightsCommand, "", getStaffFlagValue("None"), true, false, "Turns on and off the lights for your vehicle, house, or business"),
 		],
 		npc: [
 			new CommandData("addnpc", createNPCCommand, "<skin id/name>", getStaffFlagValue("ManageNPCs"), true, false, "Creates an NPC with the specified skin"),
@@ -394,16 +417,17 @@ function loadCommands() {
 			//new CommandData("npcrespawn", respawnNPCCommand, "", getStaffFlagValue("ManageNPCs"), true, false, "Respawns the nearest NPC"),
 		],
 		race: [
-			new CommandData("addrace", createRaceCommand, "<name>", getStaffFlagValue("ManageRaces"), true, false, "Creates a race"),
-			new CommandData("delrace", deleteRaceCommand, "", getStaffFlagValue("ManageRaces"), true, false, "Deletes a race by name"),
-			new CommandData("addracecp", createRaceCheckPointCommand, "<name>", getStaffFlagValue("ManageRaces"), true, false, "Creates a race checkpoint"),
-			new CommandData("addracestart", createRaceStartPositionCommand, "<name>", getStaffFlagValue("ManageRaces"), true, false, "Creates a starting position for a race"),
-			new CommandData("delracestart", deleteRaceStartPositionCommand, "", getStaffFlagValue("ManageRaces"), true, false, "Deletes the closest starting position for a race"),
-			new CommandData("delracecp", deleteRaceCheckPointCommand, "", getStaffFlagValue("ManageRaces"), true, false, "Deletes the closest race checkpoint"),
-			new CommandData("racename", setRaceNameCommand, "<name>", getStaffFlagValue("ManageRaces"), true, false, "Sets a race's name"),
-			new CommandData("startrace", startRaceCommand, "", getStaffFlagValue("None"), true, false, "Starts a race"),
-			new CommandData("stoprace", stopRaceCommand, "", getStaffFlagValue("None"), true, false, "Stops racing (forfeits if in an active race)"),
-			new CommandData("stopAllRacesCommand", stopAllRacesCommand, "", getStaffFlagValue("ManageRaces"), true, false, "Stops a race"),
+			// Unfinished!
+			//new CommandData("addrace", createRaceCommand, "<name>", getStaffFlagValue("ManageRaces"), true, false, "Creates a race"),
+			//new CommandData("delrace", deleteRaceCommand, "", getStaffFlagValue("ManageRaces"), true, false, "Deletes a race by name"),
+			//new CommandData("addracecp", createRaceCheckPointCommand, "<name>", getStaffFlagValue("ManageRaces"), true, false, "Creates a race checkpoint"),
+			//new CommandData("addracestart", createRaceStartPositionCommand, "<name>", getStaffFlagValue("ManageRaces"), true, false, "Creates a starting position for a race"),
+			//new CommandData("delracestart", deleteRaceStartPositionCommand, "", getStaffFlagValue("ManageRaces"), true, false, "Deletes the closest starting position for a race"),
+			//new CommandData("delracecp", deleteRaceCheckPointCommand, "", getStaffFlagValue("ManageRaces"), true, false, "Deletes the closest race checkpoint"),
+			//new CommandData("racename", setRaceNameCommand, "<name>", getStaffFlagValue("ManageRaces"), true, false, "Sets a race's name"),
+			//new CommandData("startrace", startRaceCommand, "", getStaffFlagValue("None"), true, false, "Starts a race"),
+			//new CommandData("stoprace", stopRaceCommand, "", getStaffFlagValue("None"), true, false, "Stops racing (forfeits if in an active race)"),
+			//new CommandData("stopAllRacesCommand", stopAllRacesCommand, "", getStaffFlagValue("ManageRaces"), true, false, "Stops a race"),
 		],
 		radio: [
 			new CommandData("radiostation", playStreamingRadioCommand, "<radio station id>", getStaffFlagValue("None"), true, false, "Plays a radio station in your vehicle, house, or business (depending on which one you're in)"),
@@ -423,9 +447,12 @@ function loadCommands() {
 			new CommandData("getveh", getVehicleCommand, "<vehicle id>", getStaffFlagValue("BasicModeration"), true, true, "Teleports a vehicle to you."),
 			new CommandData("warpinveh", warpIntoVehicleCommand, "[vehicle id]", getStaffFlagValue("ManageVehicles"), true, false),
 			new CommandData("returnplr", returnPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Returns a player to their previous position."),
+			new CommandData("returnplayer", returnPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Returns a player to their previous position."),
 			new CommandData("gotopos", gotoPositionCommand, "<x> <y> <z> [int] [vw]", getStaffFlagValue("BasicModeration"), true, true, "Teleports you to specific coordinates with optional interior and dimension."),
 			new CommandData("gotoveh", gotoVehicleCommand, "<vehicle id>", getStaffFlagValue("BasicModeration"), true, true, "Teleports you to a vehicle by ID."),
+			new CommandData("gotovehicle", gotoVehicleCommand, "<vehicle id>", getStaffFlagValue("BasicModeration"), true, true, "Teleports you to a vehicle by ID."),
 			new CommandData("gotobiz", gotoBusinessCommand, "<business id/name>", getStaffFlagValue("BasicModeration"), true, true, "Teleports you to a business by ID or name."),
+			new CommandData("gotobusiness", gotoBusinessCommand, "<business id/name>", getStaffFlagValue("BasicModeration"), true, true, "Teleports you to a business by ID or name."),
 			new CommandData("gotohouse", gotoHouseCommand, "<house id/name>", getStaffFlagValue("BasicModeration"), true, true, "Teleports you to a house by ID or description."),
 			new CommandData("gotojob", gotoJobLocationCommand, "<job id/name> <location id>", getStaffFlagValue("BasicModeration"), true, true, "Teleports you to a job location by name and location ID."),
 			new CommandData("gotoloc", gotoGameLocationCommand, "<location name>", getStaffFlagValue("BasicModeration"), true, true, "Teleports you to a game location by name."),
@@ -443,6 +470,7 @@ function loadCommands() {
 			new CommandData("getstaffflags", getPlayerStaffFlagsCommand, "<player name/id>", getStaffFlagValue("ManageAdmins"), true, true, "Shows a list of all staff flags a player has (this server only)."),
 			new CommandData("clearstaffflags", removePlayerStaffFlagsCommand, "<player name/id>", getStaffFlagValue("ManageAdmins"), true, true, "Removes all staff flags for a player (this server only)."),
 			new CommandData("staffflags", getStaffFlagsCommand, "", getStaffFlagValue("ManageAdmins"), true, true, "Shows a list of all valid staff flag names."),
+			new CommandData("stafftitle", setPlayerStaffTitleCommand, "", getStaffFlagValue("ManageAdmins"), true, true, "Sets a player's staff title."),
 			new CommandData("givemoney", givePlayerMoneyCommand, "<player name/id> <amount>", getStaffFlagValue("serverManager"), true, true),
 			new CommandData("nonrpname", forceCharacterNameChangeCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Forces a player to change their current character's name."),
 			new CommandData("setname", setCharacterNameCommand, "<player name/id> <first name> <last name>", getStaffFlagValue("BasicModeration"), true, true, "Changes a character's name directly."),
@@ -451,21 +479,33 @@ function loadCommands() {
 			//new CommandData("setfightstyle", setPlayerFightStyleCommand, "<player name/id> <fight style name>", getStaffFlagValue("BasicModeration"), true, true, "Changes a character's fight style."),
 			new CommandData("setstars", setPlayerWantedLevelCommand, "<player name/id> <wanted level>", getStaffFlagValue("BasicModeration"), true, true, "Forces a player to have a wanted level"),
 			new CommandData("plrinfo", getPlayerInfoCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows basic info about the specified player"),
-			new CommandData("getplrhouse", getHousesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all houses owned by the player"),
-			new CommandData("getplrbiz", getBusinessesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all businesses owned by the player"),
-			new CommandData("getplrveh", getVehiclesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all vehicles owned by the player"),
+			new CommandData("playerinfo", getPlayerInfoCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows basic info about the specified player"),
+			new CommandData("getplrhouses", getHousesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all houses owned by the player"),
+			new CommandData("getplrbizs", getBusinessesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all businesses owned by the player"),
+			new CommandData("getplrbusinesses", getBusinessesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all businesses owned by the player"),
+			new CommandData("getplrvehs", getVehiclesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all vehicles owned by the player"),
+			new CommandData("getplrvehicles", getVehiclesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all vehicles owned by the player"),
+			new CommandData("getplayerhouses", getHousesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all houses owned by the player"),
+			new CommandData("getplayerbizs", getBusinessesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all businesses owned by the player"),
+			new CommandData("getplayerbusinesses", getBusinessesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all businesses owned by the player"),
+			new CommandData("getplayervehs", getVehiclesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all vehicles owned by the player"),
+			new CommandData("getplayervehicles", getVehiclesOwnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Shows a list of all vehicles owned by the player"),
 			new CommandData("geoip", getPlayerGeoIPInformationCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Retrieves GeoIP information on a player (country & city)"),
 			new CommandData("ip", getPlayerIPInformationCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Retrieves IP information on a player"),
 			new CommandData("plrsync", toggleSyncForElementsSpawnedByPlayerCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Sets whether elements spawned by a player are synced (traffic, peds, etc)"),
 			new CommandData("health", setPlayerHealthCommand, "<player name/id> <health", getStaffFlagValue("BasicModeration"), true, true, "Sets a player's health"),
 			new CommandData("armour", setPlayerArmourCommand, "<player name/id> <armour>", getStaffFlagValue("BasicModeration"), true, true, "Sets a player's armour"),
 			new CommandData("infiniterun", setPlayerInfiniteRunCommand, "<player name/id> <state>", getStaffFlagValue("BasicModeration"), true, true, "Toggles a player's infinite sprint"),
+			new CommandData("atbiz", getPlayerCurrentBusinessCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Gets which business a player is at/in"),
+			new CommandData("atbusiness", getPlayerCurrentBusinessCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Gets which business a player is at/in"),
+			new CommandData("athouse", getPlayerCurrentHouseCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Gets which house a player is at/in"),
 		],
 		startup: [],
 		subAccount: [
 			new CommandData("switchchar", switchCharacterCommand, "", getStaffFlagValue("None"), true, false),
 			new CommandData("newchar", newCharacterCommand, "<first name> <last name>", getStaffFlagValue("None"), true, false),
 			new CommandData("usechar", useCharacterCommand, "<character id>", getStaffFlagValue("None"), true, false),
+			new CommandData("autolastchar", toggleAutoSelectLastCharacterCommand, "", getStaffFlagValue("None"), true, false, "Toggle whether to automatically spawn with the last character you played as"),
 		],
 		translate: [],
 		trigger: [
@@ -492,11 +532,9 @@ function loadCommands() {
 			new CommandData("oldcar", getLastVehicleInfoCommand, "", getStaffFlagValue("None"), true, false),
 			new CommandData("lastcar", getLastVehicleInfoCommand, "", getStaffFlagValue("None"), true, false),
 
-			new CommandData("lock", vehicleLockCommand, "", getStaffFlagValue("None"), true, false),
-			new CommandData("unlock", vehicleLockCommand, "", getStaffFlagValue("None"), true, false),
+			//new CommandData("unlock", vehicleLockCommand, "", getStaffFlagValue("None"), true, false),
 			new CommandData("engine", vehicleEngineCommand, "", getStaffFlagValue("None"), true, false),
 			new CommandData("siren", vehicleSirenCommand, "", getStaffFlagValue("None"), true, false),
-			new CommandData("lights", vehicleLightsCommand, "", getStaffFlagValue("None"), true, false),
 
 			new CommandData("vehowner", setVehicleOwnerCommand, "<player id/name>", getStaffFlagValue("ManageVehicles"), true, true),
 			new CommandData("vehpublic", setVehiclePublicCommand, "", getStaffFlagValue("ManageVehicles"), true, true),
@@ -547,10 +585,11 @@ function loadCommands() {
 
 function addAllCommandHandlers() {
 	let commandCount = 0;
-	for(let i in serverCommands) {
-		for(let j in serverCommands[i]) {
-			logToConsole(LOG_DEBUG, `[VRR.Command] Adding command handler for ${i} - ${serverCommands[i][j].command}`);
-			addCommandHandler(serverCommands[i][j].command, processPlayerCommand);
+	let commands = getCommands();
+	for(let i in commands) {
+		for(let j in commands[i]) {
+			logToConsole(LOG_DEBUG, `[VRR.Command] Adding command handler for ${i} - ${commands[i][j].command}`);
+			addCommandHandler(commands[i][j].command, processPlayerCommand);
 			commandCount++;
 		}
 	}
@@ -583,7 +622,7 @@ function getCommandData(command) {
 // ===========================================================================
 
 function getCommands() {
-	return serverCommands;
+	return getServerData().commands;
 }
 
 // ===========================================================================
@@ -723,43 +762,44 @@ function processPlayerCommand(command, params, client) {
 	}
 
 	if(!doesCommandExist(toLowerCase(command))) {
-		console.warn(`[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (invalid command): /${command} ${paramsDisplay}`);
+		logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (invalid command): /${command} ${paramsDisplay}`);
 
 		let possibleCommand = getCommandFromParams(command);
 		if(possibleCommand != false && doesPlayerHaveStaffPermission(client, getCommandRequiredPermissions(toLowerCase(possibleCommand.command)))) {
-			messagePlayerError(client, `The command {ALTCOLOUR}/${command} {MAINCOLOUR}does not exist! Did you mean {ALTCOLOUR}/${possibleCommand.command} ?`);
+			messagePlayerError(client, getLocaleString(client, "InvalidCommandPossibleMatchTip", `{ALTCOLOUR}/${command}{MAINCOLOUR}`, `{ALTCOLOUR}${toLowerCase(possibleCommand.command)}{MAINCOLOUR}`));
 		} else {
-			messagePlayerError(client, `The command {ALTCOLOUR}/${command} {MAINCOLOUR}does not exist! Use /help for commands and information.`);
+			messagePlayerError(client, getLocaleString(client, "InvalidCommandHelpTip", `{ALTCOLOUR}/${command}{MAINCOLOUR}`, `{ALTCOLOUR}/help{MAINCOLOUR}`));
 		}
 		return false;
 	}
 
 	if(!commandData.enabled) {
-		console.warn(`[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (command is disabled): /${command} ${paramsDisplay}`);
-		messagePlayerError(client, `The command {ALTCOLOUR}/${command} {MAINCOLOUR}is disabled!`);
+		logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (command is disabled): /${command} ${paramsDisplay}`);
+		messagePlayerError(client, `The command {ALTCOLOUR}/${command}{MAINCOLOUR} is disabled!`);
+		messagePlayerError(client, getLocaleString(client, "CommandDisabled", `{ALTCOLOUR}/${command}{MAINCOLOUR}`));
 		return false;
 	}
 
 	if(doesCommandRequireLogin(toLowerCase(command))) {
 		if(!isPlayerLoggedIn(client)) {
-			console.warn(`[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (requires login first): /${command} ${paramsDisplay}`);
-			messagePlayerError(client, `You must be logged in to use the {ALTCOLOUR}/${command} {MAINCOLOUR}command!`);
+			logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (requires login first): /${command} ${paramsDisplay}`);
+			messagePlayerError(client, getLocaleString(client, "CommandRequiresLogin", `{ALTCOLOUR}/${command}{MAINCOLOUR}`));
 			return false;
 		}
 	}
 
-	//if(isClientFromDiscord(client)) {
-	//	if(!isCommandAllowedOnDiscord(command)) {
-	//        console.warn(`[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command from discord, but failed (not available on discord): /${command} ${paramsDisplay}`);
-	//		messagePlayerError(client, `The {ALTCOLOUR}/${command} {MAINCOLOUR} command isn't available on discord!`);
-	//		return false;
-	//	}
-	//}
+	if(isClientFromDiscord(client)) {
+		if(!isCommandAllowedOnDiscord(command)) {
+	      	logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command from discord, but failed (not available on discord): /${command} ${paramsDisplay}`);
+			messagePlayerError(client, `The {ALTCOLOUR}/${command}{MAINCOLOUR} command isn't available on discord!`);
+			return false;
+		}
+	}
 
-	if(!client.console) {
+	if(!isConsole(client)) {
 		if(!doesPlayerHaveStaffPermission(client, getCommandRequiredPermissions(toLowerCase(command)))) {
-			console.warn(`[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (no permission): /${command} ${paramsDisplay}`);
-			messagePlayerError(client, `You do not have permission to use the {ALTCOLOUR}/${toLowerCase(command)} {MAINCOLOUR}command!`);
+			logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (no permission): /${command} ${paramsDisplay}`);
+			messagePlayerError(client, "CommandNoPermissions", `{ALTCOLOUR}/${toLowerCase(command)}{MAINCOLOUR}`);
 			return false;
 		}
 	}
@@ -785,9 +825,10 @@ addCommandHandler("cmd", function(command, params, client) {
 // ===========================================================================
 
 function listAllCommands() {
-	for(let i in serverCommands) {
-		for(let j in serverCommands[i]) {
-			logToConsole(LOG_DEBUG, serverCommands[i][j].command);
+	let commands = getCommands();
+	for(let i in commands) {
+		for(let j in commands[i]) {
+			logToConsole(LOG_DEBUG, commands[i][j].command);
 		}
 	}
 }
@@ -796,9 +837,10 @@ function listAllCommands() {
 
 function getAllCommandsInSingleArray() {
 	let tempCommands = [];
-	for(let i in serverCommands) {
-		for(let j in serverCommands[i]) {
-			tempCommands.push(serverCommands[i][j].command);
+	let commands = getCommands();
+	for(let i in commands) {
+		for(let j in commands[i]) {
+			tempCommands.push(commands[i][j].command);
 		}
 	}
 
@@ -809,9 +851,10 @@ function getAllCommandsInSingleArray() {
 
 function getAllCommandsInGroupInSingleArray(groupName, staffFlag = "None") {
 	let tempCommands = [];
-	for(let i in serverCommands[groupName]) {
-		if(getCommandRequiredPermissions(serverCommands[groupName][i].command) == 0) {
-			tempCommands.push(serverCommands[groupName][i].command);
+	let commands = getCommands();
+	for(let i in commands[groupName]) {
+		if(getCommandRequiredPermissions(commands[groupName][i].command) == 0) {
+			tempCommands.push(commands[groupName][i].command);
 		}
 	}
 
@@ -822,11 +865,12 @@ function getAllCommandsInGroupInSingleArray(groupName, staffFlag = "None") {
 
 function getAllCommandsForStaffFlagInSingleArray(staffFlagName) {
 	let tempCommands = [];
-	for(let i in serverCommands) {
-		for(let j in serverCommands[i]) {
-			if(getCommandRequiredPermissions(serverCommands[i][j].command) != 0) {
-				if(hasBitFlag(getCommandRequiredPermissions(serverCommands[i][j].command), getStaffFlagValue(staffFlagName))) {
-					tempCommands.push(serverCommands[i][j].command);
+	let commands = getCommands();
+	for(let i in commands) {
+		for(let j in commands[i]) {
+			if(getCommandRequiredPermissions(commands[i][j].command) != 0) {
+				if(hasBitFlag(getCommandRequiredPermissions(commands[i][j].command), getStaffFlagValue(staffFlagName))) {
+					tempCommands.push(commands[i][j].command);
 				}
 			}
 		}
@@ -848,13 +892,14 @@ function doesCommandExist(command) {
 // ===========================================================================
 
 function cacheAllCommandsAliases() {
-	for(let i in serverCommands) {
-		for(let j in serverCommands[i]) {
-			for(let k in serverCommands) {
-				for(let m in serverCommands[k]) {
-					if(serverCommands[i][j].handlerFunction == serverCommands[k][m].handlerFunction) {
-						serverCommands[i][j].aliases.push(serverCommands[k][m]);
-						serverCommands[k][m].aliases.push(serverCommands[i][j]);
+	let commands = getCommands();
+	for(let i in commands) {
+		for(let j in commands[i]) {
+			for(let k in commands) {
+				for(let m in commands[k]) {
+					if(commands[i][j].handlerFunction == commands[k][m].handlerFunction) {
+						commands[i][j].aliases.push(commands[k][m]);
+						commands[k][m].aliases.push(commands[i][j]);
 					}
 				}
 			}
@@ -904,10 +949,11 @@ function getParam(params, delimiter, index) {
 // ===========================================================================
 
 function getCommandFromParams(params) {
-	for(let i in serverCommands) {
-		for(let j in serverCommands[i]) {
-			if(toLowerCase(serverCommands[i][j].command).indexOf(toLowerCase(params)) != -1) {
-				return serverCommands[i][j];
+	let commands = getCommands();
+	for(let i in commands) {
+		for(let j in commands[i]) {
+			if(toLowerCase(commands[i][j].command).indexOf(toLowerCase(params)) != -1) {
+				return commands[i][j];
 			}
 		}
 	}

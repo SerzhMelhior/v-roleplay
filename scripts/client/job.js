@@ -12,6 +12,11 @@ let localPlayerWorking = false;
 let jobRouteLocationBlip = null;
 let jobRouteLocationSphere = null;
 
+let jobBlipBlinkAmount = 0;
+let jobBlipBlinkTimes = 10;
+let jobBlipBlinkInterval = 500;
+let jobBlipBlinkTimer = null;
+
 // ===========================================================================
 
 class JobData {
@@ -52,7 +57,7 @@ function setLocalPlayerWorkingState(tempWorking) {
 function showJobRouteLocation(position, colour) {
 	logToConsole(LOG_DEBUG, `[VRR.Job] Showing job route location`);
 	if(getMultiplayerMod() == VRR_MPMOD_GTAC) {
-		if(game.game == VRR_GAME_GTA_SA) {
+		if(getGame() == VRR_GAME_GTA_SA) {
 			// Server-side spheres don't show in GTA SA for some reason.
 			jobRouteLocationSphere = game.createPickup(1318, position, 1);
 		} else {
@@ -64,7 +69,9 @@ function showJobRouteLocation(position, colour) {
 			destroyElement(jobRouteLocationBlip);
 		}
 
+		// Blinking is bugged if player hit the spot before it stops blinking.
 		blinkJobRouteLocationBlip(10, position, colour);
+		jobRouteLocationBlip = game.createBlip(position, 0, 2, colour);
 	}
 }
 
@@ -72,30 +79,48 @@ function showJobRouteLocation(position, colour) {
 
 function enteredJobRouteSphere() {
 	logToConsole(LOG_DEBUG, `[VRR.Job] Entered job route sphere`);
+
+	clearInterval(jobBlipBlinkTimer);
+	jobBlipBlinkAmount = 0;
+	jobBlipBlinkTimes = 0;
+
+	if(jobRouteLocationBlip != null) {
+		destroyElement(jobRouteLocationBlip);
+		jobRouteLocationBlip = null;
+	}
+
+	if(jobRouteLocationSphere != null) {
+		destroyElement(jobRouteLocationSphere);
+		jobRouteLocationSphere = null;
+	}
+
 	tellServerPlayerArrivedAtJobRouteLocation();
-	destroyElement(jobRouteLocationSphere);
-	destroyElement(jobRouteLocationBlip);
-	jobRouteLocationSphere = null;
-	jobRouteLocationBlip = null;
 }
 
 // ===========================================================================
 
 function blinkJobRouteLocationBlip(times, position, colour) {
-	for(let i = 1 ; i <= times ; i++) {
-		setTimeout(function() {
+	jobBlipBlinkTimes = times;
+	jobBlipBlinkTimer = setInterval(function() {
+		if(jobRouteLocationBlip != null) {
+			destroyElement(jobRouteLocationBlip);
+			jobRouteLocationBlip = null;
+		} else {
+			jobRouteLocationBlip = game.createBlip(position, 0, 2, colour);
+		}
+
+		if(jobBlipBlinkAmount >= jobBlipBlinkTimes) {
 			if(jobRouteLocationBlip != null) {
 				destroyElement(jobRouteLocationBlip);
 				jobRouteLocationBlip = null;
-			} else {
-				jobRouteLocationBlip = game.createBlip(position, 0, 2, colour);
 			}
-		}, 500*i);
-	}
 
-	setTimeout(function() {
-		jobRouteLocationBlip = game.createBlip(position, 0, 2, colour);
-	}, 500*times+1);
+			jobBlipBlinkAmount = 0;
+			jobBlipBlinkTimes = 0;
+			jobRouteLocationBlip = game.createBlip(position, 0, 2, colour);
+			clearInterval(jobBlipBlinkTimer);
+		}
+	}, jobBlipBlinkInterval);
 }
 
 // ===========================================================================
