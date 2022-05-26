@@ -862,6 +862,8 @@ function playerUseItem(client, hotBarSlot) {
 				if(getItemData(itemIndex).value <= 0) {
 					destroyItem(itemIndex);
 				}
+			} else {
+				messagePlayerError(client, getLocaleString(client, "VehicleRepairFailedTooFar"));
 			}
 			break;
 		}
@@ -1374,8 +1376,11 @@ function setAllItemTypeDataIndexes() {
 
 function cacheAllGroundItems() {
 	clearArray(getServerData().groundItemCache);
-	getServerData().groundItemCache = getServerData().items.filter(item => item.ownerType == VRR_ITEM_OWNER_GROUND);
-	//getServerData().groundPlantCache = getServerData().items.filter(item => item.ownerType == VRR_ITEM_OWNER_PLANT);
+	for(let i in getServerData().items) {
+		if(getServerData().items[i].ownerType == VRR_ITEM_OWNER_GROUND) {
+			getServerData().groundItemCache.push(i);
+		}
+	}
 }
 
 // ===========================================================================
@@ -1411,11 +1416,19 @@ function cachePlayerHotBarItems(client) {
 		return false;
 	}
 
-	clearArray(getPlayerData(client).hotBarItems);
-	getPlayerData(client).hotBarItems = getServerData().items.filter(item => item.ownerType == VRR_ITEM_OWNER_PLAYER && item.ownerId == getPlayerCurrentSubAccount(client).databaseId);
+	for(let i = 0 ; i < 9 ; i++) {
+		getPlayerData(client).hotBarItems[i] = -1;
+	}
 
-	if(getPlayerData(client).hotBarItems.length < getGlobalConfig().maxPlayerItemSlots) {
-		getPlayerData(client).hotBarItems.concat(Array(getGlobalConfig().maxPlayerItemSlots-getPlayerData(client).hotBarItems.length).fill(-1));
+	for(let i in getServerData().items) {
+		if(getItemData(i).ownerType == VRR_ITEM_OWNER_PLAYER) {
+			if(getItemData(i).ownerId == getPlayerCurrentSubAccount(client).databaseId) {
+				let firstSlot = getPlayerFirstEmptyHotBarSlot(client);
+				if(firstSlot != -1) {
+					getPlayerData(client).hotBarItems[firstSlot] = i;
+				}
+			}
+		}
 	}
 }
 
@@ -1575,18 +1588,20 @@ function getBestItemToTake(client, slot) {
  *
  */
 function listPlayerInventoryCommand(command, params, client) {
-	let targetClient = client;
-	if(doesPlayerHaveStaffPermission(client, getStaffFlagValue("BasicModeration"))) {
-		if(!areParamsEmpty(client)) {
-			if(targetClient == false) {
-				sendMessageToPlayer(client, getLocaleString(client, "InvalidPlayer"));
-				return false;
-			}
-			targetClient = getPlayerFromParams(params);
-		}
-	}
-	showPlayerInventoryToPlayer(client, targetClient);
-	//showPlayerInventoryToPlayer(client, client);
+	//let targetClient = client;
+	//if(!areParamsEmpty(client)) {
+	//	if(doesPlayerHaveStaffPermission(client, getStaffFlagValue("BasicModeration"))) {
+	//		if(targetClient == false) {
+	//			sendMessageToPlayer(client, getLocaleString(client, "InvalidPlayer"));
+	//			return false;
+	//		}
+	//
+	//		targetClient = getPlayerFromParams(params);
+	//	}
+	//}
+	//showPlayerInventoryToPlayer(client, targetClient);
+
+	showPlayerInventoryToPlayer(client, client);
 }
 
 // ===========================================================================
@@ -1707,6 +1722,7 @@ function getItemData(itemId) {
 	if(typeof getServerData().items[itemId] != "undefined") {
 		return getServerData().items[itemId];
 	}
+
 	return false;
 }
 
@@ -1717,7 +1733,11 @@ function getItemData(itemId) {
  * @return {ItemTypeData} The item type's data (class instance)
  */
 function getItemTypeData(itemTypeId) {
-	return getServerData().itemTypes[itemTypeId];
+	if(typeof getServerData().itemTypes[itemTypeId] != "undefined") {
+		return getServerData().itemTypes[itemTypeId];
+	}
+
+	return false;
 }
 
 // ===========================================================================
@@ -2268,7 +2288,7 @@ function showItemInventoryToPlayer(client, itemId) {
 
 // ===========================================================================
 
-function showPlayerInventoryToPlayer(client, targetClient) {
+function showPlayerInventoryToPlayer(showToClient, targetClient) {
 	resyncWeaponItemAmmo(targetClient);
 	let itemDisplay = [];
 	for(let i in getPlayerData(targetClient).hotBarItems) {
@@ -2279,19 +2299,24 @@ function showPlayerInventoryToPlayer(client, targetClient) {
 		if(getPlayerData(targetClient).hotBarItems[i] == -1) {
 			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: ${colour}(Empty)`);
 		} else {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: ${colour}${getItemTypeData(getItemData(getPlayerData(targetClient).hotBarItems[i]).itemTypeIndex).name}`);
+			let itemTypeData = getItemTypeData(getItemData(getPlayerData(targetClient).hotBarItems[i]).itemTypeIndex);
+			if(itemTypeData != false) {
+				itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: ${colour}${itemTypeData.name}`);
+			} else {
+				itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: ${colour}(Empty)`);
+			}
 		}
 	}
 
-	if(client == targetClient) {
-		messagePlayerNormal(client, makeChatBoxSectionHeader(getLocaleString(client, "HeaderSelfItemList")));
+	if(showToClient == targetClient) {
+		messagePlayerNormal(showToClient, makeChatBoxSectionHeader(getLocaleString(showToClient, "HeaderSelfItemList")));
 	} else {
-		messagePlayerNormal(client, makeChatBoxSectionHeader(getLocaleString(client, "HeaderPlayerItemList", getCharacterFullName(targetClient))));
+		messagePlayerNormal(showToClient, makeChatBoxSectionHeader(getLocaleString(showToClient, "HeaderPlayerItemList", getCharacterFullName(targetClient))));
 	}
 
 	let chunkedList = splitArrayIntoChunks(itemDisplay, 5);
 	for(let i in chunkedList) {
-		messagePlayerNormal(client, chunkedList[i].join(`{MAINCOLOUR} • `), COLOUR_WHITE);
+		messagePlayerNormal(showToClient, chunkedList[i].join(`{MAINCOLOUR} • `), COLOUR_WHITE);
 	}
 }
 

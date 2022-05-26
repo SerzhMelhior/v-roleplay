@@ -477,11 +477,11 @@ function createGamePickup(modelIndex, position, type) {
 
 // ===========================================================================
 
-function createGameBlip(position, type = 0, colour = toColour(255, 255, 255, 255)) {
+function createGameBlip(position, type = 0, size = 1, colour = toColour(255, 255, 255, 255)) {
 	if(!isGameFeatureSupported("blips")) {
 		return false;
 	}
-	return game.createBlip(type, position, 1, colour);
+	return game.createBlip(type, position, size, colour);
 }
 
 // ===========================================================================
@@ -619,14 +619,13 @@ function createGameVehicle(modelIndex, position, heading, toClient = null) {
 
 // ===========================================================================
 
-function createGameCivilian(modelIndex, position, heading, toClient = null) {
+function createGamePed(modelIndex, position, heading, toClient = null) {
 	if(areServerElementsSupported()) {
-		let civilian = game.createCivilian(getGameConfig().skins[getGame()][modelIndex][1], 0);
-		if(!isNull(civilian)) {
-			civilian.position = position;
-			civilian.heading = heading;
-			addToWorld(civilian);
-			return civilian;
+		let ped = game.createPed(getGameConfig().skins[getGame()][modelIndex][0], position);
+		if(ped) {
+			//ped.position = position;
+			ped.heading = heading;
+			return ped;
 		}
 	}
 
@@ -920,6 +919,103 @@ function quickDatabaseQuery(queryString) {
 
 // ===========================================================================
 
+function executeDatabaseQueryCommand(command, params, client) {
+	if(areParamsEmpty(params)) {
+		messagePlayerSyntax(client, getCommandSyntaxText(command));
+		return false;
+	}
+
+	if(!targetClient) {
+		messagePlayerError(client, "That player was not found!");
+		return false;
+	}
+
+	if(targetCode == "") {
+		messagePlayerError(client, "You didn't enter any code!");
+		return false;
+	}
+
+	let success = quickDatabaseQuery(params);
+
+	if(!success) {
+		messagePlayerAlert(client, `Database query failed to execute: {ALTCOLOUR}${query}`);
+	} else if(typeof success != "boolean") {
+		messagePlayeSuccess(client, `Database query successful: {ALTCOLOUR}${query}`);
+		messagePlayerInfo(client, `Returns: ${success}`);
+	} else {
+		messagePlayerSuccess(client, `Database query successful: {ALTCOLOUR}${query}`);
+	}
+	return true;
+}
+
+// ===========================================================================
+
+function setConstantsAsGlobalVariablesInDatabase() {
+	let dbConnection = connectToDatabase();
+	let entries = Object.entries(global);
+	for(let i in entries) {
+		logToConsole(LOG_DEBUG, `[VRR.Database] Checking entry ${i} (${entries[i]})`);
+		if(toString(i).slice(0, 3).indexOf("VRR_") != -1) {
+			logToConsole(LOG_DEBUG, `[VRR.Database] Adding ${i} (${entries[i]}) to database global variables`);
+		}
+	}
+}
+
+// ===========================================================================
+
+function createDatabaseInsertQuery(tableName, data) {
+	let fields = [];
+	let values = [];
+
+	for(let i in data) {
+		if(data[i][1] != "undefined" && data[i][1] != NaN && data[i][0] != 'NaN') {
+			if(data[i][1] != "undefined" && data[i][1] != NaN && data[i][1] != 'NaN') {
+				fields.push(data[i][0]);
+
+				if(typeof data[i][1] == "string") {
+					if(data[i][1] == "{UNIXTIMESTAMP}") {
+						values.push("UNIX_TIMESTAMP()");
+					} else {
+						values.push(`'${data[i][1]}'`);
+					}
+				} else {
+					values.push(data[i][1]);
+				}
+			}
+		}
+	}
+
+	let queryString = `INSERT INTO ${tableName} (${fields.join(", ")}) VALUES (${values.join(", ")})`;
+	return queryString;
+}
+
+// ===========================================================================
+
+function createDatabaseUpdateQuery(tableName, data, whereClause) {
+	let values = [];
+
+	for(let i in data) {
+		if(data[i][0] != "undefined" && data[i][0] != NaN && data[i][0] != 'NaN') {
+			if(data[i][1] != "undefined" && data[i][1] != NaN && data[i][1] != 'NaN') {
+				if(typeof data[i][1] == "string") {
+					if(data[i][1] == "{UNIXTIMESTAMP}") {
+						values.push(`${data[i][0]}=UNIX_TIMESTAMP()`);
+					} else {
+						values.push(`${data[i][0]}='${data[i][1]}'`);
+					}
+				} else {
+					values.push(`${data[i][0]}=${data[i][1]}`);
+				}
+			}
+		}
+	}
+
+	let queryString = `UPDATE ${tableName} SET ${values.join(", ")} WHERE ${whereClause}`;
+	return queryString;
+}
+
+// ===========================================================================
+
 function sendNetworkEventToPlayer(eventName, client, ...args) {
 	let argsArray = [eventName, client];
 	argsArray = argsArray.concat(args);
@@ -1178,24 +1274,6 @@ function getCountryNameFromIP(ip) {
 
 // ===========================================================================
 
-function getSubdivisionNameFromIP(ip) {
-	if(module.geoip.getSubdivisionName(ip)) {
-		return module.geoip.getSubdivisionName(ip);
-	}
-	return false;
-}
-
-// ===========================================================================
-
-function getCityNameFromIP(ip) {
-	if(module.geoip.getCityNameFromIP(ip)) {
-		return module.geoip.getCityNameFromIP(ip);
-	}
-	return false;
-}
-
-// ===========================================================================
-
 function getServerPort() {
 	return server.port;
 }
@@ -1214,6 +1292,7 @@ function setVehicleTrunkState(vehicle, trunkState) {
 
 // ===========================================================================
 
+/*
 function addAllEventHandlers() {
 	bindServerEventHandler("onResourceStart", onResourceStart)
 	bindServerEventHandler("onResourceStop", onResourceStart)
@@ -1241,6 +1320,7 @@ function addAllEventHandlers() {
 	addServerEventHandler("onPedEnteringVehicle", onPedEnteringVehicle);
 	addServerEventHandler("onPedExitingVehicle", onPedExitingVehicle);
 }
+*/
 
 // ===========================================================================
 
@@ -1268,6 +1348,30 @@ function bindServerEventHandler(eventName, bindTo, handlerFunction) {
 			event.preventDefault();
 		}
 	});
+}
+
+// ===========================================================================
+
+function setElementName(element, name) {
+	element.name = name;
+}
+
+// ===========================================================================
+
+function hideElementForPlayer(element, client) {
+	element.setExistsFor(client, false);
+}
+
+// ===========================================================================
+
+function showElementForPlayer(element, client) {
+	element.setExistsFor(client, true);
+}
+
+// ===========================================================================
+
+function setElementShownByDefault(element, state) {
+	element.netFlags.defaultExistance = state;
 }
 
 // ===========================================================================

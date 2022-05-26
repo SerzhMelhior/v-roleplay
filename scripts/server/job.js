@@ -264,16 +264,7 @@ function createAllJobBlips() {
 	logToConsole(LOG_DEBUG, `[VRR.Job] Spawning all job location blips ...`);
 	for(let i in getServerData().jobs) {
 		for(let j in getServerData().jobs[i].locations) {
-			getServerData().jobs[i].locations[j].blip = game.createBlip((getServerData().jobs[i].blipModel!=0) ? getServerData().jobs[i].blipModel : 0, getServerData().jobs[i].locations[j].position, 2, getColourByName("yellow"));
-			if(getGlobalConfig().jobBlipStreamInDistance == -1 || getGlobalConfig().jobBlipStreamOutDistance == -1)	{
-				getServerData().jobs[i].locations[j].blip.netFlags.distanceStreaming = false;
-			} else {
-				setElementStreamInDistance(getServerData().jobs[i].locations[j].blip, getGlobalConfig().jobBlipStreamInDistance);
-				setElementStreamOutDistance(getServerData().jobs[i].locations[j].blip, getGlobalConfig().jobBlipStreamOutDistance);
-			}
-
-			//addToWorld(getServerData().jobs[i].locations[j].blip);
-			logToConsole(LOG_DEBUG, `[VRR.Job] Job '${getServerData().jobs[i].name}' location blip ${j} spawned!`);
+			createJobLocationBlip(i, j);
 		}
 	}
 	logToConsole(LOG_DEBUG, `[VRR.Job] All job location blips spawned!`);
@@ -496,7 +487,7 @@ function startWorkingCommand(command, params, client) {
 	}
 
 	messagePlayerSuccess(client, `💼 You are now working for the {jobYellow}${jobData.name}{MAINCOLOUR} job`);
-	messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} is now working for the {jobYellow}${jobData.name}{MAINCOLOUR} job`);
+	messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} started working for the {jobYellow}${jobData.name}{MAINCOLOUR} job`);
 
 	startWorking(client);
 	//messagePlayerNewbieTip(client, `Enter a job vehicle to get started!`);
@@ -650,6 +641,7 @@ function stopWorking(client) {
 	restorePlayerJobLockerItems(client);
 	respawnJobVehicle(client);
 	sendPlayerStopJobRoute(client);
+	messageDiscordEventChannel(`💼 ${getPlayerName(client)} has stopped working as a ${getJobData(jobId).name}`);
 
 	let jobId = getPlayerJob(client);
 	switch(getJobType(jobId)) {
@@ -935,6 +927,7 @@ function quitJob(client) {
 	stopWorking(client);
 	getPlayerCurrentSubAccount(client).job = 0;
 	sendPlayerJobType(client, 0);
+	updateJobBlipsForPlayer(client);
 }
 
 // ===========================================================================
@@ -942,6 +935,7 @@ function quitJob(client) {
 function takeJob(client, jobId) {
 	getPlayerCurrentSubAccount(client).job = getJobData(jobId).databaseId;
 	sendPlayerJobType(client, getJobData(jobId).databaseId);
+	updateJobBlipsForPlayer(client);
 }
 
 // ===========================================================================
@@ -1760,7 +1754,7 @@ function startJobRoute(client, forceRoute = -1) {
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `${getPlayerDisplayForConsole(client)} is starting job route ${jobRoute} for job ${jobId}`);
+	logToConsole(LOG_DEBUG, `${getPlayerDisplayForConsole(client)} is starting job route ${getJobRouteData(jobId, jobRoute).name} (${jobRoute}) for the ${getJobData(jobId).name} (${jobId}) job`);
 
 	getPlayerData(client).jobRoute = jobRoute;
 	getPlayerData(client).jobRouteLocation = 0;
@@ -1770,6 +1764,12 @@ function startJobRoute(client, forceRoute = -1) {
 	getPlayerVehicle(client).colour2 = getJobRouteData(jobId, jobRoute).vehicleColour2;
 
 	messagePlayerNormal(client, replaceJobRouteStringsInMessage(getJobRouteData(jobId, jobRoute).startMessage, jobId, jobRoute));
+
+	// Don't announce routes that an admin just created
+	if(forceRoute == -1) {
+		messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} started the ${getJobRouteData(jobId, jobRoute).name} route for the ${getJobData(jobId).name} job`);
+	}
+
 	if(getJobRouteData(jobId, jobRoute).locations.length > 0) {
 		showCurrentJobLocation(client);
 	} else {
@@ -1781,15 +1781,18 @@ function startJobRoute(client, forceRoute = -1) {
 
 function stopJobRoute(client, successful = false, alertPlayer = true) {
 	let jobId = getPlayerJob(client);
+	let routeId = getPlayerJobRoute(client);
 
 	if(alertPlayer) {
-		messagePlayerAlert(client, replaceJobRouteStringsInMessage(getJobRouteData(jobId, getPlayerJobRoute(client)).finishMessage), jobId, getPlayerJobRoute(client));
+		messagePlayerAlert(client, replaceJobRouteStringsInMessage(getJobRouteData(jobId, routeId).finishMessage, jobId, routeId));
 	}
 
 	if(successful == true) {
 		finishSuccessfulJobRoute(client);
 		return false;
 	}
+
+	messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} failed to finish the ${getJobRouteData(jobId, getPlayerJobRoute(client)).name} route for the ${getJobData(jobId).name} job and didn't earn anything.`);
 
 	stopReturnToJobVehicleCountdown(client);
 	sendPlayerStopJobRoute(client);
@@ -2416,24 +2419,46 @@ function createJobLocationBlip(jobId, locationId) {
 
 	let tempJobData = getJobData(jobId);
 
-	if(getJobData(jobId).blipModel != -1) {
-		let blipModelId = getGameConfig().blipSprites[getGame()].Job;
+	if(getJobData(jobId).blipModel == -1) {
+		return false;
+	}
 
-		if(getJobData(jobId).blipModel != 0) {
-			blipModelId = getJobData(jobId).blipModel;
-		}
+	let blipModelId = getGameConfig().blipSprites[getGame()].Job;
 
-		if(areServerElementsSupported()) {
-			let blip = createGameBlip(tempJobData.locations[locationId].position, blipModelId, getColourByType("jobYellow"));
-			if(blip != false) {
-				tempJobData.locations[locationId].blip = blip;
+	if(getJobData(jobId).blipModel != 0) {
+		blipModelId = getJobData(jobId).blipModel;
+	}
+
+	if(areServerElementsSupported()) {
+		let blip = createGameBlip(tempJobData.locations[locationId].position, blipModelId, 1, getColourByName("yellow"));
+		if(blip != false) {
+			tempJobData.locations[locationId].blip = blip;
+
+			if(getGlobalConfig().jobBlipStreamInDistance == -1 || getGlobalConfig().jobBlipStreamOutDistance == -1)	{
+				blip.netFlags.distanceStreaming = false;
+			} else {
+				setElementStreamInDistance(getServerData().jobs[i].locations[j].blip, getGlobalConfig().jobBlipStreamInDistance);
+				setElementStreamOutDistance(getServerData().jobs[i].locations[j].blip, getGlobalConfig().jobBlipStreamOutDistance);
 			}
+
 			setElementOnAllDimensions(blip, false);
 			setElementDimension(blip, tempJobData.locations[locationId].dimension);
-			addToWorld(blip);
-		} else {
-			sendJobToPlayer(null, jobId, tempJobData.name, tempJobData.locations[locationId].position, blipModelId);
+
+			let clients  = getClients();
+			for(let i in clients) {
+				if(getPlayerJob(client) == false) {
+					showElementForPlayer(blip, clients[i]);
+				} else {
+					if(getPlayerJob(clients[i]) == getServerData().jobs[i].databaseId) {
+						showElementForPlayer(blip, clients[i]);
+					} else {
+						hideElementForPlayer(blip, clients[i]);
+					}
+				}
+			}
 		}
+	} else {
+		sendJobToPlayer(null, jobId, tempJobData.name, tempJobData.locations[locationId].position, blipModelId);
 	}
 }
 
@@ -3000,6 +3025,7 @@ function finishSuccessfulJobRoute(client) {
 	let payout = toInteger(applyServerInflationMultiplier(jobRouteData.pay));
 	getPlayerData(client).payDayAmount = getPlayerData(client).payDayAmount + payout;
 
+	messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} finished the ${getJobRouteData(jobId, getPlayerJobRoute(client)).name} route for the ${getJobData(jobId).name} job and earned $${getJobRouteData(jobId, jobRouteId).pay}!`);
 	messagePlayerSuccess(client, replaceJobRouteStringsInMessage(jobRouteData.finishMessage, jobId, jobRouteData.index));
 
 	stopReturnToJobVehicleCountdown(client);
@@ -3066,6 +3092,20 @@ function replaceJobRouteStringsInMessage(messageText, jobId, jobRouteId) {
 	messageText = messageText.replace(tempRegex, getJobData(tempJobRouteData.jobIndex).name);
 
 	return messageText;
+}
+
+// ===========================================================================
+
+function updateJobBlipsForPlayer(client) {
+	for(let i in getServerData().jobs) {
+		for(let j in getServerData().jobs[i].locations) {
+			if(getPlayerJob(client) == 0 || getPlayerJob(client) == i) {
+				showElementForPlayer(getServerData().jobs[i].locations[j].blip, client);
+			} else {
+				hideElementForPlayer(getServerData().jobs[i].locations[j].blip, client);
+			}
+		}
+	}
 }
 
 // ===========================================================================

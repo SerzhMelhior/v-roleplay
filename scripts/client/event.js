@@ -53,19 +53,15 @@ function addAllEventHandlers() {
 	addEventHandler("OnCameraProcess", onCameraProcess);
 
 	addEventHandler("OnMouseWheel", onMouseWheel);
+
+	addEventHandler("OnEntityProcess", onEntityProcess);
 }
 
 // ===========================================================================
 
 function onResourceStart(event, resource) {
 	sendResourceStartedSignalToServer();
-	//setUpInitialGame();
 	//garbageCollectorInterval = setInterval(collectAllGarbage, 1000*60);
-
-	resourceStarted = true;
-	if(resourceReady == true) {
-		initClient();
-	}
 }
 
 // ===========================================================================
@@ -78,10 +74,6 @@ function onResourceStop(event, resource) {
 
 function onResourceReady(event, resource) {
 	sendResourceReadySignalToServer();
-	resourceReady = true;
-	if(resourceStarted == true) {
-		initClient();
-	}
 }
 
 // ===========================================================================
@@ -109,6 +101,7 @@ function onProcess(event, deltaTime) {
 	processVehicleBurning();
 	//checkChatBoxAutoHide(); // Will be uncommented on 1.4.0 GTAC update
 	//processVehicleFires();
+
 }
 
 // ===========================================================================
@@ -243,6 +236,18 @@ function onCameraProcess(event) {
 
 function onMouseWheel(event, mouseId, deltaCoordinates, flipped) {
 	processMouseWheelForChatBox(mouseId, deltaCoordinates, flipped);
+}
+
+// ===========================================================================
+
+function onEntityProcess(event, entity) {
+	if(!isSpawned) {
+		return false;
+	}
+
+	//if(entity.isType(ELEMENT_PED) && !entity.isType(ELEMENT_PLAYER)) {
+	//	processNPCMovement(entity);
+	//}
 }
 
 // ===========================================================================

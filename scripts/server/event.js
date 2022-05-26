@@ -15,7 +15,35 @@ function initEventScript() {
 
 // ===========================================================================
 
-function onInitialConnectionToServer(ipAddress, port) {
+function addAllEventHandlers() {
+	addEventHandler("onResourceStart", onResourceStart);
+	addEventHandler("onResourceStop", onResourceStop);
+	addEventHandler("onServerStop", onResourceStop);
+
+	addEventHandler("onProcess", onProcess);
+	addEventHandler("onEntityProcess", onEntityProcess);
+
+	addEventHandler("onPlayerConnect", onPlayerConnect);
+	addEventHandler("onPlayerJoin", onPlayerJoin);
+	addEventHandler("onPlayerJoined", onPlayerJoined);
+	addEventHandler("onPlayerChat", onPlayerChat);
+	addEventHandler("onPlayerQuit", onPlayerQuit);
+	addEventHandler("onElementStreamIn", onElementStreamIn);
+	addEventHandler("onElementStreamOut", onElementStreamOut);
+
+	addEventHandler("onPedSpawn", onPedSpawn);
+	addEventHandler("onPedEnterVehicle", onPedEnteringVehicle);
+	addEventHandler("onPedExitVehicle", onPedExitingVehicle);
+
+	addEventHandler("onPedEnteringVehicle", onPedEnteringVehicle);
+	addEventHandler("onPedExitingVehicle", onPedExitingVehicle);
+
+	//addEventHandler("OnPlayerCommand", onPlayerCommand);
+}
+
+// ===========================================================================
+
+function onPlayerConnect(event, ipAddress, port) {
 	logToConsole(LOG_INFO, `[VRR.Event] Client connecting (IP: ${ipAddress})`);
 	//if(isIpAddressBanned(ipAddress)) {
 	//    messagePlayerError(client, "You are banned from this server!");
@@ -25,12 +53,16 @@ function onInitialConnectionToServer(ipAddress, port) {
 
 // ===========================================================================
 
-function onPlayerJoin(client) {
+function onPlayerJoin(event, client) {
 	logToConsole(LOG_INFO, `[VRR.Event] Client ${getPlayerName(client)}[${getPlayerId(client)}] joining from ${getPlayerIP(client)}`);
 
 	if(isFadeCameraSupported()) {
 		fadeCamera(client, true, 1.0);
 	}
+
+	//if(isCustomCameraSupported()) {
+	//	showConnectCameraToPlayer(client);
+	//}
 
 	let messageText = `👋 ${getPlayerName(client)} is connecting to the server ...`;
 	messageDiscordEventChannel(messageText);
@@ -45,13 +77,13 @@ function onPlayerJoin(client) {
 
 // ===========================================================================
 
-function onPlayerJoined(client) {
+function onPlayerJoined(event, client) {
 
 }
 
 // ===========================================================================
 
-function onElementStreamIn(element, client) {
+function onElementStreamIn(event, element, client) {
 	//if(getPlayerDimension(client) != getElementDimension(element)) {
 	//    event.preventDefault();
 	//}
@@ -66,13 +98,13 @@ function onElementStreamIn(element, client) {
 
 // ===========================================================================
 
-function onElementStreamOut(element, client) {
+function onElementStreamOut(event, element, client) {
 
 }
 
 // ===========================================================================
 
-function onPlayerQuit(client, quitReasonId) {
+function onPlayerQuit(event, client, quitReasonId) {
 	logToConsole(LOG_INFO, `👋 Client ${getPlayerDisplayForConsole(client)} disconnected (${disconnectReasons[quitReasonId]}[${quitReasonId}])`);
 	updateConnectionLogOnQuit(client, quitReasonId);
 
@@ -94,21 +126,18 @@ function onPlayerQuit(client, quitReasonId) {
 		resetClientStuff(client);
 		getServerData().clients[getPlayerId(client)] = null;
 	}
-
-	clearTemporaryVehicles();
-	clearTemporaryPeds();
 }
 
 // ===========================================================================
 
-async function onPlayerChat(client, messageText) {
+async function onPlayerChat(event, client, messageText) {
 	processPlayerChat(client, messageText);
 	event.preventDefault();
 }
 
 // ===========================================================================
 
-function onProcess(deltaTime = 0) {
+function onProcess(event, deltaTime) {
 	updateServerGameTime();
 	//checkPlayerSpawning();
 	//checkPlayerPedState();
@@ -119,12 +148,12 @@ function onProcess(deltaTime = 0) {
 
 // ===========================================================================
 
-function onEntityProcess(entity) {
+function onEntityProcess(event, entity) {
 }
 
 // ===========================================================================
 
-function onPedEnteringVehicle(ped, vehicle, seat) {
+function onPedEnteringVehicle(event, ped, vehicle, seat) {
 	if(ped.isType(ELEMENT_PLAYER)) {
 		let client = getClientFromPlayerElement(ped);
 		getPlayerData(client).pedState = VRR_PEDSTATE_ENTERINGVEHICLE;
@@ -155,7 +184,7 @@ function onPedEnteringVehicle(ped, vehicle, seat) {
 
 // ===========================================================================
 
-function onPedExitingVehicle(ped, vehicle) {
+function onPedExitingVehicle(event, ped, vehicle) {
 	if(!getVehicleData(vehicle)) {
 		return false;
 	}
@@ -174,22 +203,22 @@ function onPedExitingVehicle(ped, vehicle) {
 
 // ===========================================================================
 
-function onResourceStart(resource) {
+function onResourceStart(event, resource) {
 	logToConsole(LOG_WARN, `[VRR.Event] Resource ${resource.name} started!`);
 
-	if(resource != thisResource) {
-		messageAdmins(`{MAINCOLOUR}Resource {ALTCOLOUR}${resource.name}{MAINCOLOUR} started!`);
-	}
+	//if(resource != thisResource) {
+	//	messageAdmins(`{MAINCOLOUR}Resource {ALTCOLOUR}${resource.name}{MAINCOLOUR} started!`);
+	//}
 }
 
 // ===========================================================================
 
-function onResourceStop(resource) {
+function onResourceStop(event, resource) {
 	logToConsole(LOG_WARN, `[VRR.Event] Resource ${resource.name} stopped!`);
 
-	if(resource != thisResource) {
-		messageAdmins(`{MAINCOLOUR}Resource {ALTCOLOUR}${resource.name}{MAINCOLOUR} stopped!`);
-	}
+	//if(resource != thisResource) {
+	//	messageAdmins(`{MAINCOLOUR}Resource {ALTCOLOUR}${resource.name}{MAINCOLOUR} stopped!`);
+	//}
 
 	if(resource == thisResource) {
 		kickAllClients();
@@ -497,9 +526,6 @@ function onPlayerSpawn(client) {
 	//messagePlayerNormal(client, "This server is in early development and may restart at any time for updates.", getColourByName("orange"));
 	//messagePlayerNormal(client, "Please report any bugs using /bug and suggestions using /idea", getColourByName("yellow"));
 
-	logToConsole(LOG_DEBUG, `[VRR.Event] Updating spawned state for ${getPlayerDisplayForConsole(client)} to true`);
-	updatePlayerSpawnedState(client, true);
-
 	logToConsole(LOG_DEBUG, `[VRR.Event] Setting player interior for ${getPlayerDisplayForConsole(client)} to ${getPlayerCurrentSubAccount(client).interior}`);
 	setPlayerInterior(client, getPlayerCurrentSubAccount(client).interior);
 
@@ -599,11 +625,29 @@ function onPlayerSpawn(client) {
 		sendAllHousesToPlayer(client);
 		sendAllJobsToPlayer(client);
 		//sendAllVehiclesToPlayer(client);
-
 		requestPlayerPedNetworkId(client);
 	}
 
+	logToConsole(LOG_DEBUG, `[VRR.Event] Updating spawned state for ${getPlayerDisplayForConsole(client)} to true`);
+	updatePlayerSpawnedState(client, true);
+
 	getPlayerData(client).payDayTickStart = sdl.ticks;
+
+	// Stop playing intro music and any other radio
+	stopRadioStreamForPlayer(client);
+
+	// Start playing business/house radio if in one
+	let businessId = getPlayerBusiness(client);
+	let houseId = getPlayerHouse(client);
+	if(businessId != -1) {
+		if(getBusinessData(businessId).streamingRadioStation != -1) {
+			playRadioStreamForPlayer(client, getRadioStationData(getBusinessData(businessId).streamingRadioStation).url, true, getPlayerStreamingRadioVolume(client), null);
+		}
+	} else if(houseId != -1) {
+		if(getHouseData(houseId).streamingRadioStation != -1) {
+			playRadioStreamForPlayer(client, getRadioStationData(getHouseData(houseId).streamingRadioStation).url, true, getPlayerStreamingRadioVolume(client), null);
+		}
+	}
 
 	messageDiscordEventChannel(`🧍 ${getPlayerName(client)} spawned as ${getCharacterFullName(client)}`);
 }

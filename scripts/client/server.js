@@ -86,6 +86,23 @@ function addAllNetworkHandlers() {
 	addNetworkEventHandler("vrr.showNewCharacter", showNewCharacterGUI);
 	addNetworkEventHandler("vrr.showLogin", showLoginGUI);
 	addNetworkEventHandler("vrr.2fa", showTwoFactorAuthGUI);
+	addNetworkEventHandler("vrr.showResetPasswordCodeInput", resetPasswordCodeInputGUI);
+	addNetworkEventHandler("vrr.showResetPasswordEmailInput", resetPasswordEmailInputGUI);
+	addNetworkEventHandler("vrr.showChangePassword", showChangePasswordGUI);
+	addNetworkEventHandler("vrr.showCharacterSelect", showCharacterSelectGUI);
+	addNetworkEventHandler("vrr.switchCharacterSelect", switchCharacterSelectGUI);
+	addNetworkEventHandler("vrr.showError", showErrorGUI);
+	addNetworkEventHandler("vrr.showInfo", showInfoGUI);
+	addNetworkEventHandler("vrr.showPrompt", showYesNoPromptGUI);
+	addNetworkEventHandler("vrr.loginSuccess", loginSuccess);
+	addNetworkEventHandler("vrr.characterSelectSuccess", characterSelectSuccess);
+	addNetworkEventHandler("vrr.loginFailed", loginFailed);
+	addNetworkEventHandler("vrr.registrationSuccess", registrationSuccess);
+	addNetworkEventHandler("vrr.registrationFailed", registrationFailed);
+	addNetworkEventHandler("vrr.newCharacterFailed", newCharacterFailed);
+	addNetworkEventHandler("vrr.changePassword", showChangePasswordGUI);
+	addNetworkEventHandler("vrr.showLocaleChooser", showLocaleChooserGUI);
+	addNetworkEventHandler("vrr.guiColour", setGUIColours);
 
 	// Business
 	addNetworkEventHandler("vrr.business", receiveBusinessFromServer);
@@ -121,9 +138,9 @@ function addAllNetworkHandlers() {
 	addNetworkEventHandler("vrr.nametag", updatePlayerNameTag);
 	addNetworkEventHandler("vrr.nametagDistance", setNameTagDistance);
 	addNetworkEventHandler("vrr.ping", updatePlayerPing);
-	addNetworkEventHandler("vrr.pedAnim", makePedPlayAnimation);
-	addNetworkEventHandler("vrr.pedStopAnim", makePedStopAnimation);
-	addNetworkEventHandler("vrr.forcePedAnim", forcePedAnimation);
+	addNetworkEventHandler("vrr.anim", makePedPlayAnimation);
+	addNetworkEventHandler("vrr.stopAnim", makePedStopAnimation);
+	addNetworkEventHandler("vrr.forceAnim", forcePedAnimation);
 	addNetworkEventHandler("vrr.clientInfo", serverRequestedClientInfo);
 	addNetworkEventHandler("vrr.interiorLights", updateInteriorLightsState);
 	addNetworkEventHandler("vrr.cutsceneInterior", setCutsceneInterior);
@@ -184,11 +201,23 @@ function set2DRendering(hudState, labelState, smallGameMessageState, scoreboardS
 function onServerSpawnedLocalPlayer(state) {
 	logToConsole(LOG_DEBUG, `[VRR.Main] Setting spawned state to ${state}`);
 	isSpawned = state;
+	setUpInitialGame();
 	if(state) {
-		setUpInitialGame();
 		setTimeout(function() {
 			calledDeathEvent = false;
 		}, 1000);
+
+		getPeds().filter(ped => !ped.isType(ELEMENT_PLAYER)).forEach(ped => {
+			syncCivilianProperties(ped);
+		});
+
+		getPlayers().forEach(player => {
+			syncPlayerProperties(player);
+		});
+
+		getVehicles().forEach(veh => {
+			syncVehicleProperties(veh);
+		});
 	}
 }
 
