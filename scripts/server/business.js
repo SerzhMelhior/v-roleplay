@@ -25,7 +25,7 @@ function loadBusinessFromId(businessId) {
 		if(dbQuery) {
 			let dbAssoc = fetchQueryAssoc(dbQuery);
 			freeDatabaseQuery(dbQuery);
-			return new BusinessData(dbAssoc);
+			return new BusinessData(dbAssoc[0]);
 		}
 		disconnectFromDatabase(dbConnection);
 	}
