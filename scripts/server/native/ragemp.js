@@ -1223,3 +1223,27 @@ function bindServerEventHandler(eventName, bindTo, handlerFunction) {
 }
 
 // ===========================================================================
+
+function setElementName(element, name) {
+	element.name = name;
+}
+
+// ===========================================================================
+
+function hideElementForPlayer(element, client) {
+	element.setExistsFor(client, false);
+}
+
+// ===========================================================================
+
+function showElementForPlayer(element, client) {
+	element.setExistsFor(client, true);
+}
+
+// ===========================================================================
+
+function setElementShownByDefault(element, state) {
+	element.netFlags.defaultExistance(state);
+}
+
+// ===========================================================================
