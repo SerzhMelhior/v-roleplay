@@ -163,12 +163,6 @@ function clearLocalPlayerWeapons(clearData) {
 
 // ===========================================================================
 
-function getClosestVehicle(pos) {
-	return getElementsByType(ELEMENT_VEHICLE).reduce((i, j) => (i.position.distance(pos) < j.position.distance(pos)) ? i : j);
-}
-
-// ===========================================================================
-
 function setLocalPlayerPosition(position) {
 	logToConsole(LOG_DEBUG, `[VRR.Utilities] Setting position to ${position.x}, ${position.y}, ${position.z}`);
 	if(typeof localPlayer.velocity != "undefined") {

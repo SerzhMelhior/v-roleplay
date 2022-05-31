@@ -1086,12 +1086,6 @@ function getVehiclesInRange(position, range) {
 
 // ===========================================================================
 
-function getClosestVehicle(position) {
-	return getClosestElementByType(ELEMENT_VEHICLE, position);
-}
-
-// ===========================================================================
-
 function getClosestElementByType(elementType, position) {
 	return getElementsByType(elementType).reduce((i, j) => (getDistance(position, getElementPosition(i)) <= getDistance(position, getElementPosition(j))) ? i : j);
 }

@@ -1696,3 +1696,18 @@ function getVehicleColourInfoString(colour, isRGBA) {
 }
 
 // ===========================================================================
+
+function getClosestVehicle(position, interior, dimension) {
+	let closest = 0;
+	let vehicles = getServerData().vehicles;
+
+	for(let i in vehicles) {
+		if(getDistance(getVehiclePosition(vehicles[i].vehicle), position) < getDistance(getVehiclePosition(vehicles[closest].vehicle), position) && getVehicleDimension(vehicles[i].vehicle) == dimension && getVehicleInterior(vehicles[i].vehicle) == interior) {
+			closest = i;
+		}
+	}
+
+	return closest;
+}
+
+// ===========================================================================
