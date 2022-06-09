@@ -99,10 +99,10 @@ class ServerConfigData {
 				money: dbAssoc["svr_newchar_money"],
 				bank: dbAssoc["svr_newchar_bank"],
 				skin: dbAssoc["svr_newchar_skin"],
-			},
+			};
 
-				this.connectCameraPosition = toVector3(dbAssoc["svr_connectcam_pos_x"], dbAssoc["svr_connectcam_pos_y"], dbAssoc["svr_connectcam_pos_z"]);
-			this.connectCameraLookAt = toVector3(dbAssoc["svr_connectcam_lookat_x"], dbAssoc["svr_connectcam_lookat_y"], dbAssoc["svr_connectcam_lookat_z"]);
+			//this.connectCameraPosition = toVector3(dbAssoc["svr_connectcam_pos_x"], dbAssoc["svr_connectcam_pos_y"], dbAssoc["svr_connectcam_pos_z"]);
+			//this.connectCameraLookAt = toVector3(dbAssoc["svr_connectcam_lookat_x"], dbAssoc["svr_connectcam_lookat_y"], dbAssoc["svr_connectcam_lookat_z"]);
 
 			this.hour = toInteger(dbAssoc["svr_start_time_hour"]);
 			this.minute = toInteger(dbAssoc["svr_start_time_min"]);
@@ -111,7 +111,7 @@ class ServerConfigData {
 			this.fallingSnow = intToBool(toInteger(dbAssoc["svr_snow_falling"]));
 			this.groundSnow = intToBool(toInteger(dbAssoc["svr_snow_ground"]));
 			this.useGUI = intToBool(toInteger(dbAssoc["svr_gui"]));
-			this.showLogo = intToBool(toInteger(dbAssoc["svr_logo"]));
+			//this.showLogo = intToBool(toInteger(dbAssoc["svr_logo"]));
 			this.createJobPickups = intToBool(toInteger(dbAssoc["svr_job_pickups"]));
 			this.createBusinessPickups = intToBool(toInteger(dbAssoc["svr_biz_pickups"]));
 			this.createHousePickups = intToBool(toInteger(dbAssoc["svr_house_pickups"]));
@@ -122,7 +122,7 @@ class ServerConfigData {
 			this.guiColourPrimary = [toInteger(dbAssoc["svr_gui_col1_r"]), toInteger(dbAssoc["svr_gui_col1_g"]), toInteger(dbAssoc["svr_gui_col1_b"])];
 			this.guiColourSecondary = [toInteger(dbAssoc["svr_gui_col2_r"]), toInteger(dbAssoc["svr_gui_col2_g"]), toInteger(dbAssoc["svr_gui_col2_b"])];
 			this.guiTextColourPrimary = [toInteger(dbAssoc["svr_gui_textcol1_r"]), toInteger(dbAssoc["svr_gui_textcol1_g"]), toInteger(dbAssoc["svr_gui_textcol1_b"])];
-			//this.guiTextColourSecondary = [toInteger(dbAssoc["svr_gui_textcol2_r"]), toInteger(dbAssoc["svr_gui_textcol2_g"]), toInteger(dbAssoc["svr_gui_textcol2_b"])];
+			this.guiTextColourSecondary = [toInteger(dbAssoc["svr_gui_textcol2_r"]), toInteger(dbAssoc["svr_gui_textcol2_g"]), toInteger(dbAssoc["svr_gui_textcol2_b"])];
 			this.inflationMultiplier = toFloat(dbAssoc["svr_inflation_multiplier"]);
 			this.nameTagDistance = toFloat(dbAssoc["svr_nametag_distance"]);
 			this.discordBotToken = intToBool(dbAssoc["svr_discord_bot_token"]);
