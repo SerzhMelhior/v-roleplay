@@ -258,6 +258,8 @@ class ClientData {
 		this.customDisconnectReason = "";
 
 		this.interiorCutscene = -1;
+
+		this.playerBlip = false;
 	}
 };
 
