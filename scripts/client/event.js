@@ -79,11 +79,11 @@ function onResourceReady(event, resource) {
 // ===========================================================================
 
 function onProcess(event, deltaTime) {
-	if(localPlayer == null) {
+	if (localPlayer == null) {
 		return false;
 	}
 
-	if(!isSpawned) {
+	if (!isSpawned) {
 		return false;
 	}
 
@@ -116,21 +116,21 @@ function onKeyUp(event, keyCode, scanCode, keyModifiers) {
 // ===========================================================================
 
 function onDrawnHUD(event) {
-	if(!renderHUD) {
+	if (!renderHUD) {
 		return false;
 	}
 
-	if(localPlayer == null) {
+	if (localPlayer == null) {
 		return false;
 	}
 
 	processSmallGameMessageRendering();
-	processScoreBoardRendering();
+	//processScoreBoardRendering();
 	processLabelRendering();
-	processLogoRendering();
+	//processLogoRendering();
 	processItemActionRendering();
 	processSkinSelectRendering();
-	processNameTagRendering();
+	//processNameTagRendering();
 	processInteriorLightsRendering();
 }
 
@@ -153,7 +153,7 @@ function onLocalPlayerExitedVehicle(event, vehicle, seat) {
 	logToConsole(LOG_DEBUG, `[VRR.Event] Local player exited vehicle`);
 	sendNetworkEventToServer("vrr.onPlayerExitVehicle", getVehicleForNetworkEvent(vehicle), seat);
 
-	if(inVehicleSeat) {
+	if (inVehicleSeat) {
 		parkedVehiclePosition = false;
 		parkedVehicleHeading = false;
 	}
@@ -167,11 +167,11 @@ function onLocalPlayerEnteredVehicle(event, vehicle, seat) {
 	sendNetworkEventToServer("vrr.onPlayerEnterVehicle", getVehicleForNetworkEvent(vehicle), seat);
 
 	//if(inVehicleSeat == 0) {
-		//setVehicleEngine(vehicle, false);
-		//if(!inVehicle.engine) {
-		//	parkedVehiclePosition = inVehicle.position;
-		//	parkedVehicleHeading = inVehicle.heading;
-		//}
+	//setVehicleEngine(vehicle, false);
+	//if(!inVehicle.engine) {
+	//	parkedVehiclePosition = inVehicle.position;
+	//	parkedVehicleHeading = inVehicle.heading;
+	//}
 	//}
 }
 
@@ -181,12 +181,12 @@ function onPedInflictDamage(event, damagedEntity, damagerEntity, weaponId, healt
 	//let damagerEntityString = (!isNull(damagedEntity)) ? `${damagerEntity.name} (${damagerEntity.name}, ${damagerEntity.type} - ${typeof damagerEntity})` : `Unknown ped`;
 	//let damagedEntityString = (!isNull(damagedEntity)) ? `${damagedEntity.name} (${damagedEntity.name}, ${damagedEntity.type} - ${typeof damagedEntity})` : `Unknown ped`;
 	//logToConsole(LOG_DEBUG, `[VRR.Event] ${damagerEntityString} damaged ${damagedEntityString}'s '${pedPiece} with weapon ${weaponId}`);
-	if(!isNull(damagedEntity) && !isNull(damagerEntity)) {
-		if(damagedEntity.isType(ELEMENT_PLAYER)) {
-			if(damagedEntity == localPlayer) {
+	if (!isNull(damagedEntity) && !isNull(damagerEntity)) {
+		if (damagedEntity.isType(ELEMENT_PLAYER)) {
+			if (damagedEntity == localPlayer) {
 				//if(!weaponDamageEnabled[damagerEntity.name]) {
-					preventDefaultEventAction(event);
-					sendNetworkEventToServer("vrr.weaponDamage", damagerEntity.name, weaponId, pedPiece, healthLoss);
+				preventDefaultEventAction(event);
+				sendNetworkEventToServer("vrr.weaponDamage", damagerEntity.name, weaponId, pedPiece, healthLoss);
 				//}
 			}
 		}
@@ -197,7 +197,7 @@ function onPedInflictDamage(event, damagedEntity, damagerEntity, weaponId, healt
 
 function onLocalPlayerEnterSphere(event, sphere) {
 	logToConsole(LOG_DEBUG, `[VRR.Event] Local player entered sphere`);
-	if(sphere == jobRouteLocationSphere) {
+	if (sphere == jobRouteLocationSphere) {
 		enteredJobRouteSphere();
 	}
 }
@@ -241,7 +241,7 @@ function onMouseWheel(event, mouseId, deltaCoordinates, flipped) {
 // ===========================================================================
 
 function onEntityProcess(event, entity) {
-	if(!isSpawned) {
+	if (!isSpawned) {
 		return false;
 	}
 

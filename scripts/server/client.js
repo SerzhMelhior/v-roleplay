@@ -84,7 +84,7 @@ function addAllNetworkHandlers() {
 
 function updatePlayerNameTag(client) {
 	//logToConsole(LOG_DEBUG, `[VRR.Client] Sending ${getPlayerDisplayForConsole(client)}'s updated nametag to all players`);
-	sendNetworkEventToPlayer("vrr.nametag", null, getPlayerName(client), getPlayerNameForNameTag(client), getPlayerColour(client), getPlayerData(client).afk, getPlayerPing(client));
+	sendNetworkEventToPlayer("agrp.nametag", null, getPlayerName(client), getPlayerNameForNameTag(client), getPlayerColour(client), getPlayerData(client).afk, getPlayerPing(client));
 }
 
 // ===========================================================================
@@ -101,7 +101,7 @@ function updateAllPlayerNameTags() {
 
 function updatePlayerPing(client) {
 	//logToConsole(LOG_DEBUG, `[VRR.Client] Sending ${getPlayerDisplayForConsole(client)}'s ping to all players`);
-	sendNetworkEventToPlayer("vrr.ping", null, getPlayerName(client), getPlayerPing(client));
+	sendNetworkEventToPlayer("agrp.ping", null, getPlayerName(client), getPlayerPing(client));
 }
 
 // ===========================================================================
@@ -193,7 +193,7 @@ function setPlayerControlState(client, state) {
 
 function updatePlayerShowLogoState(client, state) {
 	logToConsole(LOG_DEBUG, `[VRR.Client] Setting ${getPlayerDisplayForConsole(client)}'s logo state ${toUpperCase(getOnOffFromBool(state))}`);
-	sendNetworkEventToPlayer("vrr.logo", client, state);
+	sendNetworkEventToPlayer("agrp.serverLogo", client, state);
 }
 
 // ===========================================================================
@@ -435,14 +435,14 @@ function sendPlayerStopJobRoute(client) {
 
 function sendPlayerMouseCameraToggle(client) {
 	logToConsole(LOG_DEBUG, `[VRR.Client] Sending signal to toggle mouse camera ${getPlayerDisplayForConsole(client)}`);
-	sendNetworkEventToPlayer("vrr.mouseCamera", client);
+	sendNetworkEventToPlayer("agrp.mouseCamera", client);
 }
 
 // ===========================================================================
 
 function setPlayerMouseCameraState(client, state) {
 	logToConsole(LOG_DEBUG, `[VRR.Client] Sending signal to toggle mouse camera ${getPlayerDisplayForConsole(client)}`);
-	sendNetworkEventToPlayer("vrr.mouseCameraForce", client, state);
+	sendNetworkEventToPlayer("agrp.mouseCameraForce", client, state);
 }
 
 // ===========================================================================
@@ -1194,7 +1194,7 @@ function tellPlayerToSpawn(client, skinId, position) {
 // ==========================================================================
 
 function sendNameTagDistanceToClient(client, distance) {
-	sendNetworkEventToPlayer("vrr.nameTagDistance", client, distance);
+	sendNetworkEventToPlayer("agrp.nameTagDistance", client, distance);
 }
 
 // ==========================================================================

@@ -142,7 +142,7 @@
 	<script src="scripts/client/item.js" type="client" language="javascript" />
 	<script src="scripts/client/job.js" type="client" language="javascript" />
 	<script src="scripts/client/keybind.js" type="client" language="javascript" />
-	<script src="scripts/client/label.js" type="client" language="javascript" />
+	//<script src="scripts/client/label.js" type="client" language="javascript" />
 	<script src="scripts/client/locale.js" type="client" language="javascript" />
 	<!--<script src="scripts/client/logo.js" type="client" language="javascript" />-->
 	<script src="scripts/client/main.js" type="client" language="javascript" />
