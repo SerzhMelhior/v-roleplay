@@ -1191,8 +1191,8 @@ function initClient(client) {
 	sendPlayerGUIInit(client);
 	updatePlayerSnowState(client);
 
-	//logToConsole(LOG_DEBUG, `[VRR.Account] Showing connect camera to ${getPlayerDisplayForConsole(client)} ...`);
-	//showConnectCameraToPlayer(client);
+	logToConsole(LOG_DEBUG, `[VRR.Account] Showing connect camera to ${getPlayerDisplayForConsole(client)} ...`);
+	showConnectCameraToPlayer(client);
 
 	messageClient(`Please wait ...`, client, getColourByName("softGreen"));
 
@@ -1521,7 +1521,7 @@ function sendAccountLoginFailedNotification(emailAddress, name, ip, game = getGa
 	emailBodyText = emailBodyText.replace("{IPADDRESS}", ip);
 	emailBodyText = emailBodyText.replace("{LOCATION}", `${cityName}, ${subDivisionName}, ${countryName}`);
 	emailBodyText = emailBodyText.replace("{SERVERNAME}", getServerName());
-	emailBodyText = emailBodyText.replace("{TIMESTAMP}", date.toLocaleString('en-US'));
+	emailBodyText = emailBodyText.replace("{TIMESTAMP}", new Date().toLocaleString('en-US'));
 
 	sendEmail(emailAddress, name, `Login failed on ${getServerName()}`, emailBodyText);
 	return true;
@@ -1539,7 +1539,7 @@ function sendAccountLoginSuccessNotification(emailAddress, name, ip, game = getG
 	emailBodyText = emailBodyText.replace("{IPADDRESS}", ip);
 	emailBodyText = emailBodyText.replace("{LOCATION}", `${cityName}, ${subDivisionName}, ${countryName}`);
 	emailBodyText = emailBodyText.replace("{SERVERNAME}", getServerName());
-	emailBodyText = emailBodyText.replace("{TIMESTAMP}", date.toLocaleString('en-US'));
+	emailBodyText = emailBodyText.replace("{TIMESTAMP}", new Date().toLocaleString('en-US'));
 
 	sendEmail(emailAddress, name, `Login failed on ${getServerName()}`, emailBodyText);
 	return true;
