@@ -7,6 +7,164 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+// Vehicle Owner Types
+const VRR_VEHOWNER_NONE = 0;                     // Not owned
+const VRR_VEHOWNER_PLAYER = 1;                   // Owned by a player (character/subaccount)
+const VRR_VEHOWNER_JOB = 2;                      // Owned by a job
+const VRR_VEHOWNER_CLAN = 3;                     // Owned by a clan
+const VRR_VEHOWNER_FACTION = 4;                  // Owned by a faction (not used at the moment)
+const VRR_VEHOWNER_PUBLIC = 5;                   // Public vehicle. Anybody can drive it.
+const VRR_VEHOWNER_BIZ = 6;                      // Owned by a business (also includes dealerships since they're businesses)
+
+// ===========================================================================
+
+// Vehicle Seats
+const VRR_VEHSEAT_DRIVER = 0;
+const VRR_VEHSEAT_FRONTPASSENGER = 1;
+const VRR_VEHSEAT_REARLEFTPASSENGER = 2;
+const VRR_VEHSEAT_REARRIGHTPASSENGER = 3;
+
+// ===========================================================================
+
+/**
+ * @class Representing a vehicle's data. Loaded and saved in the database
+ */
+class VehicleData {
+	constructor(dbAssoc = false, vehicle = false) {
+		// General Info
+		this.databaseId = 0;
+		this.serverId = getServerId();
+		this.model = (vehicle != false) ? getVehicleModelIndexFromModel(vehicle.modelIndex) : 0;
+		this.vehicle = vehicle;
+		this.index = -1;
+		this.needsSaved = false;
+
+		// GTA IV
+		this.ivNetworkId = -1;
+		this.syncPosition = toVector3(0.0, 0.0, 0.0);
+		this.syncHeading = 0.0;
+
+		// Ownership
+		this.ownerType = VRR_VEHOWNER_NONE;
+		this.ownerId = 0;
+		this.buyPrice = 0;
+		this.rentPrice = 0;
+		this.rentedBy = false;
+		this.rentStart = 0;
+
+		// Position and Rotation
+		this.spawnPosition = (vehicle) ? vehicle.position : toVector3(0.0, 0.0, 0.0);
+		this.spawnRotation = (vehicle) ? vehicle.heading : 0.0;
+		this.spawnLocked = false;
+		this.interior = 0;
+		this.dimension = 0;
+
+		// Colour Info
+		this.colour1IsRGBA = 0;
+		this.colour2IsRGBA = 0;
+		this.colour3IsRGBA = 0;
+		this.colour4IsRGBA = 0;
+		this.colour1 = (vehicle) ? vehicle.colour1 : 1;
+		this.colour2 = (vehicle) ? vehicle.colour2 : 1;
+		this.colour3 = (vehicle) ? vehicle.colour3 : 1;
+		this.colour4 = (vehicle) ? vehicle.colour4 : 1;
+		this.livery = 3;
+
+		// Vehicle Attributes
+		this.locked = false;
+		this.engine = false;
+		this.lights = false;
+		this.health = 1000;
+		this.engineDamage = 0;
+		this.visualDamage = 0;
+		this.dirtLevel = 0;
+
+		this.trunkItemCache = [];
+		this.dashItemCache = [];
+
+		this.streamingRadioStation = -1;
+
+		// Other/Misc
+		this.insuranceAccount = 0;
+		this.fuel = 0;
+		this.flags = 0;
+		this.needsSaved = false;
+		this.whoAdded = 0;
+		this.whenAdded = 0;
+		this.licensePlate = "";
+
+		this.lastActiveTime = false;
+
+		if (dbAssoc) {
+			// General Info
+			this.databaseId = toInteger(dbAssoc["veh_id"]);
+			this.serverId = toInteger(dbAssoc["veh_server"]);
+			this.model = toInteger(dbAssoc["veh_model"]);
+
+			// Ownership
+			this.ownerType = toInteger(dbAssoc["veh_owner_type"]);
+			this.ownerId = toInteger(dbAssoc["veh_owner_id"]);
+			this.buyPrice = toInteger(dbAssoc["veh_buy_price"]);
+			this.rentPrice = toInteger(dbAssoc["veh_rent_price"]);
+
+			// Position and Rotation
+			this.spawnPosition = toVector3(dbAssoc["veh_pos_x"], dbAssoc["veh_pos_y"], dbAssoc["veh_pos_z"]);
+			this.spawnRotation = toInteger(dbAssoc["veh_rot_z"]);
+			this.spawnLocked = intToBool(toInteger(dbAssoc["veh_spawn_lock"]));
+			this.interior = toInteger(dbAssoc["veh_int"]);
+			this.dimension = toInteger(dbAssoc["veh_vw"]);
+
+			// Colour Info
+			this.colour1IsRGBA = intToBool(toInteger(dbAssoc["veh_col1_isrgba"]));
+			this.colour2IsRGBA = intToBool(toInteger(dbAssoc["veh_col2_isrgba"]));
+			this.colour3IsRGBA = intToBool(toInteger(dbAssoc["veh_col3_isrgba"]));
+			this.colour4IsRGBA = intToBool(toInteger(dbAssoc["veh_col4_isrgba"]));
+			this.colour1 = toInteger(dbAssoc["veh_col1"]);
+			this.colour2 = toInteger(dbAssoc["veh_col2"]);
+			this.colour3 = toInteger(dbAssoc["veh_col3"]);
+			this.colour4 = toInteger(dbAssoc["veh_col4"]);
+			this.livery = toInteger(dbAssoc["veh_livery"]);
+
+			// Extras (components on SA, extras on IV+)
+			this.extras = [
+				toInteger(dbAssoc["veh_extra1"]),
+				toInteger(dbAssoc["veh_extra2"]),
+				toInteger(dbAssoc["veh_extra3"]),
+				toInteger(dbAssoc["veh_extra4"]),
+				toInteger(dbAssoc["veh_extra5"]),
+				toInteger(dbAssoc["veh_extra6"]),
+				toInteger(dbAssoc["veh_extra7"]),
+				toInteger(dbAssoc["veh_extra8"]),
+				toInteger(dbAssoc["veh_extra9"]),
+				toInteger(dbAssoc["veh_extra10"]),
+				toInteger(dbAssoc["veh_extra11"]),
+				toInteger(dbAssoc["veh_extra12"]),
+				toInteger(dbAssoc["veh_extra13"]),
+			];
+
+			// Vehicle Attributes
+			this.locked = intToBool(toInteger(dbAssoc["veh_locked"]));
+			this.engine = intToBool(toInteger(dbAssoc["veh_engine"]));
+			this.lights = intToBool(toInteger(dbAssoc["veh_lights"]));
+			this.health = toInteger(dbAssoc["veh_damage_normal"]);
+			this.engineDamage = toInteger(dbAssoc["veh_damage_engine"]);
+			this.visualDamage = toInteger(dbAssoc["veh_damage_visual"]);
+			this.dirtLevel = toInteger(dbAssoc["veh_dirt_level"]);
+
+			// Other/Misc
+			this.insuranceAccount = toInteger(0);
+			this.fuel = toInteger(0);
+			this.flags = toInteger(0);
+			this.needsSaved = false;
+			this.whoAdded = toInteger(dbAssoc["veh_who_added"]);
+			this.whenAdded = toInteger(dbAssoc["veh_when_added"]);
+			this.licensePlate = toInteger(dbAssoc["veh_license_plate"]);
+		}
+	}
+};
+
+// ===========================================================================
+
 function initVehicleScript() {
 	logToConsole(LOG_INFO, "[VRR.Vehicle]: Initializing vehicle script ...");
 	logToConsole(LOG_INFO, "[VRR.Vehicle]: Vehicle script initialized successfully!");
@@ -183,7 +341,7 @@ function getVehicleData(vehicle) {
 			}
 		}
 	} else {
-		return getServerVehicles().find((v) => v.ivNetworkId == vehicle);
+		return getServerData().vehicles.find((v) => v.ivNetworkId == vehicle);
 	}
 
 	return false;
@@ -346,7 +504,7 @@ function deleteVehicleCommand(command, params, client) {
 	let dataIndex = getEntityData(vehicle, "vrr.dataSlot");
 	let vehicleName = getVehicleName(vehicle);
 
-	quickDatabaseQuery(`DELETE FROM veh_main WHERE veh_id = ${getVehicleData(vehicle).databaseId}`);
+	quickDatabaseQuery(`UPDATE veh_main SET veh_deleted = 1 WHERE veh_id = ${getVehicleData(vehicle).databaseId}`);
 
 	getServerData().vehicles.splice(dataIndex, 1);
 	destroyElement(vehicle);

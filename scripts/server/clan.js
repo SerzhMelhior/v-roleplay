@@ -7,6 +7,103 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+/**
+ * @class Representing a clan's data. Loaded and saved in the database
+ */
+ class ClanData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.ownerId = 0;
+		this.tag = "";
+		this.enabled = false;
+		this.index = -1;
+		this.colour = COLOUR_WHITE;
+		this.colours = [];
+		this.initialRank = 0;
+		this.members = [];
+		this.ranks = [];
+		this.needsSaved = false;
+		this.motd = false;
+
+		if(dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["clan_id"]);
+			this.name = dbAssoc["clan_name"];
+			this.owner = toInteger(dbAssoc["clan_owner"]);
+			this.tag = dbAssoc["clan_tag"];
+			this.enabled = intToBool(toInteger(dbAssoc["clan_enabled"]));
+			this.colour = toColour(toInteger(dbAssoc["clan_col_r"]), toInteger(dbAssoc["clan_col_g"]), toInteger(dbAssoc["clan_col_b"]));
+			this.colours = [toInteger(dbAssoc["clan_col_r"]), toInteger(dbAssoc["clan_col_g"]), toInteger(dbAssoc["clan_col_b"])];
+			this.motd = dbAssoc["clan_motd"];
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing a clan rank's data. Loaded and saved in the database
+ */
+class ClanRankData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.clan = 0;
+		this.name = "";
+		this.level = 0;
+		this.flags = 0;
+		this.customTag = "";
+		this.enabled = true;
+		this.index = -1;
+		this.clanIndex = -1;
+		this.needsSaved = false;
+
+		if(dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["clan_rank_id"]);
+			this.clan = toInteger(dbAssoc["clan_rank_clan"]);
+			this.name = dbAssoc["clan_rank_name"];
+			this.level = toInteger(dbAssoc["clan_rank_level"]);
+			this.flags = toInteger(dbAssoc["clan_rank_flags"]);
+			this.tag = dbAssoc["clan_rank_tag"];
+			this.enabled = intToBool(toInteger(dbAssoc["clan_rank_enabled"]));
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing a clan member's data. Loaded and saved in the database
+ */
+class ClanMemberData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.clan = 0;
+		this.subAccount = 0;
+		this.flags = 0;
+		this.customTitle = "";
+		this.customTag = "";
+		this.rank = 0;
+		this.enabled = false;
+		this.index = -1;
+		this.clanIndex = -1;
+		this.rankIndex = -1;
+		this.needsSaved = false;
+
+		if(dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["clan_member_id"]);
+			this.subAccount = toInteger(dbAssoc["clan_member_sacct"]);
+			this.clan = toInteger(dbAssoc["clan_member_clan"]);
+			this.name = dbAssoc["clan_member_name"];
+			this.rank = toInteger(dbAssoc["clan_member_rank"]);
+			this.flags = toInteger(dbAssoc["clan_member_flags"]);
+			this.customTag = dbAssoc["clan_member_tag"];
+			this.customTitle = dbAssoc["clan_member_title"];
+		}
+	}
+};
+
+// ===========================================================================
+
 function initClanScript() {
 	logToConsole(LOG_INFO, "[VRR.Clan]: Initializing clans script ...");
 	logToConsole(LOG_INFO, "[VRR.Clan]: Clan script initialized successfully!");

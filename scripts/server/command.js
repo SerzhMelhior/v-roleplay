@@ -7,6 +7,41 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+/**
+ * @class Representing a command's data. Loaded and saved in the database
+ */
+class CommandData {
+	enable() {
+		this.enabled = true;
+	}
+
+	disable() {
+		this.enabled = false;
+	}
+
+	toggleEnabled() {
+		this.enabled = !this.enabled;
+	}
+
+	constructor(command, handlerFunction, syntaxString, requiredStaffFlags, requireLogin, allowOnDiscord, helpDescription) {
+		this.command = command;
+		this.handlerFunction = handlerFunction;
+		this.syntaxString = syntaxString;
+		this.requiredStaffFlags = requiredStaffFlags;
+		this.enabled = true;
+		this.requireLogin = requireLogin;
+		this.allowOnDiscord = allowOnDiscord;
+		this.helpDescription = helpDescription;
+		this.aliases = [];
+	}
+};
+
+// ===========================================================================
+
+let serverCommands = [];
+
+// ===========================================================================
+
 function initCommandScript() {
 	logToConsole(LOG_INFO, "[VRR.Command]: Initializing commands script ...");
 	logToConsole(LOG_INFO, "[VRR.Command]: Initialized commands script!");
@@ -612,8 +647,8 @@ function loadCommands() {
 function addAllCommandHandlers() {
 	let commandCount = 0;
 	let commands = getCommands();
-	for(let i in commands) {
-		for(let j in commands[i]) {
+	for (let i in commands) {
+		for (let j in commands[i]) {
 			logToConsole(LOG_DEBUG, `[VRR.Command] Adding command handler for ${i} - ${commands[i][j].command}`);
 			addCommandHandler(commands[i][j].command, processPlayerCommand);
 			commandCount++;
@@ -627,10 +662,10 @@ function addAllCommandHandlers() {
 
 function getCommand(command) {
 	let commandGroups = getCommands()
-	for(let i in commandGroups) {
+	for (let i in commandGroups) {
 		let commandGroup = commandGroups[i];
-		for(let j in commandGroup) {
-			if(toLowerCase(commandGroup[j].command) == toLowerCase(command)) {
+		for (let j in commandGroup) {
+			if (toLowerCase(commandGroup[j].command) == toLowerCase(command)) {
 				return commandGroup[j];
 			}
 		}
@@ -684,14 +719,14 @@ function isCommandAllowedOnDiscord(command) {
 // ===========================================================================
 
 function disableCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
 	params = toLowerCase(params);
 
-	if(!getCommand(params)) {
+	if (!getCommand(params)) {
 		messagePlayerError(client, `The command {ALTCOLOUR}/${params} {MAINCOLOUR} does not exist!`);
 		return false;
 	}
@@ -704,14 +739,14 @@ function disableCommand(command, params, client) {
 // ===========================================================================
 
 function enableCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
 	params = toLowerCase(params);
 
-	if(!getCommand(params)) {
+	if (!getCommand(params)) {
 		messagePlayerError(client, `The command {ALTCOLOUR}/${params} {MAINCOLOUR} does not exist!`);
 		return false;
 	}
@@ -724,19 +759,19 @@ function enableCommand(command, params, client) {
 // ===========================================================================
 
 function disableAllCommandsByType(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
 	params = toLowerCase(params);
 
-	if(isNull(getServerData().commands[params])) {
+	if (isNull(getServerData().commands[params])) {
 		messagePlayerError(client, `Command type {ALTCOLOUR}${params} {MAINCOLOUR}does not exist!`);
 		return false;
 	}
 
-	for(let i in getServerData().commands[params]) {
+	for (let i in getServerData().commands[params]) {
 		getServerData().commands[params][i].enabled = false;
 	}
 
@@ -747,19 +782,19 @@ function disableAllCommandsByType(command, params, client) {
 // ===========================================================================
 
 function enableAllCommandsByType(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
 	params = toLowerCase(params);
 
-	if(isNull(getServerData().commands[params])) {
+	if (isNull(getServerData().commands[params])) {
 		messagePlayerError(client, `Command type {ALTCOLOUR}${params} {MAINCOLOUR}does not exist!`);
 		return false;
 	}
 
-	for(let i in getServerData().commands[params]) {
+	for (let i in getServerData().commands[params]) {
 		getServerData().commands[params][i].enabled = true;
 	}
 
@@ -776,22 +811,22 @@ function enableAllCommandsByType(command, params, client) {
 // ===========================================================================
 
 function processPlayerCommand(command, params, client) {
-	if(builtInCommands.indexOf(toLowerCase(command)) != -1) {
+	if (builtInCommands.indexOf(toLowerCase(command)) != -1) {
 		return true;
 	}
 
 	let commandData = getCommand(toLowerCase(command));
 
 	let paramsDisplay = params;
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		paramsDisplay = "";
 	}
 
-	if(!doesCommandExist(toLowerCase(command))) {
+	if (!doesCommandExist(toLowerCase(command))) {
 		logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (invalid command): /${command} ${paramsDisplay}`);
 
 		let possibleCommand = getCommandFromParams(command);
-		if(possibleCommand != false && doesPlayerHaveStaffPermission(client, getCommandRequiredPermissions(toLowerCase(possibleCommand.command)))) {
+		if (possibleCommand != false && doesPlayerHaveStaffPermission(client, getCommandRequiredPermissions(toLowerCase(possibleCommand.command)))) {
 			messagePlayerError(client, getLocaleString(client, "InvalidCommandPossibleMatchTip", `{ALTCOLOUR}/${command}{MAINCOLOUR}`, `{ALTCOLOUR}${toLowerCase(possibleCommand.command)}{MAINCOLOUR}`));
 		} else {
 			messagePlayerError(client, getLocaleString(client, "InvalidCommandHelpTip", `{ALTCOLOUR}/${command}{MAINCOLOUR}`, `{ALTCOLOUR}/help{MAINCOLOUR}`));
@@ -799,31 +834,31 @@ function processPlayerCommand(command, params, client) {
 		return false;
 	}
 
-	if(!commandData.enabled) {
+	if (!commandData.enabled) {
 		logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (command is disabled): /${command} ${paramsDisplay}`);
 		messagePlayerError(client, `The command {ALTCOLOUR}/${command}{MAINCOLOUR} is disabled!`);
 		messagePlayerError(client, getLocaleString(client, "CommandDisabled", `{ALTCOLOUR}/${command}{MAINCOLOUR}`));
 		return false;
 	}
 
-	if(doesCommandRequireLogin(toLowerCase(command))) {
-		if(!isPlayerLoggedIn(client)) {
+	if (doesCommandRequireLogin(toLowerCase(command))) {
+		if (!isPlayerLoggedIn(client)) {
 			logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (requires login first): /${command} ${paramsDisplay}`);
 			messagePlayerError(client, getLocaleString(client, "CommandRequiresLogin", `{ALTCOLOUR}/${command}{MAINCOLOUR}`));
 			return false;
 		}
 	}
 
-	if(isClientFromDiscord(client)) {
-		if(!isCommandAllowedOnDiscord(command)) {
-	      	logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command from discord, but failed (not available on discord): /${command} ${paramsDisplay}`);
+	if (isClientFromDiscord(client)) {
+		if (!isCommandAllowedOnDiscord(command)) {
+			logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command from discord, but failed (not available on discord): /${command} ${paramsDisplay}`);
 			messagePlayerError(client, `The {ALTCOLOUR}/${command}{MAINCOLOUR} command isn't available on discord!`);
 			return false;
 		}
 	}
 
-	if(!isConsole(client)) {
-		if(!doesPlayerHaveStaffPermission(client, getCommandRequiredPermissions(toLowerCase(command)))) {
+	if (!isConsole(client)) {
+		if (!doesPlayerHaveStaffPermission(client, getCommandRequiredPermissions(toLowerCase(command)))) {
 			logToConsole(LOG_WARN, `[VRR.Command] ${getPlayerDisplayForConsole(client)} attempted to use command, but failed (no permission): /${command} ${paramsDisplay}`);
 			messagePlayerError(client, getLocaleString(client, "CommandNoPermissions", `{ALTCOLOUR}/${toLowerCase(command)}{MAINCOLOUR}`));
 			return false;
@@ -836,8 +871,8 @@ function processPlayerCommand(command, params, client) {
 
 // ===========================================================================
 
-addCommandHandler("cmd", function(command, params, client) {
-	if(!isConsole(client)) {
+addCommandHandler("cmd", function (command, params, client) {
+	if (!isConsole(client)) {
 		return false;
 	}
 
@@ -852,8 +887,8 @@ addCommandHandler("cmd", function(command, params, client) {
 
 function listAllCommands() {
 	let commands = getCommands();
-	for(let i in commands) {
-		for(let j in commands[i]) {
+	for (let i in commands) {
+		for (let j in commands[i]) {
 			logToConsole(LOG_DEBUG, commands[i][j].command);
 		}
 	}
@@ -864,8 +899,8 @@ function listAllCommands() {
 function getAllCommandsInSingleArray() {
 	let tempCommands = [];
 	let commands = getCommands();
-	for(let i in commands) {
-		for(let j in commands[i]) {
+	for (let i in commands) {
+		for (let j in commands[i]) {
 			tempCommands.push(commands[i][j].command);
 		}
 	}
@@ -878,8 +913,8 @@ function getAllCommandsInSingleArray() {
 function getAllCommandsInGroupInSingleArray(groupName, staffFlag = "None") {
 	let tempCommands = [];
 	let commands = getCommands();
-	for(let i in commands[groupName]) {
-		if(getCommandRequiredPermissions(commands[groupName][i].command) == 0) {
+	for (let i in commands[groupName]) {
+		if (getCommandRequiredPermissions(commands[groupName][i].command) == 0) {
 			tempCommands.push(commands[groupName][i].command);
 		}
 	}
@@ -892,10 +927,10 @@ function getAllCommandsInGroupInSingleArray(groupName, staffFlag = "None") {
 function getAllCommandsForStaffFlagInSingleArray(staffFlagName) {
 	let tempCommands = [];
 	let commands = getCommands();
-	for(let i in commands) {
-		for(let j in commands[i]) {
-			if(getCommandRequiredPermissions(commands[i][j].command) != 0) {
-				if(hasBitFlag(getCommandRequiredPermissions(commands[i][j].command), getStaffFlagValue(staffFlagName))) {
+	for (let i in commands) {
+		for (let j in commands[i]) {
+			if (getCommandRequiredPermissions(commands[i][j].command) != 0) {
+				if (hasBitFlag(getCommandRequiredPermissions(commands[i][j].command), getStaffFlagValue(staffFlagName))) {
 					tempCommands.push(commands[i][j].command);
 				}
 			}
@@ -908,7 +943,7 @@ function getAllCommandsForStaffFlagInSingleArray(staffFlagName) {
 // ===========================================================================
 
 function doesCommandExist(command) {
-	if(getCommandData(command)) {
+	if (getCommandData(command)) {
 		return true;
 	}
 
@@ -919,11 +954,11 @@ function doesCommandExist(command) {
 
 function cacheAllCommandsAliases() {
 	let commands = getCommands();
-	for(let i in commands) {
-		for(let j in commands[i]) {
-			for(let k in commands) {
-				for(let m in commands[k]) {
-					if(commands[i][j].handlerFunction == commands[k][m].handlerFunction) {
+	for (let i in commands) {
+		for (let j in commands[i]) {
+			for (let k in commands) {
+				for (let m in commands[k]) {
+					if (commands[i][j].handlerFunction == commands[k][m].handlerFunction) {
 						commands[i][j].aliases.push(commands[k][m]);
 						commands[k][m].aliases.push(commands[i][j]);
 					}
@@ -937,7 +972,7 @@ function cacheAllCommandsAliases() {
 
 function getCommandAliasesNames(command) {
 	let commandAliases = [];
-	for(let i in command.aliases) {
+	for (let i in command.aliases) {
 		commandAliases.push(command.aliases[i].name);
 	}
 
@@ -947,7 +982,7 @@ function getCommandAliasesNames(command) {
 // ===========================================================================
 
 function areParamsEmpty(params) {
-	if(!params || params == "" || params.length == 0 || typeof params == "undefined") {
+	if (!params || params == "" || params.length == 0 || typeof params == "undefined") {
 		return true;
 	}
 
@@ -969,16 +1004,16 @@ function areThereEnoughParams(params, requiredAmount, delimiter = " ") {
 // ===========================================================================
 
 function getParam(params, delimiter, index) {
-	return params.split(delimiter)[index-1];
+	return params.split(delimiter)[index - 1];
 }
 
 // ===========================================================================
 
 function getCommandFromParams(params) {
 	let commands = getCommands();
-	for(let i in commands) {
-		for(let j in commands[i]) {
-			if(toLowerCase(commands[i][j].command).indexOf(toLowerCase(params)) != -1) {
+	for (let i in commands) {
+		for (let j in commands[i]) {
+			if (toLowerCase(commands[i][j].command).indexOf(toLowerCase(params)) != -1) {
 				return commands[i][j];
 			}
 		}

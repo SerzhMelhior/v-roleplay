@@ -8,6 +8,32 @@
 
 // ===========================================================================
 
+class KeyBindData {
+	constructor(dbAssoc = false, key = 0, commandString = "", keyState = VRR_KEYSTATE_UP) {
+		this.databaseId = 0;
+		this.key = key;
+		this.account = 0;
+		this.commandString = commandString;
+		this.whenAdded = 0;
+		this.enabled = true;
+		this.keyState = false;
+		this.index = -1;
+		this.needsSaved = false;
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["acct_hotkey_id"];
+			this.key = toInteger(dbAssoc["acct_hotkey_key"]);
+			this.account = toInteger(dbAssoc["acct_hotkey_acct"]);
+			this.commandString = dbAssoc["acct_hotkey_cmdstr"];
+			this.whenAdded = dbAssoc["acct_hotkey_when_added"];
+			this.enabled = intToBool(dbAssoc["acct_hotkey_enabled"]);
+			this.keyState = intToBool(dbAssoc["acct_hotkey_down"]);
+		}
+	}
+};
+
+// ===========================================================================
+
 function initKeyBindScript() {
 	logToConsole(LOG_INFO, "[VRR.KeyBind]: Initializing key bind script ...");
 	logToConsole(LOG_INFO, "[VRR.KeyBind]: Key bind script initialized!");

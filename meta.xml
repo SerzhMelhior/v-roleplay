@@ -15,7 +15,6 @@
 	<script src="scripts/client/native/connected.js" type="client" language="javascript" />
 
 	<!-- Server Scripts -->
-	<script src="scripts/server/class.js" type="server" language="javascript" />
 	<script src="scripts/server/accent.js" type="server" language="javascript" />
 	<script src="scripts/server/account.js" type="server" language="javascript" />
 	<script src="scripts/server/animation.js" type="server" language="javascript" />
@@ -26,7 +25,7 @@
 	<script src="scripts/server/chat.js" type="server" language="javascript" />
 	<script src="scripts/server/clan.js" type="server" language="javascript" />
 	<script src="scripts/server/client.js" type="server" language="javascript" />
-	<script src="scripts/server/const.js" type="server" language="javascript" />
+	<script src="scripts/server/crime.js" type="server" language="javascript" />
 	<script src="scripts/server/database.js" type="server" language="javascript" />
 	<script src="scripts/server/developer.js" type="server" language="javascript" />
 	<script src="scripts/server/discord.js" type="server" language="javascript" />
@@ -34,10 +33,13 @@
 	<script src="scripts/server/email.js" type="server" language="javascript" />
 	<script src="scripts/server/event.js" type="server" language="javascript" />
 	<script src="scripts/server/fishing.js" type="server" language="javascript" />
+	<script src="scripts/server/forensics.js" type="server" language="javascript" />
 	<script src="scripts/server/gate.js" type="server" language="javascript" />
+	<script src="scripts/server/gps.js" type="server" language="javascript" />
 	<script src="scripts/server/gui.js" type="server" language="javascript" />
 	<script src="scripts/server/help.js" type="server" language="javascript" />
 	<script src="scripts/server/house.js" type="server" language="javascript" />
+	<script src="scripts/server/insurance.js" type="server" language="javascript" />
 	<script src="scripts/server/item.js" type="server" language="javascript" />
 	<script src="scripts/server/job.js" type="server" language="javascript" />
 	<script src="scripts/server/keybind.js" type="server" language="javascript" />
@@ -46,7 +48,6 @@
 	<script src="scripts/server/misc.js" type="server" language="javascript" />
 	<script src="scripts/server/npc.js" type="server" language="javascript" />
 	<script src="scripts/server/race.js" type="server" language="javascript" />
-	<script src="scripts/server/radio.js" type="server" language="javascript" />
 	<script src="scripts/server/radio.js" type="server" language="javascript" />
 	<script src="scripts/server/security.js" type="server" language="javascript" />
 	<script src="scripts/server/staff.js" type="server" language="javascript" />

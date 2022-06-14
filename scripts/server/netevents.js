@@ -7,6 +7,124 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+// Return-To types (for when a player is teleported)
+const VRR_RETURNTO_TYPE_NONE = 0;                // "Return to" data is invalid
+const VRR_RETURNTO_TYPE_ADMINGET = 1;            // "Return to" data is from admin teleporting
+const VRR_RETURNTO_TYPE_SKINSELECT = 2;          // "Return to" data is from skin select
+
+// ===========================================================================
+
+/**
+ * @class Representing extra data for a client
+ */
+class ClientData {
+	constructor(client, accountData, subAccounts) {
+		/** @member {AccountData} accountData */
+		this.accountData = accountData;
+
+		/** @member {Array.<SubAccountData>} subAccounts */
+		this.subAccounts = subAccounts; // Characters
+		this.client = client;
+		this.currentSubAccount = -1;
+		this.loggedIn = false;
+		this.index = -1;
+		this.connectTime = 0;
+		this.clientVersion = "0.0.0";
+		this.loginAttemptsRemaining = 3;
+		this.afk = false;
+
+		this.jobRoute = -1;
+		this.jobRouteLocation = -1;
+		this.jobRouteVehicle = false;
+
+		this.spawned = false;
+
+		this.rentingVehicle = false;
+		this.buyingVehicle = false;
+
+		this.lastVehicle = false;
+
+		this.returnToJobVehicleTick = 0;
+		this.returnToJobVehicleTimer = null;
+
+		this.switchingCharacter = false;
+
+		this.tutorialStep = -1;
+		this.tutorialItem = null;
+		this.tutorialVehicle = null;
+
+		this.hotBarItems = new Array(9).fill(-1);
+		this.activeHotBarSlot = -1;
+		this.toggleUseItem = false;
+
+		this.jobLockerCache = new Array(9).fill(-1);
+		this.jobEquipmentCache = [];
+		this.jobUniform = 0;
+
+		this.itemActionState = VRR_ITEM_ACTION_NONE;
+		this.itemActionItem = -1;
+
+		this.alcoholLevel = 0;
+
+		this.pedState = VRR_PEDSTATE_NONE;
+		this.promptType = VRR_PROMPT_NONE;
+
+		this.businessOrderAmount = 0;
+		this.businessOrderBusiness = -1;
+		this.businessOrderItem = -1;
+		this.businessOrderValue = -1;
+
+		this.syncPosition = null;
+		this.syncHeading = null;
+		this.syncVehicle = null;
+		this.syncVehicleSeat = null;
+
+		this.twoFactorAuthenticationState = VRR_2FA_STATE_NONE;
+		this.twoFactorAuthenticationCode = 0;
+
+		this.payDayAmount = 0;
+		this.payDayTickStart = 0;
+
+		this.creatingCharacter = false;
+		this.creatingCharacterSkin = -1;
+
+		this.streamingRadioStation = -1;
+		this.streamingRadioElement = false;
+
+		this.returnToPosition = null;
+		this.returnToHeading = null;
+		this.returnToInterior = null;
+		this.returnToDimension = null;
+		this.returnToHouse = null;
+		this.returnToBusiness = null;
+		this.returnToType = VRR_RETURNTO_TYPE_NONE;
+
+		this.changingCharacterName = false;
+		this.currentPickup = false;
+		this.usingSkinSelect = false;
+		this.keyBinds = [];
+		this.sessionId = 0;
+		this.incomingDamageMultiplier = 1;
+		this.weaponDamageEvent = VRR_WEAPON_DAMAGE_EVENT_NORMAL;
+		this.currentAnimation = -1;
+		this.currentAnimationPositionOffset = false;
+		this.currentAnimationPositionReturnTo = false;
+		this.animationStart = 0;
+		this.animationForced = false;
+		this.passwordResetState = VRR_RESETPASS_STATE_NONE;
+		this.passwordResetCode = "";
+		this.lastJobVehicle = null;
+		this.health = 100;
+		this.locale = 0;
+		this.enteringVehicle = null;
+		this.customDisconnectReason = "";
+		this.interiorCutscene = -1;
+		this.playerBlip = null;
+	}
+};
+
+// ===========================================================================
+
 function initNetworkEventsScript() {
 	logToConsole(LOG_DEBUG, "[VRR.Client]: Initializing client script ...");
 	addAllNetworkEventHandlers();

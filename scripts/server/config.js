@@ -7,6 +7,127 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+/**
+ * @class Representing data for server configuration
+ */
+class ServerConfigData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.needsSaved = false;
+
+		this.newCharacter = {
+			spawnPosition: toVector3(0.0, 0.0, 0.0),
+			spawnHeading: 0.0,
+			spawnInterior: 0,
+			spawnDimension: 0,
+			money: 0,
+			bank: 0,
+			skin: 0,
+		};
+
+		this.connectCameraPosition = toVector3(0.0, 0.0, 0.0);
+		this.connectCameraLookAt = toVector3(0.0, 0.0, 0.0);
+
+		this.characterSelectCameraPosition = toVector3(0.0, 0.0, 0.0);
+		this.characterSelectCameraLookAt = toVector3(0.0, 0.0, 0.0);
+		this.characterSelectPedPosition = toVector3(0.0, 0.0, 0.0);
+		this.characterSelectPedHeading = 0.0;
+		this.characterSelectInterior = 0;
+		this.characterSelectDimension = 0;
+
+		this.hour = 0;
+		this.minute = 0
+		this.minuteDuration = 1000;
+		this.weather = 0
+		this.fallingSnow = false;
+		this.groundSnow = false;
+		this.useGUI = true;
+		this.guiColourPrimary = [200, 200, 200];
+		this.guiColourSecondary = [200, 200, 200];
+		this.guiTextColourPrimary = [0, 0, 0];
+		this.guiTextColourSecondary = [0, 0, 0];
+		this.showLogo = true;
+		this.inflationMultiplier = 1;
+		this.testerOnly = false;
+		this.settings = 0;
+
+		this.antiCheat = {
+			enabled: false,
+			//checkGameScripts: false,
+			//gameScriptWhiteListEnabled: false,
+			//gameScriptBlackListEnabled: false,
+			//gameScriptWhiteList: [],
+			//gameScriptBlackList: [],
+		};
+
+		this.discordBotToken = "";
+		this.discordEnabled = false;
+
+		this.createJobPickups = false;
+		this.createBusinessPickups = false;
+		this.createHousePickups = false;
+		this.createJobBlips = false;
+		this.createBusinessBlips = false;
+		this.createHouseBlips = false;
+
+		this.introMusicURL = "";
+
+		this.pauseSavingToDatabase = false;
+
+		this.useRealTime = false;
+		this.realTimeZone = 0;
+
+		this.discordConfig = {
+			eventChannelWebHookURL: "",
+			chatChannelWebHookURL: "",
+			adminChannelWebHookURL: "",
+			sendEvents: true,
+			sendChat: true,
+			sendAdminEvents: true,
+		};
+
+		if (dbAssoc) {
+			this.databaseId = dbAssoc["svr_id"];
+			this.newCharacter = {
+				spawnPosition: toVector3(dbAssoc["svr_newchar_pos_x"], dbAssoc["svr_newchar_pos_y"], dbAssoc["svr_newchar_pos_z"]),
+				spawnHeading: dbAssoc["svr_newchar_rot_z"],
+				money: dbAssoc["svr_newchar_money"],
+				bank: dbAssoc["svr_newchar_bank"],
+				skin: dbAssoc["svr_newchar_skin"],
+			},
+				this.settings = toInteger(dbAssoc["svr_settings"]);
+
+			this.connectCameraPosition = toVector3(dbAssoc["svr_connectcam_pos_x"], dbAssoc["svr_connectcam_pos_y"], dbAssoc["svr_connectcam_pos_z"]);
+			this.connectCameraLookAt = toVector3(dbAssoc["svr_connectcam_lookat_x"], dbAssoc["svr_connectcam_lookat_y"], dbAssoc["svr_connectcam_lookat_z"]);
+
+			this.hour = toInteger(dbAssoc["svr_start_time_hour"]);
+			this.minute = toInteger(dbAssoc["svr_start_time_min"]);
+			this.minuteDuration = toInteger(dbAssoc["svr_time_min_duration"]);
+			this.weather = toInteger(dbAssoc["svr_start_weather"]);
+			this.guiColourPrimary = [toInteger(dbAssoc["svr_gui_col1_r"]), toInteger(dbAssoc["svr_gui_col1_g"]), toInteger(dbAssoc["svr_gui_col1_b"])];
+			this.guiColourSecondary = [toInteger(dbAssoc["svr_gui_col2_r"]), toInteger(dbAssoc["svr_gui_col2_g"]), toInteger(dbAssoc["svr_gui_col2_b"])];
+			this.guiTextColourPrimary = [toInteger(dbAssoc["svr_gui_textcol1_r"]), toInteger(dbAssoc["svr_gui_textcol1_g"]), toInteger(dbAssoc["svr_gui_textcol1_b"])];
+			//this.guiTextColourSecondary = [toInteger(dbAssoc["svr_gui_textcol2_r"]), toInteger(dbAssoc["svr_gui_textcol2_g"]), toInteger(dbAssoc["svr_gui_textcol2_b"])];
+			this.inflationMultiplier = toFloat(dbAssoc["svr_inflation_multiplier"]);
+
+			this.discordBotToken = intToBool(dbAssoc["svr_discord_bot_token"]);
+			this.introMusicURL = dbAssoc["svr_intro_music"];
+			this.realTimeZone = dbAssoc["svr_time_realtime_timezone"];
+
+			this.discordConfig = {
+				eventChannelWebHookURL: dbAssoc["svr_discord_event_webhook"],
+				chatChannelWebHookURL: dbAssoc["svr_discord_chat_webhook"],
+				adminChannelWebHookURL: dbAssoc["svr_discord_admin_webhook"],
+				sendEvents: true,
+				sendChat: true,
+				sendAdminEvents: true,
+			};
+		}
+	}
+};
+
+// ===========================================================================
+
 let serverConfig = false;
 let gameConfig = false;
 
@@ -653,7 +774,7 @@ function toggleServerGUICommand(command, params, client) {
 
 	getServerConfig().needsSaved = true;
 
-	announceAdminAction(`ServerGUISet`, `${getPlayerName(client)}{MAINCOLOUR}`, `{adminOrange}${getPlayerName(client)}{MAINCOLOUR}`, `${getBoolRedGreenInlineColour(getServerConfig().useGUI)}${toUpperCase(getOnOffFromBool(getServerConfig().useGUI))}{MAINCOLOUR}`);
+	announceAdminAction(`ServerGUISet`, `${getPlayerName(client)}{MAINCOLOUR}`, `${getBoolRedGreenInlineColour(getServerConfig().useGUI)}${toUpperCase(getOnOffFromBool(getServerConfig().useGUI))}{MAINCOLOUR}`);
 	updateServerRules();
 	return true;
 }
@@ -961,6 +1082,8 @@ function loadServerConfig() {
 		logToConsole(LOG_ERROR, `[VRR.Config] Could not load server configuration for game ${getGame()} and port ${getServerPort}`);
 		thisResource.stop();
 	}
+
+	logToConsole(LOG_DEBUG | LOG_WARN, `Server ID: ${serverConfig.databaseId}`);
 }
 
 // ===========================================================================

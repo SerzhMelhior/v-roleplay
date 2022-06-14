@@ -169,6 +169,16 @@ let supportedFeatures = {
 		[VRR_GAME_MAFIA_ONE]: false,
 		[VRR_GAME_MAFIA_TWO]: false,
 		[VRR_GAME_MAFIA_THREE]: false
+	},
+	interior: {
+		[VRR_GAME_GTA_III]: false,
+		[VRR_GAME_GTA_VC]: true,
+		[VRR_GAME_GTA_SA]: true,
+		[VRR_GAME_GTA_IV]: false,
+		[VRR_GAME_GTA_IV_EFLC]: false,
+		[VRR_GAME_MAFIA_ONE]: false,
+		[VRR_GAME_MAFIA_TWO]: false,
+		[VRR_GAME_MAFIA_THREE]: false
 	}
 };
 
@@ -4008,6 +4018,20 @@ let gameData = {
 			[170, "Grenade"],
 			[182, "RemoteDetonator"],
 			[1319, "GenericPackageWhite"],
+			[1343, "WoodenBox"],
+			[1339, "CardboardBox"],
+			[1336, "RustyBarrel"],
+			[1348, "TrashDumpster"],
+			[1338, "WoodenPallet"],
+			[1360, "TrafficCone"],
+			[1310, "WashingMachine"],
+			[1347, "TrashBin"],
+			[1396, "MailBox"],
+			[1359, "OrangeRoundRoadBarrier"],
+			[1398, "ParkBench"],
+			[1344, "RedBarrel"],
+			[1349, "StraightRoadBarrier"]
+			[1337, "YellowBarrel"],
 		],
 		[VRR_GAME_GTA_VC]: [   // GTA VC
 			[259, "BrassKnuckles"],
@@ -4769,6 +4793,8 @@ let gameData = {
 		[VRR_GAME_GTA_III]: [1],
 		[VRR_GAME_GTA_VC]: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
 		[VRR_GAME_GTA_SA]: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+		[VRR_GAME_GTA_IV]: [1, 2, 3],
+		[VRR_GAME_GTA_IV_EFLC]: [1, 2, 3],
 	},
 	blipSprites: {
 		[VRR_GAME_GTA_III]: {	// GTA III
@@ -5724,6 +5750,8 @@ let gameData = {
 			Apartment1: [toVector3(891.87, -308.28, 8.72), 0, false, -1],
 			JailCell: [toVector3(328.40, -1093.31, 25.98), 0, false, -1],
 			Church: [toVector3(13.87, -1122.43, 26.12), 0, false, -1],
+			Mansion: [toVector3(1461.00, -173.87, 55.78), 0, false, -1],
+			Garage: [toVector3(-420.69, 289.86, 62.96), 0, false, -1],
 		},
 		[VRR_GAME_GTA_VC]: { // GTA VC
 			Mall: [toVector3(379.62, 1007.00, 19.22), 4, false, -1],

@@ -7,6 +7,45 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+// Pickup Types
+const VRR_PICKUP_NONE = 0;
+const VRR_PICKUP_JOB = 1;
+const VRR_PICKUP_BUSINESS_ENTRANCE = 2;
+const VRR_PICKUP_BUSINESS_EXIT = 3;
+const VRR_PICKUP_HOUSE_ENTRANCE = 4;
+const VRR_PICKUP_HOUSE_EXIT = 5;
+const VRR_PICKUP_EXIT = 6;
+
+// ===========================================================================
+
+// Blip Owner Types
+const VRR_BLIP_NONE = 0;
+const VRR_BLIP_JOB = 1;
+const VRR_BLIP_BUSINESS_ENTRANCE = 2;
+const VRR_BLIP_BUSINESS_EXIT = 3;
+const VRR_BLIP_HOUSE_ENTRANCE = 4;
+const VRR_BLIP_HOUSE_EXIT = 5;
+const VRR_BLIP_EXIT = 6;
+
+// ===========================================================================
+
+// Ped States
+const VRR_PEDSTATE_NONE = 2;                     // None
+const VRR_PEDSTATE_READY = 1;                    // Ready
+const VRR_PEDSTATE_DRIVER = 2;                   // Driving a vehicle
+const VRR_PEDSTATE_PASSENGER = 3;                // In a vehicle as passenger
+const VRR_PEDSTATE_DEAD = 4;                     // Dead
+const VRR_PEDSTATE_ENTERINGPROPERTY = 5;         // Entering a property
+const VRR_PEDSTATE_EXITINGPROPERTY = 6;          // Exiting a property
+const VRR_PEDSTATE_ENTERINGVEHICLE = 7;          // Entering a vehicle
+const VRR_PEDSTATE_EXITINGVEHICLE = 8;           // Exiting a vehicle
+const VRR_PEDSTATE_BINDED = 9;                   // Binded by rope or handcuffs
+const VRR_PEDSTATE_TAZED = 10;                   // Under incapacitating effect of tazer
+const VRR_PEDSTATE_INTRUNK = 11;                 // In vehicle trunk
+const VRR_PEDSTATE_INITEM = 12;                  // In item (crate, box, etc)
+const VRR_PEDSTATE_HANDSUP = 13;                 // Has hands up (surrendering)
+const VRR_PEDSTATE_SPAWNING = 14;                // Spawning
+
 // ===========================================================================
 
 function initMiscScript() {
@@ -218,10 +257,10 @@ function enterExitPropertyCommand(command, params, client) {
 
 			setTimeout(function () {
 				setPlayerInCutsceneInterior(client, closestProperty.exitCutscene);
-				setPlayerPosition(client, closestProperty.exitPosition);
-				setPlayerHeading(client, closestProperty.exitRotation);
 				setPlayerDimension(client, closestProperty.exitDimension);
 				setPlayerInterior(client, closestProperty.exitInterior);
+				setPlayerPosition(client, closestProperty.exitPosition);
+				setPlayerHeading(client, closestProperty.exitRotation);
 				setTimeout(function () {
 					if (isFadeCameraSupported()) {
 						fadeCamera(client, true, 1.0);
@@ -412,146 +451,6 @@ function listOnlineAdminsCommand(command, params, client) {
 	let chunkedList = splitArrayIntoChunks(admins, 3);
 	for (let i in chunkedList) {
 		messagePlayerInfo(client, chunkedList[i].join(", "));
-	}
-}
-
-// ===========================================================================
-
-/**
- * This is a command handler function.
- *
- * @param {string} command - The command name used by the player
- * @param {string} params - The parameters/args string used with the command by the player
- * @param {Client} client - The client/player that used the command
- * @return {bool} Whether or not the command was successful
- *
- */
-function gpsCommand(command, params, client) {
-	messagePlayerNormal(client, makeChatBoxSectionHeader(getLocaleString(client, "HeaderBusinessList")));
-
-	let locationType = VRR_GPS_TYPE_NONE;
-	let useType = VRR_ITEM_USETYPE_NONE;
-	let blipColour = "white";
-
-	switch (toLowerCase(params)) {
-		case "police":
-		case "policestation":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_POLICE;
-			break;
-
-		case "hospital":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_HOSPITAL;
-			break;
-
-		case "job":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_JOB;
-			break;
-
-		case "skin":
-		case "skins":
-		case "clothes":
-		case "player":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_BUSINESS;
-			useType = VRR_ITEM_USETYPE_SKIN;
-			break;
-
-		case "gun":
-		case "guns":
-		case "weapon":
-		case "weapons":
-		case "wep":
-		case "weps":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_BUSINESS;
-			useType = VRR_ITEM_USETYPE_WEAPON;
-			break;
-
-		case "food":
-		case "eat":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_BUSINESS;
-			useType = VRR_ITEM_USETYPE_FOOD;
-			break;
-
-		case "drink":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_BUSINESS;
-			useType = VRR_ITEM_USETYPE_DRINK;
-			break;
-
-		case "alcohol":
-		case "booze":
-		case "bar":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_BUSINESS;
-			useType = VRR_ITEM_USETYPE_ALCOHOL;
-			break;
-
-		case "repair":
-		case "carrepair":
-		case "vehrepair":
-		case "spray":
-		case "fix":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_BUSINESS;
-			useType = VRR_ITEM_USETYPE_VEHREPAIR;
-			break;
-
-		case "vehiclecolour":
-		case "vehcolour":
-		case "carcolour":
-		case "colour":
-			blipColour = "mediumGrey"
-			locationType = VRR_GPS_TYPE_BUSINESS;
-			useType = VRR_ITEM_USETYPE_VEHCOLOUR;
-			break;
-
-		default: {
-			let itemTypeId = getItemTypeFromParams(params);
-			if (getItemTypeData(itemTypeId) != false) {
-				locationType = VRR_GPS_TYPE_BUSINESS;
-				blipColour = "mediumGrey";
-				useType = getItemTypeData(itemTypeId).useType;
-			} else {
-				let gameLocationId = getGameLocationFromParams(params);
-				if (gameLocationId != false) {
-					position = getGameConfig().locations[getGame()][gameLocationId][1]
-				}
-			}
-		}
-	}
-
-	if (locationType == VRR_GPS_TYPE_NONE) {
-		messagePlayerError(client, getLocaleString(client, "InvalidGPSLocation"));
-		return false;
-	}
-
-	if (locationType == VRR_GPS_TYPE_BUSINESS) {
-		let businessId = getClosestBusinessWithBuyableItemOfUseType(useType);
-		if (!businessId) {
-			messagePlayerError(client, getLocaleString(client, "NoBusinessWithItemType"));
-			return false;
-		}
-
-		if (!getBusinessData(businessId)) {
-			messagePlayerError(client, getLocaleString(client, "NoBusinessWithItemType"));
-			return false;
-		}
-
-		hideAllBlipsForPlayerGPS(client);
-		blinkGenericGPSBlipForPlayer(client, getBusinessData(businessId).entrancePosition, getBusinessData(businessId).entranceBlipModel, getColourByType(blipColour), 10);
-		messagePlayerSuccess(client, "Look for the blinking icon on your mini map");
-	}
-
-	if (locationType == VRR_GPS_TYPE_GAMELOC) {
-		hideAllBlipsForPlayerGPS(client);
-		blinkGenericGPSBlipForPlayer(client, position, 0, getColourByType(blipColour), 10);
-		messagePlayerSuccess(client, "Look for the blinking icon on your mini map");
-		return true;
 	}
 }
 
@@ -881,9 +780,9 @@ function deletePlayerBlip(client) {
 		return false;
 	}
 
-	if (getPlayerData(client).playerBlip != false) {
-		destroyElement(getPlayerData(client).playerBlip);
-		getPlayerData(client).playerBlip = false;
+	if (getPlayerData(client).playerBlip != null) {
+		deleteGameElement(getPlayerData(client).playerBlip);
+		getPlayerData(client).playerBlip = null;
 	}
 }
 

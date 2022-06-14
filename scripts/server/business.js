@@ -7,10 +7,171 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+// Business Types
+const VRR_BIZ_TYPE_NONE = 0;                     // None (invalid)
+const VRR_BIZ_TYPE_NORMAL = 1;                   // Normal business (sells items)
+const VRR_BIZ_TYPE_BANK = 2;                     // Bank
+const VRR_BIZ_TYPE_PUBLIC = 3;                   // Public business (Government, public service, etc)
+
+// ===========================================================================
+
+// Business Location Types
+const VRR_BIZLOC_NONE = 0;                       // None
+const VRR_BIZLOC_GATE = 1;                       // Center of any moveable gate that belongs to the biz
+const VRR_BIZLOC_GARAGE = 2;                     // Location for attached garage (pos1 = outside, pos2 = inside). Use pos to teleport or spawn veh/ped
+const VRR_BIZLOC_FUEL = 3;                       // Fuel pump
+const VRR_BIZLOC_DRIVETHRU = 4;                  // Drivethrough
+const VRR_BIZLOC_VENDMACHINE = 5;                // Vending machine
+
+// ===========================================================================
+
+// Business Owner Types
+const VRR_BIZOWNER_NONE = 0;                     // Not owned
+const VRR_BIZOWNER_PLAYER = 1;                   // Owned by a player (character/subaccount)
+const VRR_BIZOWNER_JOB = 2;                      // Owned by a job
+const VRR_BIZOWNER_CLAN = 3;                     // Owned by a clan
+const VRR_BIZOWNER_FACTION = 4;                  // Owned by a faction (not used at the moment)
+const VRR_BIZOWNER_PUBLIC = 5;                   // Public Business. Used for goverment/official places like police, fire, city hall, DMV, etc
+
+// ===========================================================================
+
+/**
+ * @class Representing a businesses' data. Loaded and saved in the database
+ */
+class BusinessData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.ownerType = VRR_BIZOWNER_NONE;
+		this.ownerId = 0;
+		this.buyPrice = 0;
+		this.locked = false;
+		this.hasInterior = false;
+		this.index = -1;
+		this.needsSaved = false;
+		this.interiorLights = true;
+
+		this.floorItemCache = [];
+		this.storageItemCache = [];
+		this.locations = [];
+		this.gameScripts = [];
+
+		this.entrancePosition = false;
+		this.entranceRotation = 0.0;
+		this.entranceInterior = 0;
+		this.entranceDimension = 0;
+		this.entrancePickupModel = -1;
+		this.entranceBlipModel = -1;
+		this.entrancePickup = null;
+		this.entranceBlip = null;
+
+		this.exitPosition = false;
+		this.exitRotation = 0.0;
+		this.exitInterior = 0;
+		this.exitDimension = 0;
+		this.exitPickupModel = -1;
+		this.exitBlipModel = -1;
+		this.exitPickup = null;
+		this.exitBlip = null;
+
+		this.entranceFee = 0;
+		this.till = 0;
+
+		this.streamingRadioStation = -1;
+
+		this.labelHelpType = VRR_PROPLABEL_INFO_NONE;
+
+		if (dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["biz_id"]);
+			this.name = toString(dbAssoc["biz_name"]);
+			this.ownerType = toInteger(dbAssoc["biz_owner_type"]);
+			this.ownerId = toInteger(dbAssoc["biz_owner_id"]);
+			this.buyPrice = toInteger(dbAssoc["biz_buy_price"]);
+			this.locked = intToBool(toInteger(dbAssoc["biz_locked"]));
+			this.hasInterior = intToBool(toInteger(dbAssoc["biz_has_interior"]));
+			this.interiorLights = intToBool(toInteger(dbAssoc["biz_interior_lights"]));
+
+			this.entrancePosition = toVector3(toFloat(dbAssoc["biz_entrance_pos_x"]), toFloat(dbAssoc["biz_entrance_pos_y"]), toFloat(dbAssoc["biz_entrance_pos_z"]));
+			this.entranceRotation = toInteger(dbAssoc["biz_entrance_rot_z"]);
+			this.entranceInterior = toInteger(dbAssoc["biz_entrance_int"]);
+			this.entranceDimension = toInteger(dbAssoc["biz_entrance_vw"]);
+			this.entrancePickupModel = toInteger(dbAssoc["biz_entrance_pickup"]);
+			this.entranceBlipModel = toInteger(dbAssoc["biz_entrance_blip"]);
+
+			this.exitPosition = toVector3(dbAssoc["biz_exit_pos_x"], dbAssoc["biz_exit_pos_y"], dbAssoc["biz_exit_pos_z"]);
+			this.exitRotation = toInteger(dbAssoc["biz_exit_rot_z"]);
+			this.exitInterior = toInteger(dbAssoc["biz_exit_int"]);
+			this.exitDimension = toInteger(dbAssoc["biz_exit_vw"]);
+			this.exitPickupModel = toInteger(dbAssoc["biz_exit_pickup"]);
+			this.exitBlipModel = toInteger(dbAssoc["biz_exit_blip"]);
+
+			this.entranceFee = toInteger(dbAssoc["biz_entrance_fee"]);
+			this.till = toInteger(dbAssoc["biz_till"]);
+
+			this.labelHelpType = toInteger(dbAssoc["biz_label_help_type"]);
+			this.streamingRadioStation = toInteger(dbAssoc["biz_radiostation"]);
+		}
+	};
+};
+
+/**
+ * @class Representing a business's location data. Multiple can be used for a single business. Used for things like doors, fuel pumps, drive thru positions, etc. Loaded and saved in the database
+ */
+class BusinessLocationData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.type = 0;
+		this.business = 0;
+		this.enabled = false;
+		this.index = -1;
+		this.businessIndex = -1;
+		this.needsSaved = false;
+
+		this.position = toVector3(0.0, 0.0, 0.0);
+		this.interior = 0;
+		this.dimension = 0;
+
+		if (dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["biz_loc_id"]);
+			this.name = toString(dbAssoc["biz_loc_name"]);
+			this.type = toInteger(dbAssoc["biz_loc_type"]);
+			this.business = toInteger(dbAssoc["biz_loc_biz"]);
+			this.enabled = intToBool(toInteger(dbAssoc["biz_loc_enabled"]));
+
+			this.position = toVector3(toFloat(dbAssoc["biz_loc_pos_x"]), toFloat(dbAssoc["biz_loc_pos_y"]), toFloat(dbAssoc["biz_loc_pos_z"]));
+			this.interior = toInteger(dbAssoc["biz_loc_int"]);
+			this.dimension = toInteger(dbAssoc["biz_loc_vw"]);
+		}
+	}
+};
+
+/**
+ * @class Representing a business's game scripts. Multiple can be used for a single business. Used for things like bar and club NPCs and other actions
+ */
+class BusinessGameScriptData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.business = 0;
+		this.enabled = false;
+		this.index = -1;
+		this.businessIndex = -1;
+		this.needsSaved = false;
+
+		if (dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["biz_script_id"]);
+			this.name = toString(dbAssoc["biz_script_name"]);
+			this.state = toInteger(dbAssoc["biz_script_state"]);
+			this.business = toInteger(dbAssoc["biz_script_biz"]);
+		}
+	}
+};
+
+// ===========================================================================
+
 function initBusinessScript() {
 	logToConsole(LOG_INFO, "[VRR.Business]: Initializing business script ...");
-
-
 	logToConsole(LOG_INFO, "[VRR.Business]: Business script initialized successfully!");
 	return true;
 }
@@ -44,7 +205,7 @@ function loadBusinessesFromDatabase() {
 	let dbAssoc;
 
 	if (dbConnection) {
-		dbQuery = queryDatabase(dbConnection, `SELECT * FROM biz_main WHERE biz_server = ${getServerId()}`);
+		dbQuery = queryDatabase(dbConnection, `SELECT * FROM biz_main WHERE biz_deleted = 0 AND biz_server = ${getServerId()}`);
 		if (dbQuery) {
 			if (dbQuery.numRows > 0) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {

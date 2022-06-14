@@ -166,11 +166,13 @@ function onLocalPlayerEnteredVehicle(event, vehicle, seat) {
 
 	sendNetworkEventToServer("vrr.onPlayerEnterVehicle", getVehicleForNetworkEvent(vehicle), seat);
 
+	//if (areServerElementsSupported()) {
 	//if(inVehicleSeat == 0) {
 	//setVehicleEngine(vehicle, false);
 	//if(!inVehicle.engine) {
 	//	parkedVehiclePosition = inVehicle.position;
 	//	parkedVehicleHeading = inVehicle.heading;
+	//}
 	//}
 	//}
 }

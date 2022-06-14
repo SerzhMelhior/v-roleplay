@@ -97,6 +97,20 @@ const VRR_VEHBUYSTATE_EXITVEH = 2;
 const VRR_VEHBUYSTATE_FARENOUGH = 3;
 const VRR_VEHBUYSTATE_WRONGVEH = 4;
 
+// Islands
+const VRR_ISLAND_NONE = 0;                       // None
+const VRR_ISLAND_PORTLAND = 0;                   // Portland Island
+const VRR_ISLAND_STAUNTON = 1;                   // Staunton Island
+const VRR_ISLAND_SHORESIDEVALE = 2;              // Shoreside Vale
+const VRR_ISLAND_VICEWEST = 0;                   // Western Island of VC
+const VRR_ISLAND_VICEEAST = 1;                   // Eastern Island of VC
+const VRR_ISLAND_LOSSANTOS = 0;                  // Los Santos
+const VRR_ISLAND_LASVENTURAS = 1;                // Las Venturas
+const VRR_ISLAND_SANFIERRO = 2;                  // San Fierro
+const VRR_ISLAND_REDCOUNTYNORTH = 4;             // Red County North (spans all the way from Palamino/shore on the east east to border of Flint County on the west)
+const VRR_ISLAND_BONECOUNTYNORTH = 5;            // Bone County North (usually called Tierra Robada)
+const VRR_ISLAND_BONECOUNTYSOUTH = 6;            // Bone County South
+
 // Body Parts for Skin Select (IV for now, but might do other games when I can add accessory objects)
 const VRR_SKINSELECT_NONE = 0;
 const VRR_SKINSELECT_SKIN = 1;

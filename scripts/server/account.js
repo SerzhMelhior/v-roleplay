@@ -7,6 +7,191 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+// Account Contact Types
+const VRR_CONTACT_NONE = 0;
+const VRR_CONTACT_NEUTRAL = 1;                   // Contact is neutral. Used for general contacts with no special additional features
+const VRR_CONTACT_FRIEND = 2;                    // Contact is a friend. Shows when they're online.
+const VRR_CONTACT_BLOCKED = 3;                   // Contact is blocked. Prevents all communication to/from them except for RP
+
+// ===========================================================================
+
+// Account Authentication Methods
+const VRR_ACCT_AUTHMETHOD_NONE = 0;              // None
+const VRR_ACCT_AUTHMETHOD_EMAIL = 1;             // Email
+const VRR_ACCT_AUTHMETHOD_PHONENUM = 2;          // Phone number
+const VRR_ACCT_AUTHMETHOD_2FA = 3;               // Two factor authentication app (authy, google authenticator, etc)
+const VRR_ACCT_AUTHMETHOD_PEBBLE = 4;            // Pebble watch (this one's for Vortrex but anybody with a Pebble can use)
+const VRR_ACCT_AUTHMETHOD_PHONEAPP = 5;          // The Android/iOS companion app (will initially be a web based thing until I can get the apps created)
+
+// ===========================================================================
+
+// Two-Factor Authentication States
+const VRR_2FA_STATE_NONE = 0;                    // None
+const VRR_2FA_STATE_CODEINPUT = 1;               // Waiting on player to enter code to play
+const VRR_2FA_STATE_SETUP_CODETOAPP = 2;         // Providing player with a code to put in their auth app
+const VRR_2FA_STATE_SETUP_CODEFROMAPP = 3;       // Waiting on player to enter code from auth app to set up
+
+// ===========================================================================
+
+// Reset Password States
+const VRR_RESETPASS_STATE_NONE = 0;             // None
+const VRR_RESETPASS_STATE_CODEINPUT = 1;        // Waiting on player to enter code sent via email
+const VRR_RESETPASS_STATE_SETPASS = 2;          // Waiting on player to enter new password
+
+// ===========================================================================
+
+/**
+ * @class Representing an account, loaded/saved in the database
+ */
+class AccountData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.password = "";
+		this.registerDate = 0;
+		this.flags = {
+			moderation: 0,
+			admin: 0,
+		};
+		this.staffTitle = "";
+		this.ircAccount = "";
+		this.discordAccount = 0;
+		this.settings = 0;
+		this.emailAddress = "";
+		this.ipAddress = 0;
+
+		this.notes = [];
+		this.messages = [];
+		this.contacts = [];
+		this.subAccounts = [];
+
+		this.emailVerificationCode = "";
+		this.twoFactorAuthVerificationCode = "";
+
+		this.chatScrollLines = 1;
+
+		this.streamingRadioVolume = 20;
+		this.locale = 0;
+
+		if (dbAssoc) {
+			this.databaseId = dbAssoc["acct_id"];
+			this.name = dbAssoc["acct_name"];
+			this.password = dbAssoc["acct_pass"];
+			this.registerDate = dbAssoc["acct_when_made"];
+			this.flags = {
+				moderation: dbAssoc["acct_svr_mod_flags"],
+				admin: dbAssoc["acct_svr_staff_flags"],
+			};
+			this.staffTitle = dbAssoc["acct_svr_staff_title"];
+			this.ircAccount = dbAssoc["acct_irc"];
+			this.discordAccount = dbAssoc["acct_discord"];
+			this.settings = dbAssoc["acct_svr_settings"];
+			this.emailAddress = dbAssoc["acct_email"];
+			this.whenRegistered = dbAssoc["acct_when_registered"];
+			this.ipAddress = dbAssoc["acct_ip"];
+
+			this.notes = [];
+			this.messages = [];
+			this.contacts = [];
+			this.subAccounts = [];
+
+			this.emailVerificationCode = dbAssoc["acct_code_verifyemail"];
+			this.twoFactorAuthVerificationCode = dbAssoc["acct_code_2fa"];
+			this.chatScrollLines = toInteger(dbAssoc["acct_svr_chat_scroll_lines"]);
+			this.streamingRadioVolume = toInteger(dbAssoc["acct_streaming_radio_volume"]);
+			this.locale = toInteger(dbAssoc["acct_locale"]);
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing an account's contact list, loaded/saved in the database
+ */
+class AccountContactData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.accountId = 0;
+		this.contactAccountId = 0;
+		this.type = 0;
+		this.whenAdded = 0;
+		this.needsSaved = false;
+
+		if (dbAssoc) {
+			this.databaseId = dbAssoc["acct_contact_id"];
+			this.accountId = dbAssoc["acct_contact_acct"];
+			this.contactAccountId = dbAssoc["acct_contact_contact"];
+			this.type = dbAssoc["acct_contact_type"];
+			this.whenAdded = dbAssoc["acct_contact_when_added"];
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing an account's messages, loaded/saved in the database
+ */
+class AccountMessageData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.account = 0;
+		this.whoSent = 0;
+		this.whenSent = 0;
+		this.whenRead = 0;
+		this.deleted = false;
+		this.whenDeleted = 0;
+		this.folder = 0;
+		this.message = "";
+		this.needsSaved = false;
+
+		if (dbAssoc) {
+			this.databaseId = dbAssoc["acct_msg_id"];
+			this.account = dbAssoc["acct_msg_acct"];
+			this.whoSent = dbAssoc["acct_msg_who_sent"];
+			this.whenSent = dbAssoc["acct_msg_when_sent"];
+			this.whenRead = dbAssoc["acct_msg_when_read"];
+			this.deleted = intToBool(dbAssoc["acct_msg_deleted"]);
+			this.whenDeleted = dbAssoc["acct_msg_when_deleted"];
+			this.folder = dbAssoc["acct_msg_folder"];
+			this.message = dbAssoc["acct_msg_message"];
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing an account's staff notes. Visible only to staff and loaded/saved in the database
+ */
+class AccountStaffNoteData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.account = 0;
+		this.whoAdded = 0;
+		this.whenAdded = 0;
+		this.deleted = false;
+		this.whenDeleted = 0;
+		this.serverId = 0;
+		this.note = "";
+		this.needsSaved = false;
+
+		if (dbAssoc) {
+			this.databaseId = dbAssoc["acct_note_id"];
+			this.account = dbAssoc["acct_note_acct"];
+			this.whoAdded = dbAssoc["acct_note_who_added"];
+			this.whenAdded = dbAssoc["acct_note_when_added"];
+			this.deleted = intToBool(dbAssoc["acct_note_deleted"]);
+			this.whenDeleted = dbAssoc["acct_note_when_deleted"];
+			this.serverId = dbAssoc["acct_note_server"];
+			this.note = dbAssoc["acct_note_message"];
+		}
+	}
+};
+
+// ===========================================================================
+
 function initAccountScript() {
 	logToConsole(LOG_DEBUG, "[VRR.Account]: Initializing account script ...");
 	logToConsole(LOG_DEBUG, "[VRR.Account]: Account script initialized!");
@@ -801,9 +986,10 @@ function createAccount(name, password, email = "") {
 
 // ===========================================================================
 
-function checkLogin(client, password) {
+async function checkLogin(client, password) {
 	getPlayerData(client).loginAttemptsRemaining = getPlayerData(client).loginAttemptsRemaining - 1;
 	if (getPlayerData(client).loginAttemptsRemaining <= 0) {
+		getPlayerData(client).customDisconnectReason = "Kicked - Failed to login";
 		disconnectPlayer(client);
 	}
 
@@ -840,9 +1026,10 @@ function checkLogin(client, password) {
 			logToConsole(LOG_DEBUG, `[VRR.Account] ${getPlayerDisplayForConsole(client)} is being shown the login message (GUI disabled) with ${getPlayerData(client).loginAttemptsRemaining} login attempts remaining alert.`);
 		}
 
-		if (isAccountEmailVerified(getPlayerData(client).accountData) && !isAccountSettingFlagEnabled(getPlayerData(client).accountData, getAccountSettingsFlagValue("AuthAttemptAlert"))) {
-			sendAccountLoginFailedNotification(getPlayerData(client).accountData.emailAddress, getPlayerName(client), getPlayerIP(client), getGame());
-		}
+		// Disabling email login alerts for now. It hangs the server for a couple seconds. Need a way to thread it.
+		//if (isAccountEmailVerified(getPlayerData(client).accountData) && !isAccountSettingFlagEnabled(getPlayerData(client).accountData, getAccountSettingsFlagValue("AuthAttemptAlert"))) {
+		//	await sendAccountLoginFailedNotification(getPlayerData(client).accountData.emailAddress, getPlayerName(client), getPlayerIP(client), getGame());
+		//}
 		return false;
 	}
 
@@ -856,9 +1043,10 @@ function checkLogin(client, password) {
 			logToConsole(LOG_DEBUG, `[VRR.Account] ${getPlayerDisplayForConsole(client)} is being shown the login message (GUI disabled) with ${getPlayerData(client).loginAttemptsRemaining} login attempts remaining alert.`);
 		}
 
-		if (isAccountEmailVerified(getPlayerData(client).accountData) && !isAccountSettingFlagEnabled(getPlayerData(client).accountData, getAccountSettingsFlagValue("AuthAttemptAlert"))) {
-			sendAccountLoginFailedNotification(getPlayerData(client).accountData.emailAddress, getPlayerName(client), getPlayerIP(client), getGame());
-		}
+		// Disabling email login alerts for now. It hangs the server for a couple seconds. Need a way to thread it.
+		//if (isAccountEmailVerified(getPlayerData(client).accountData) && !isAccountSettingFlagEnabled(getPlayerData(client).accountData, getAccountSettingsFlagValue("AuthAttemptAlert"))) {
+		//	await sendAccountLoginFailedNotification(getPlayerData(client).accountData.emailAddress, getPlayerName(client), getPlayerIP(client), getGame());
+		//}
 		return false;
 	}
 
@@ -875,9 +1063,10 @@ function checkLogin(client, password) {
 
 	loginSuccess(client);
 
-	if (isAccountEmailVerified(getPlayerData(client).accountData) && !isAccountSettingFlagEnabled(getPlayerData(client).accountData, getAccountSettingsFlagValue("AuthAttemptAlert"))) {
-		sendAccountLoginSuccessNotification(getPlayerData(client).accountData.emailAddress, getPlayerName(client), getPlayerIP(client), getGame());
-	}
+	// Disabling email login alerts for now. It hangs the server for a couple seconds. Need a way to thread it.
+	//if (isAccountEmailVerified(getPlayerData(client).accountData) && !isAccountSettingFlagEnabled(getPlayerData(client).accountData, getAccountSettingsFlagValue("AuthAttemptAlert"))) {
+	//	await sendAccountLoginSuccessNotification(getPlayerData(client).accountData.emailAddress, getPlayerName(client), getPlayerIP(client), getGame());
+	//}
 }
 
 // ===========================================================================
@@ -984,6 +1173,7 @@ function checkRegistration(client, password, confirmPassword = "", emailAddress 
 
 	if (doesServerHaveTesterOnlyEnabled() && !isPlayerATester(client)) {
 		setTimeout(function () {
+			getPlayerData(client).customDisconnectReason = "Kicked - Not a tester";
 			disconnectPlayer(client);
 		}, 5000);
 
@@ -1029,22 +1219,23 @@ function checkAccountResetPasswordRequest(client, inputText) {
 			getPlayerData(client).passwordResetCode = passwordResetCode;
 			showPlayerResetPasswordCodeInputGUI(client);
 			sendPasswordResetEmail(client, passwordResetCode);
-			logToConsole(LOG_INFO, `${getPlayerDisplayForConsole(client)} submitted successful email for password reset. Sending email and awaiting verification code input ...`);
+			logToConsole(LOG_INFO, `${getPlayerDisplayForConsole(client)} submitted successful email for password reset. Sending email and awaiting verification code input (${passwordResetCode}) ...`);
 			break;
 		}
 
 		case VRR_RESETPASS_STATE_CODEINPUT: {
+			logToConsole(LOG_INFO, `${getPlayerDisplayForConsole(client)} submitted code for password reset (${inputText}) ...`);
 			if (inputText != "") {
 				if (getPlayerData(client).passwordResetCode == toUpperCase(inputText)) {
 					getPlayerData(client).passwordResetState = VRR_RESETPASS_STATE_SETPASS;
-					showPlayerChangePasswordGUI(client, getLocaleString(client));
+					showPlayerChangePasswordGUI(client);
 					logToConsole(LOG_INFO, `${getPlayerDisplayForConsole(client)} entered the correct reset password verification code. Awaiting new password input ...`);
 				} else {
-					getPlayerData(client).passwordResetState = VRR_RESETPASS_STATE_NONE;
 					getPlayerData(client).passwordResetAttemptsRemaining = getPlayerData(client).passwordResetAttemptsRemaining - 1;
 					logToConsole(LOG_INFO | LOG_WARN, `${getPlayerDisplayForConsole(client)} failed to reset their password (verification code not correct, ${getPlayerData(client).passwordResetAttemptsRemaining} attempts remaining)`);
 					if (getPlayerData(client).passwordResetAttemptsRemaining <= 0) {
 						logToConsole(LOG_INFO | LOG_WARN, `${getPlayerDisplayForConsole(client)} failed to reset their password (verification code not correct, no more attempts remaining, kicking ...)`);
+						getPlayerData(client).customDisconnectReason = "Kicked - Failed to login";
 						disconnectPlayer(client);
 						return false;
 					}
@@ -1191,8 +1382,8 @@ function initClient(client) {
 	sendPlayerGUIInit(client);
 	updatePlayerSnowState(client);
 
-	logToConsole(LOG_DEBUG, `[VRR.Account] Showing connect camera to ${getPlayerDisplayForConsole(client)} ...`);
-	showConnectCameraToPlayer(client);
+	//logToConsole(LOG_DEBUG, `[VRR.Account] Showing connect camera to ${getPlayerDisplayForConsole(client)} ...`);
+	//showConnectCameraToPlayer(client);
 
 	messageClient(`Please wait ...`, client, getColourByName("softGreen"));
 
@@ -1541,7 +1732,7 @@ function sendAccountLoginSuccessNotification(emailAddress, name, ip, game = getG
 	emailBodyText = emailBodyText.replace("{SERVERNAME}", getServerName());
 	emailBodyText = emailBodyText.replace("{TIMESTAMP}", new Date().toLocaleString('en-US'));
 
-	sendEmail(emailAddress, name, `Login failed on ${getServerName()}`, emailBodyText);
+	sendEmail(emailAddress, name, `Login successful on ${getServerName()}`, emailBodyText);
 	return true;
 }
 
@@ -1567,6 +1758,7 @@ function checkPlayerTwoFactorAuthentication(client, authCode) {
 		}
 	}
 
+	getPlayerData(client).customDisconnectReason = "Kicked - Failed to login";
 	disconnectPlayer(client);
 	return false;
 }

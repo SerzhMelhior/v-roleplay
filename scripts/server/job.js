@@ -7,6 +7,346 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+// Job Types
+const VRR_JOB_NONE = 0;
+const VRR_JOB_POLICE = 1;
+const VRR_JOB_MEDICAL = 2;
+const VRR_JOB_FIRE = 3;
+const VRR_JOB_BUS = 4;
+const VRR_JOB_TAXI = 5;
+const VRR_JOB_GARBAGE = 6;
+const VRR_JOB_WEAPON = 7;
+const VRR_JOB_DRUG = 8;
+const VRR_JOB_PIZZA = 9;
+const VRR_JOB_GENERIC = 10;
+
+// ===========================================================================
+
+// Job Route States
+const VRR_JOBROUTESTATE_NONE = 0;                // None
+const VRR_JOBROUTESTATE_INPROGRESS = 1;          // Route is in progress. Player is in between stops but not at the last one.
+const VRR_JOBROUTESTATE_LASTSTOP = 2;            // Player is heading to the last stop on the route
+const VRR_JOBROUTESTATE_PAUSED = 3;              // Route is paused for some reason. For police, this could be player accepted callout and once finished, patrol route will resume
+const VRR_JOBROUTESTATE_ATSTOP = 4;              // For bus/trash stops that freeze player, this is the state when they're at one
+
+// ===========================================================================
+
+/**
+ * @class Representing a job's data. Loaded and saved in the database
+ */
+ class JobData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.serverId = 0;
+		this.type = VRR_JOB_NONE;
+		this.name = "Unnamed";
+		this.enabled = true;
+		this.blipModel = -1
+		this.pickupModel = -1
+		this.colour = toColour(0, 0, 0, 255);
+		this.whiteListEnabled = false;
+		this.blackListEnabled = false;
+		this.walkieTalkieFrequency = 0;
+		this.index = -1;
+		this.needsSaved = false;
+
+		this.equipment = [];
+		this.uniforms = [];
+		this.locations = [];
+		this.whiteList = [];
+		this.blackList = [];
+		this.routes = [];
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["job_id"];
+			this.serverId = dbAssoc["job_server"];
+			this.type = dbAssoc["job_type"];
+			this.name = dbAssoc["job_name"];
+			this.enabled = dbAssoc["job_enabled"];
+			this.blipModel = dbAssoc["job_blip"];
+			this.pickupModel = dbAssoc["job_pickup"];
+			this.colour = toColour(dbAssoc["job_colour_r"], dbAssoc["job_colour_g"], dbAssoc["job_colour_b"], 255);
+			this.whiteListEnabled = dbAssoc["job_wl"];
+			this.blackListEnabled = dbAssoc["job_bl"];
+			this.walkieTalkieFrequency = dbAssoc["job_walkietalkiefreq"];
+
+			this.equipment = [];
+			this.uniforms = [];
+			this.locations = [];
+			this.whiteList = [];
+			this.blackList = [];
+			this.routes = [];
+		}
+	}
+};
+
+// ===========================================================================
+
+class JobRouteData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.jobId = 0;
+		this.locationId = 0;
+		this.enabled = false;
+		this.index = -1;
+		this.jobIndex = -1;
+		this.locationIndex = -1;
+		this.needsSaved = false;
+		this.pay = 0;
+		this.vehicleColour1 = 1;
+		this.vehicleColour2 = 1;
+		this.detail = 0;
+		this.startMessage = "";
+		this.finishMessage = "";
+		this.locationArriveMessage = "";
+		this.locationNextMessage = "";
+		this.locations = [];
+
+		if(dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["job_route_id"]);
+			this.name = toString(dbAssoc["job_route_name"]);
+			this.jobId = toInteger(dbAssoc["job_route_job"]);
+			this.locationId = toInteger(dbAssoc["job_route_job_loc"]);
+			this.enabled = intToBool(toInteger(dbAssoc["job_route_enabled"]));
+			this.pay = toInteger(dbAssoc["job_route_pay"]);
+			this.startMessage = toString(dbAssoc["job_route_start_msg"]);
+			this.finishMessage = toString(dbAssoc["job_route_finish_msg"]);
+            this.locationArriveMessage = toString(dbAssoc["job_route_loc_arrive_msg"]);
+			this.locationNextMessage = toString(dbAssoc["job_route_loc_next_msg"]);
+			this.vehicleColour1 = toInteger(dbAssoc["job_route_veh_colour1"]);
+			this.vehicleColour2 = toInteger(dbAssoc["job_route_veh_colour2"]);
+			this.detail = toInteger(dbAssoc["job_route_detail"]);
+		}
+	}
+};
+
+// ===========================================================================
+
+class JobRouteLocationData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.routeId = 0;
+		this.enabled = false;
+		this.index = -1;
+        this.jobIndex = -1;
+		this.routeIndex = -1;
+		this.needsSaved = false;
+		this.position = toVector3(0.0, 0.0, 0.0);
+		this.stopDelay = 0;
+		this.pay = 0;
+
+		if(dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["job_route_loc_id"]);
+			this.name = toString(dbAssoc["job_route_loc_name"]);
+			this.routeId = toInteger(dbAssoc["job_route_loc_route"]);
+			this.enabled = intToBool(toInteger(dbAssoc["job_route_loc_enabled"]));
+			this.position = toVector3(toFloat(dbAssoc["job_route_loc_x"]), toFloat(dbAssoc["job_route_loc_y"]), toFloat(dbAssoc["job_route_loc_z"]));
+			this.stopDelay = toInteger(dbAssoc["job_route_loc_delay"]);
+			this.pay = toInteger(dbAssoc["job_route_loc_pay"]);
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing a job equipment set's data. Loaded and saved in the database
+ */
+class JobEquipmentData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.job = 0;
+		this.name = "Unnamed";
+		this.requiredRank = 0;
+		this.enabled = false;
+		this.index = -1;
+		this.jobIndex = -1;
+		this.needsSaved = false;
+		this.items = [];
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["job_equip_id"];
+			this.job = dbAssoc["job_equip_job"];
+			this.name = dbAssoc["job_equip_name"];
+			this.requiredRank = dbAssoc["job_equip_minrank"];
+			this.enabled = dbAssoc["job_equip_enabled"];
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing a job equipment set item's data. Loaded and saved in the database
+ */
+class JobEquipmentItemData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.equipmentId = 0;
+		this.itemType = 0;
+		this.value = 0;
+		this.enabled = false;
+		this.index = -1;
+		this.jobIndex = -1;
+		this.needsSaved = false;
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["job_equip_item_id"];
+			this.equipmentId = dbAssoc["job_equip_item_equip"];
+			this.itemType = dbAssoc["job_equip_item_type"];
+			this.value = dbAssoc["job_equip_item_value"];
+			this.enabled = dbAssoc["job_equip_item_enabled"];
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing a job uniform's data. Loaded and saved in the database
+ */
+class JobUniformData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.job = 0;
+		this.name = "Unnamed";
+		this.requiredRank = 0
+		this.skin = -1;
+		this.enabled = false;
+		this.index = -1;
+		this.jobIndex = -1;
+		this.needsSaved = false;
+
+		this.bodyParts = {
+			hair: [0,0],
+			head: [0,0],
+			upper: [0,0],
+			lower: [0,0],
+		};
+
+		this.bodyProps = {
+			hair: [0,0],
+			eyes: [0,0],
+			head: [0,0],
+			leftHand: [0,0],
+			rightHand: [0,0],
+			leftWrist: [0,0],
+			rightWrist: [0,0],
+			hip: [0,0],
+			leftFoot: [0,0],
+			rightFoot: [0,0],
+		};
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["job_uniform_id"];
+			this.job = dbAssoc["job_uniform_job"];
+			this.name = dbAssoc["job_uniform_name"];
+			this.requiredRank = dbAssoc["job_uniform_minrank"];
+			this.skin = dbAssoc["job_uniform_skin"];
+			this.enabled = intToBool(dbAssoc["job_uniform_enabled"]);
+
+			this.bodyParts = {
+				hair: [toInteger(dbAssoc["job_uniform_hd_part_hair_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_part_hair_texture"]) || 0],
+				head: [toInteger(dbAssoc["job_uniform_hd_part_head_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_part_head_texture"]) || 0],
+				upper: [toInteger(dbAssoc["job_uniform_hd_part_upper_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_part_upper_texture"]) || 0],
+				lower: [toInteger(dbAssoc["job_uniform_hd_part_lower_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_part_lower_texture"]) || 0],
+			};
+
+			this.bodyProps = {
+				hair: [toInteger(dbAssoc["job_uniform_hd_prop_hair_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_hair_texture"]) || 0],
+				eyes: [toInteger(dbAssoc["job_uniform_hd_prop_eyes_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_eyes_texture"]) || 0],
+				head: [toInteger(dbAssoc["job_uniform_hd_prop_head_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_head_texture"]) || 0],
+				leftHand: [toInteger(dbAssoc["job_uniform_hd_prop_lefthand_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_lefthand_texture"]) || 0],
+				rightHand: [toInteger(dbAssoc["job_uniform_hd_prop_righthand_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_righthand_texture"]) || 0],
+				leftWrist: [toInteger(dbAssoc["job_uniform_hd_prop_leftwrist_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_leftwrist_texture"]) || 0],
+				rightWrist: [toInteger(dbAssoc["job_uniform_hd_prop_rightwrist_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_rightwrist_texture"]) || 0],
+				hip: [toInteger(dbAssoc["job_uniform_hd_prop_hip_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_hip_texture"]) || 0],
+				leftFoot: [toInteger(dbAssoc["job_uniform_hd_prop_leftfoot_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_leftfoot_texture"]) || 0],
+				rightFoot: [toInteger(dbAssoc["job_uniform_hd_prop_rightfoot_model"]) || 0, toInteger(dbAssoc["job_uniform_hd_prop_rightfoot_texture"]) || 0],
+			};
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class JobLocationData Representing a job uniform's data. Loaded and saved in the database
+ */
+class JobLocationData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.jobId = 0;
+		this.position = toVector3(0.0, 0.0, 0.0);
+		this.blip = false;
+		this.pickup = false;
+		this.enabled = false;
+		this.interior = 0;
+		this.dimension = 0;
+		this.index = -1;
+		this.jobIndex = -1;
+		this.needsSaved = false;
+		this.routeCache = [];
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["job_loc_id"];
+			this.jobId = dbAssoc["job_loc_job"];
+			this.position = toVector3(dbAssoc["job_loc_pos_x"], dbAssoc["job_loc_pos_y"], dbAssoc["job_loc_pos_z"]);
+			this.blip = false;
+			this.pickup = false;
+			this.enabled = dbAssoc["job_loc_enabled"];
+			this.interior = dbAssoc["job_loc_int"];
+			this.dimension = dbAssoc["job_loc_vw"];
+		}
+	}
+};
+
+// ===========================================================================
+
+class JobWhiteListData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.job = 0;
+		this.subAccount = 0
+		this.enabled = false;
+		this.index = -1;
+		this.jobIndex = -1;
+		this.needsSaved = false;
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["job_wl_id"];
+			this.job = dbAssoc["job_wl_job"];
+			this.subAccount = dbAssoc["job_wl_sacct"]
+			this.enabled = dbAssoc["job_wl_enabled"];
+		}
+	}
+};
+
+// ===========================================================================
+
+class JobBlackListData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.job = 0;
+		this.subAccount = 0
+		this.enabled = false;
+		this.index = -1;
+		this.jobIndex = -1;
+		this.needsSaved = false;
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["job_bl_id"];
+			this.job = dbAssoc["job_bl_job"];
+			this.subAccount = dbAssoc["job_bl_sacct"]
+			this.enabled = dbAssoc["job_bl_enabled"];
+		}
+	}
+};
+
+// ===========================================================================
+
 function initJobScript() {
 	logToConsole(LOG_INFO, "[VRR.Job]: Initializing job script ...");
 	logToConsole(LOG_INFO, "[VRR.Job]: Job script initialized successfully!");
@@ -24,7 +364,7 @@ function loadJobsFromDatabase() {
 	let dbAssoc;
 
 	if (dbConnection) {
-		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_main WHERE job_enabled = 1 AND job_server = ${getServerId()}`);
+		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_main WHERE job_deleted = 0 AND job_enabled = 1 AND job_server = ${getServerId()}`);
 		if (dbQuery) {
 			if (dbQuery.numRows > 0) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
@@ -89,7 +429,7 @@ function loadJobRoutesFromDatabase(jobDatabaseId) {
 	let dbAssoc;
 
 	if (dbConnection) {
-		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_route WHERE job_route_enabled = 1 AND job_route_job = ${jobDatabaseId}`);
+		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_route WHERE job_route_deleted = 0 AND job_route_enabled = 1 AND job_route_job = ${jobDatabaseId}`);
 		if (dbQuery) {
 			if (dbQuery.numRows > 0) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
@@ -119,7 +459,7 @@ function loadJobRouteLocationsFromDatabase(jobRouteId) {
 	let dbAssoc;
 
 	if (dbConnection) {
-		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_route_loc WHERE job_route_loc_enabled = 1 AND job_route_loc_route = ${jobRouteId}`);
+		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_route_loc WHERE job_route_loc_deleted = 0 AND job_route_loc_enabled = 1 AND job_route_loc_route = ${jobRouteId}`);
 		if (dbQuery) {
 			if (dbQuery.numRows > 0) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
@@ -148,7 +488,7 @@ function loadJobEquipmentsFromDatabase(jobDatabaseId) {
 	let dbAssoc;
 
 	if (dbConnection) {
-		dbQuery = queryDatabase(dbConnection, "SELECT * FROM `job_equip` WHERE `job_equip_enabled` = 1 AND `job_equip_job` = " + toString(jobDatabaseId));
+		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_equip WHERE job_equip_deleted = 0 AND job_equip_enabled = 1 AND job_equip_job = ${jobDatabaseId}`);
 		if (dbQuery) {
 			if (dbQuery.numRows > 0) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
@@ -178,7 +518,7 @@ function loadJobLocationsFromDatabase(jobDatabaseId) {
 	let dbAssoc;
 
 	if (dbConnection) {
-		dbQuery = queryDatabase(dbConnection, "SELECT * FROM `job_loc` WHERE `job_loc_enabled` = 1 AND `job_loc_job` = " + toString(jobDatabaseId));
+		dbQuery = queryDatabase(dbConnection, `SELECT * FROM job_loc WHERE job_loc_deleted = 0 AND job_loc_enabled = 1 AND job_loc_job = ${jobDatabaseId}`);
 		if (dbQuery) {
 			if (dbQuery.numRows > 0) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
@@ -950,8 +1290,8 @@ function reloadAllJobsCommand(command, params, client) {
 
 	Promise.resolve().then(() => {
 		getServerData().jobs = loadJobsFromDatabase();
-		createJobLocationPickup(i, j);
-		createJobLocationBlip(i, j);
+		createAllJobPickups();
+		createAllJobBlips();
 	});
 
 	announceAdminAction("AllJobsReloaded");
@@ -3106,6 +3446,10 @@ function replaceJobRouteStringsInMessage(messageText, jobId, jobRouteId) {
 // ===========================================================================
 
 function updateJobBlipsForPlayer(client) {
+	if (!areServerElementsSupported()) {
+		return false;
+	}
+
 	for (let i in getServerData().jobs) {
 		for (let j in getServerData().jobs[i].locations) {
 			if (getPlayerJob(client) == 0 || getPlayerJob(client) == i) {

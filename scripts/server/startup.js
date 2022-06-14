@@ -10,7 +10,6 @@
 function initServerScripts() {
 	checkForAllRequiredModules();
 
-	initClassScript();
 	initDatabaseScript();
 	initConfigScript();
 	initEmailScript();
@@ -118,6 +117,7 @@ function loadServerDataFromDatabase() {
 
 	// Always load these regardless of "test server" status
 	getServerData().allowedSkins = getAllowedSkins(getGame());
+	getServerData().itemTypes = loadItemTypesFromDatabase();
 
 	// Translation Cache
 	//getServerData().cachedTranslations = new Array(getGlobalConfig().locale.locales.length);
@@ -127,7 +127,6 @@ function loadServerDataFromDatabase() {
 
 	// Only load these if the server isn't a testing/dev server
 	if (!getServerConfig().devServer) {
-		getServerData().itemTypes = loadItemTypesFromDatabase();
 		getServerData().items = loadItemsFromDatabase();
 		getServerData().businesses = loadBusinessesFromDatabase();
 		getServerData().houses = loadHousesFromDatabase();

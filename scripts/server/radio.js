@@ -7,6 +7,27 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+class RadioStationData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.url = "";
+		this.genre = "";
+		this.codec = "";
+		this.index = -1;
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["radio_id"];
+			this.name = dbAssoc["radio_name"];
+			this.url = dbAssoc["radio_url"];
+			this.genre = dbAssoc["radio_genre"];
+			this.codec = dbAssoc["radio_codec"];
+		}
+	}
+};
+
+// ===========================================================================
+
 function initRadioScript() {
 	logToConsole(LOG_INFO, "[VRR.Radio]: Initializing radio script ...");
 	logToConsole(LOG_INFO, "[VRR.Radio]: Radio script initialized successfully!");

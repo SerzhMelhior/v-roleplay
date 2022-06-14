@@ -7,6 +7,116 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+
+/**
+ * @class Representing a character's (subaccount) data. Loaded and saved in the database
+ */
+ class SubAccountData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.serverId = 0;
+		this.firstName = "John";
+		this.lastName = "Doe";
+		this.middleName = "Q";
+		this.account = 0;
+		this.skin = 0;
+		this.cash = 0;
+		this.spawnPosition = toVector3(0.0, 0.0, 0.0);
+		this.spawnHeading = 0.0;
+		this.lastLogin = 0;
+		this.clan = 0;
+		this.clanFlags = 0;
+		this.clanRank = 0;
+		this.clanTitle = 0;
+		this.isWorking = false;
+		this.jobUniform = this.skin;
+		this.job = 0;
+		this.jobRank = 0;
+		this.weapons = [];
+		this.inJail = false;
+		this.interior = 0;
+		this.dimension = 0;
+		this.pedScale = toVector3(1.0, 1.0, 1.0);
+		this.walkStyle = 0;
+		this.fightStyle = 0;
+		this.health = 100;
+		this.armour = 100;
+		this.inHouse = 0;
+		this.inBusiness = 0;
+		this.accent = "";
+
+		this.bodyParts = {
+			hair: [0,0],
+			head: [0,0],
+			upper: [0,0],
+			lower: [0,0],
+		};
+
+		this.bodyProps = {
+			hair: [0,0],
+			eyes: [0,0],
+			head: [0,0],
+			leftHand: [0,0],
+			rightHand: [0,0],
+			leftWrist: [0,0],
+			rightWrist: [0,0],
+			hip: [0,0],
+			leftFoot: [0,0],
+			rightFoot: [0,0],
+		};
+
+		if(dbAssoc) {
+			this.databaseId = dbAssoc["sacct_id"];
+			this.serverId = toInteger(dbAssoc["sacct_server"]);
+			this.firstName = dbAssoc["sacct_name_first"];
+			this.lastName = dbAssoc["sacct_name_last"];
+			this.middleName = dbAssoc["sacct_name_middle"] || "";
+			this.account = toInteger(dbAssoc["sacct_acct"]);
+			this.skin = toInteger(dbAssoc["sacct_svr_skin"]);
+			this.cash = toInteger(dbAssoc["sacct_cash"]);
+			this.spawnPosition = toVector3(toFloat(dbAssoc["sacct_pos_x"]), toFloat(dbAssoc["sacct_pos_y"]), toFloat(dbAssoc["sacct_pos_z"]));
+			this.spawnHeading = toFloat(dbAssoc["sacct_rot_z"]);
+			this.lastLogin = toInteger(dbAssoc["sacct_when_lastlogin"]);
+			this.clan = toInteger(dbAssoc["sacct_svr_clan"]);
+			this.clanFlags = toInteger(dbAssoc["sacct_svr_clan_flags"]);
+			this.clanRank = toInteger(dbAssoc["sacct_svr_clan_rank"]);
+			this.clanTitle = toInteger(dbAssoc["sacct_svr_clan_title"]);
+			this.job = toInteger(dbAssoc["sacct_svr_job"]);
+			this.jobRank = toInteger(dbAssoc["sacct_svr_job_rank"]);
+			this.interior = toInteger(dbAssoc["sacct_int"]);
+			this.dimension = toInteger(dbAssoc["sacct_vw"]);
+			this.pedScale = toVector3(toFloat(dbAssoc["sacct_svr_scale_x"]), toFloat(dbAssoc["sacct_svr_scale_y"]), toFloat(dbAssoc["sacct_svr_scale_z"]));
+			this.walkStyle = toInteger(dbAssoc["sacct_svr_walkstyle"]);
+			this.fightStyle = toInteger(dbAssoc["sacct_svr_fightstyle"]);
+			this.health = toInteger(dbAssoc["sacct_health"]);
+			this.armour = toInteger(dbAssoc["sacct_armour"]);
+			this.inHouse = toInteger(dbAssoc["sacct_inhouse"]);
+			this.inBusiness = toInteger(dbAssoc["sacct_inbusiness"]);
+			this.accent = toString(dbAssoc["sacct_accent"]);
+
+			this.bodyParts = {
+				hair: [toInteger(dbAssoc["sacct_svr_hd_part_hair_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_part_hair_texture"]) || 0],
+				head: [toInteger(dbAssoc["sacct_svr_hd_part_head_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_part_head_texture"]) || 0],
+				upper: [toInteger(dbAssoc["sacct_svr_hd_part_upper_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_part_upper_texture"]) || 0],
+				lower: [toInteger(dbAssoc["sacct_svr_hd_part_lower_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_part_lower_texture"]) || 0],
+			};
+
+			this.bodyProps = {
+				hair: [toInteger(dbAssoc["sacct_svr_hd_prop_hair_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_hair_texture"]) || 0],
+				eyes: [toInteger(dbAssoc["sacct_svr_hd_prop_eyes_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_eyes_texture"]) || 0],
+				head: [toInteger(dbAssoc["sacct_svr_hd_prop_head_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_head_texture"]) || 0],
+				leftHand: [toInteger(dbAssoc["sacct_svr_hd_prop_lefthand_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_lefthand_texture"]) || 0],
+				rightHand: [toInteger(dbAssoc["sacct_svr_hd_prop_righthand_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_righthand_texture"]) || 0],
+				leftWrist: [toInteger(dbAssoc["sacct_svr_hd_prop_leftwrist_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_leftwrist_texture"]) || 0],
+				rightWrist: [toInteger(dbAssoc["sacct_svr_hd_prop_rightwrist_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_rightwrist_texture"]) || 0],
+				hip: [toInteger(dbAssoc["sacct_svr_hd_prop_hip_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_hip_texture"]) || 0],
+				leftFoot: [toInteger(dbAssoc["sacct_svr_hd_prop_leftfoot_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_leftfoot_texture"]) || 0],
+				rightFoot: [toInteger(dbAssoc["sacct_svr_hd_prop_rightfoot_model"]) || 0, toInteger(dbAssoc["sacct_svr_hd_prop_rightfoot_texture"]) || 0],
+			};
+		}
+	}
+};
+
 function initSubAccountScript() {
 	logToConsole(LOG_INFO, "[VRR.SubAccount]: Initializing subaccount script ...");
 	logToConsole(LOG_INFO, "[VRR.SubAccount]: SubAccount script initialized!");
@@ -245,9 +355,9 @@ function showCharacterSelectToClient(client) {
 		//}, 500);
 		logToConsole(LOG_DEBUG, `[VRR.SubAccount] ${getPlayerDisplayForConsole(client)} is being shown the character select GUI`);
 	} else {
-		let charactersList = getPlayerData(client).subAccounts.map(sacct, index => `{teal}${index}: {ALTCOLOUR}${sacct.name}`);
+		let charactersList = getPlayerData(client).subAccounts.map((sacct, index) => `{teal}${index + 1}: {ALTCOLOUR}${sacct.firstName} ${sacct.lastName}`);
 		let chunkedList = splitArrayIntoChunks(charactersList, 5);
-		messagePlayerNormal(client, makeChatBoxSectionHeader(getLocaleString(client, "HeaderCharacterListSelf")));
+		messagePlayerNormal(client, makeChatBoxSectionHeader(getLocaleString(client, "HeaderCharactersListSelf")));
 		for (let i in chunkedList) {
 			messagePlayerNormal(client, chunkedList[i].join("{MAINCOLOUR}, "));
 		}

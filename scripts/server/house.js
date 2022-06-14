@@ -7,6 +7,159 @@
 // TYPE: Server (JavaScript)
 // ===========================================================================
 
+// House Location Types
+const VRR_HOUSELOC_NONE = 0;                     // None
+const VRR_HOUSELOC_GATE = 1;                     // Center of any moveable gate that belongs to the house
+const VRR_HOUSELOC_GARAGE = 2;                   // Location for garage (pos1 = outside, pos2 = inside). Use pos to teleport or spawn veh/ped
+
+// ===========================================================================
+
+// House Owner Types
+const VRR_HOUSEOWNER_NONE = 0;                   // Not owned
+const VRR_HOUSEOWNER_PLAYER = 1;                 // Owner is a player (character/subaccount)
+const VRR_HOUSEOWNER_JOB = 2;                    // Owned by a job
+const VRR_HOUSEOWNER_CLAN = 3;                   // Owned by a clan
+const VRR_HOUSEOWNER_FACTION = 4;                // Owned by a faction
+const VRR_HOUSEOWNER_PUBLIC = 5;                 // Is a public house. Technically not owned. This probably won't be used.
+
+// ===========================================================================
+
+/**
+ * @class Representing a house's data. Loaded and saved in the database
+ */
+ class HouseData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0
+		this.description = "";
+		this.ownerType = VRR_HOUSEOWNER_NONE;
+		this.ownerId = 0;
+		this.buyPrice = 0;
+		this.rentPrice = 0;
+		this.renter = 0;
+		this.locked = false;
+		this.hasInterior = false;
+		this.index = -1;
+		this.needsSaved = false;
+		this.interiorLights = true;
+
+		this.itemCache = [];
+		this.locations = [];
+		//this.gameScripts = [];
+
+		this.entrancePosition = false;
+		this.entranceRotation = 0.0;
+		this.entranceInterior = 0;
+		this.entranceDimension = 0;
+		this.entrancePickupModel = -1;
+		this.entranceBlipModel = -1;
+		this.entrancePickup = null;
+		this.entranceBlip = null;
+
+		this.exitPosition = false;
+		this.exitRotation = 0.0;
+		this.exitInterior = 0;
+		this.exitDimension = -1;
+		this.exitPickupModel = -1;
+		this.exitBlipModel = -1;
+		this.exitPickup = null;
+		this.exitBlip = null;
+
+		this.streamingRadioStation = -1;
+
+		if(dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["house_id"]);
+			this.description = toString(dbAssoc["house_description"]);
+			this.ownerType = toInteger(dbAssoc["house_owner_type"]);
+			this.ownerId = toInteger(dbAssoc["house_owner_id"]);
+			this.buyPrice = toInteger(dbAssoc["house_buy_price"]);
+			this.rentPrice = toInteger(dbAssoc["house_rent_price"]);
+			this.renter = toInteger(dbAssoc["house_renter"]);
+			this.locked = intToBool(toInteger(dbAssoc["house_locked"]));
+			this.hasInterior = intToBool(toInteger(dbAssoc["house_has_interior"]));
+			this.interiorLights = intToBool(toInteger(dbAssoc["house_interior_lights"]));
+
+			this.entrancePosition = toVector3(toFloat(dbAssoc["house_entrance_pos_x"]), toFloat(dbAssoc["house_entrance_pos_y"]), toFloat(dbAssoc["house_entrance_pos_z"]));
+			this.entranceRotation = toFloat(dbAssoc["house_entrance_rot_z"]);
+			this.entranceInterior = toInteger(dbAssoc["house_entrance_int"]);
+			this.entranceDimension = toInteger(dbAssoc["house_entrance_vw"]);
+			this.entrancePickupModel = toInteger(dbAssoc["house_entrance_pickup"]);
+			this.entranceBlipModel = toInteger(dbAssoc["house_entrance_blip"]);
+
+			this.exitPosition = toVector3(toFloat(dbAssoc["house_exit_pos_x"]), toFloat(dbAssoc["house_exit_pos_y"]), toFloat(dbAssoc["house_exit_pos_z"]));
+			this.exitRotation = toFloat(dbAssoc["house_exit_rot_z"]);
+			this.exitInterior = toInteger(dbAssoc["house_exit_int"]);
+			this.exitDimension = toInteger(dbAssoc["house_exit_vw"]);
+			this.exitPickupModel = toInteger(dbAssoc["house_exit_pickup"]);
+			this.exitBlipModel = toInteger(dbAssoc["house_exit_blip"]);
+		}
+	}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing a houses's location data. Multiple can be used for a single house. Used for things like doors, garage entry/exit/vehspawn, gates, etc. Loaded and saved in the database
+ */
+class HouseLocationData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.type = 0;
+		this.house = 0;
+		this.enabled = false;
+		this.index = -1;
+		this.houseIndex = -1;
+		this.needsSaved = false;
+
+		this.position = toVector3(0.0, 0.0, 0.0);
+		this.interior = 0;
+		this.dimension = 0;
+
+		if(dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["house_loc_id"]);
+			this.name = toString(dbAssoc["house_loc_name"]);
+			this.type = toInteger(dbAssoc["house_loc_type"]);
+			this.house = toInteger(dbAssoc["house_loc_house"]);
+			this.enabled = intToBool(toInteger(dbAssoc["house_loc_enabled"]));
+			this.index = -1;
+
+			this.position = toVector3(toFloat(dbAssoc["house_loc_pos_x"]), toFloat(dbAssoc["house_loc_pos_y"]), toFloat(dbAssoc["house_loc_pos_z"]));
+			this.interior = toInteger(dbAssoc["house_loc_int"]);
+			this.dimension = toInteger(dbAssoc["house_loc_vw"]);
+		}
+	};
+
+	//saveToDatabase = () => {
+	//	saveHouseLocationToDatabase(this.houseIndex, this.index);
+	//}
+};
+
+// ===========================================================================
+
+/**
+ * @class Representing a house's game scripts. Multiple can be used for a single house
+ */
+class HouseGameScriptData {
+	constructor(dbAssoc = false) {
+		this.databaseId = 0;
+		this.name = "";
+		this.business = 0;
+		this.state = false;
+		this.index = -1;
+		this.houseIndex = -1;
+		this.needsSaved = false;
+
+		if(dbAssoc) {
+			this.databaseId = toInteger(dbAssoc["house_script_id"]);
+			this.name = toString(dbAssoc["house_script_name"]);
+			this.state = toInteger(dbAssoc["house_script_state"]);
+			this.business = toInteger(dbAssoc["house_script_biz"]);
+		}
+	}
+};
+
+// ===========================================================================
+
 function initHouseScript() {
 	logToConsole(LOG_INFO, "[VRR.House]: Initializing house script ...");
 	logToConsole(LOG_INFO, "[VRR.House]: House script initialized successfully!");
@@ -22,7 +175,7 @@ function loadHousesFromDatabase() {
 	let dbAssoc;
 
 	if (dbConnection) {
-		let dbQuery = queryDatabase(dbConnection, `SELECT * FROM house_main WHERE house_server = ${getServerId()}`);
+		let dbQuery = queryDatabase(dbConnection, `SELECT * FROM house_main WHERE house_deleted = 0 AND house_server = ${getServerId()}`);
 		if (dbQuery) {
 			if (dbQuery.numRows > 0) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
