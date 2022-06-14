@@ -8,13 +8,8 @@
 // ===========================================================================
 
 function initClientScripts() {
-	initGUIScript();
-	//initNameTagScript();
-	initScoreBoardScript();
 	initMessagingScript();
-	initServerScript();
-	//initLogoScript();
-	//initLabelScript();
+	initNetworkEventsScript();
 	initChatBoxScript();
 	initAFKScript();
 	initKeyBindScript();
