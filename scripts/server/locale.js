@@ -15,76 +15,42 @@ function initLocaleScript() {
 // ===========================================================================
 
 function getLocaleString(client, stringName, ...args) {
-	let tempString = getRawLocaleString(stringName, getPlayerData(client).locale);
-	if(tempString == "" || tempString == null || typeof tempString == "undefined") {
-		logToConsole(LOG_WARN, `[VRR.Locale] Locale string missing for ${stringName} on language ${getLocaleData(getPlayerData(client).locale).englishName}`);
+	let localeId = getPlayerData(client).locale;
+	if (!findResourceByName("agrp_locale").exports.doesLocaleStringExist(localeId, stringName)) {
 		submitBugReport(client, `(AUTOMATED REPORT) Locale string "${stringName}" is missing for "${getPlayerLocaleName(client)}"`);
 		return "";
 	}
 
-	for(let i = 1; i <= args.length; i++) {
-		tempString = tempString.replace(`{${i}}`, args[i-1]);
-	}
-
-	return tempString;
+	return findResourceByName("agrp_locale").exports.getLocaleString(localeId, stringName, args);
 }
 
 // ===========================================================================
 
 function getLanguageLocaleString(localeId, stringName, ...args) {
-	let tempString = getRawLocaleString(stringName, localeId);
-	if(tempString == "" || tempString == null || typeof tempString == "undefined") {
-		logToConsole(LOG_WARN, `[VRR.Locale] Locale string missing for ${stringName} on language ${getLocaleData(getPlayerData(client).locale).englishName}`);
+	if (!findResourceByName("agrp_locale").exports.doesLocaleStringExist(localeId, stringName)) {
 		submitBugReport(client, `(AUTOMATED REPORT) Locale string "${stringName}" is missing for "${getPlayerLocaleName(client)}"`);
+		return "";
 	}
 
-	for(let i = 1; i <= args.length; i++) {
-		tempString = tempString.replace(`{${i}}`, args[i-1]);
-	}
-
-	return tempString;
+	return findResourceByName("agrp_locale").exports.getLocaleString(getPlayerData(client).locale, stringName, args);
 }
 
 // ===========================================================================
 
 function getGroupedLocaleString(client, stringName, index, ...args) {
-	let tempString = getRawGroupedLocaleString(stringName, getPlayerData(client).locale, index);
-
-	for(let i = 1; i <= args.length; i++) {
-		tempString = tempString.replace(`{${i}}`, args[i-1]);
-	}
-
-	return tempString;
+	return findResourceByName("agrp_locale").exports.getGroupedLocaleString(getPlayerData(client).locale, stringName, index, args);
 }
 
 // ===========================================================================
 
 function getRawLocaleString(stringName, localeId) {
-	return getLocaleStrings()[localeId][stringName];
-
-	//if(findResourceByName("agrp_locale").exports.doesLocaleStringExist(localeId, stringName) == false) {
-	//	return "";
-	//}
-
-	//let tempString = findResourceByName("agrp_locale").exports.getRawLocaleString(localeId, stringName);
-	//if(tempString == "" || tempString == null || tempString == undefined) {
-	//	return "";
-	//}
+	return findResourceByName("agrp_locale").exports.getRawLocaleString(localeId, stringName);
 }
 
 // ===========================================================================
 
 function getRawGroupedLocaleString(stringName, localeId, index) {
-	return getLocaleStrings()[localeId][stringName][index];
-
-	//if(findResourceByName("agrp_locale").exports.doesLocaleStringExist(localeId, stringName) == false) {
-	//	return "";
-	//}
-
-	//let tempString = findResourceByName("agrp_locale").exports.getRawLocaleString(localeId, stringName);
-	//if(tempString == "" || tempString == null || tempString == undefined) {
-	//	return "";
-	//}
+	return findResourceByName("agrp_locale").exports.getRawGroupedLocaleString(localeId, stringName, index);
 }
 
 // ===========================================================================
@@ -96,58 +62,24 @@ function getPlayerLocaleName(client) {
 
 // ===========================================================================
 
-function loadAllLocaleStrings() {
-	let tempLocaleStrings = {};
-
-	let locales = getGlobalConfig().locale.locales;
-	for(let i in locales) {
-		let localeData = locales[i];
-		let localeFile = JSON.parse(loadTextFile(`locale/${localeData.stringsFile}`));
-		tempLocaleStrings[i] = localeFile;
-	}
-
-	return tempLocaleStrings;
-}
-
-// ===========================================================================
-
-function getLocaleStrings() {
-	return getServerData().localeStrings;
-}
-
-// ===========================================================================
-
 function getLocaleFromParams(params) {
-	let locales = getLocales();
-	if(isNaN(params)) {
-		for(let i in locales) {
-			if(toLowerCase(locales[i].isoCode).indexOf(toLowerCase(params)) != -1) {
-				return i;
-			}
-
-			if(toLowerCase(locales[i].englishName).indexOf(toLowerCase(params)) != -1) {
-				return i;
-			}
-		}
-	}
-
-	return -1;
+	return findResourceByName("agrp_locale").exports.getLocaleFromParams(params);
 }
 
 // ===========================================================================
 
 function getLocales() {
-	return getGlobalConfig().locale.locales;
+	return findResourceByName("agrp_locale").exports.getLocales();
 }
 
 // ===========================================================================
 
 function showLocaleListCommand(command, params, client) {
-	let localeList = getLocales().map(function(x) { return x[0]; });
+	let localeList = getLocales().map(function (x) { return x[0]; });
 	let chunkedList = splitArrayIntoChunks(localeList, 10);
 
 	messagePlayerInfo(client, getLocaleString(client, "HeaderLocaleList"));
-	for(let i in chunkedList) {
+	for (let i in chunkedList) {
 		messagePlayerInfo(client, chunkedList[i].join(", "));
 	}
 }
@@ -155,14 +87,14 @@ function showLocaleListCommand(command, params, client) {
 // ===========================================================================
 
 function setLocaleCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
 	let localeId = getLocaleFromParams(params);
 
-	if(!getLocaleData(localeId)) {
+	if (!getLocaleData(localeId)) {
 		messagePlayerInfo(client, getLocaleString(client, "InvalidLocale"));
 		return false;
 	}
@@ -176,7 +108,7 @@ function setLocaleCommand(command, params, client) {
 // ===========================================================================
 
 function getLocaleData(localeId) {
-	if(typeof getLocales()[localeId] != "undefined") {
+	if (typeof getLocales()[localeId] != "undefined") {
 		return getLocales()[localeId];
 	}
 
@@ -204,12 +136,12 @@ function reloadLocaleConfigurationCommand(command, params, client) {
 
 async function translateMessage(messageText, translateFrom = getGlobalConfig().locale.defaultLanguageId, translateTo = getGlobalConfig().locale.defaultLanguageId) {
 	return new Promise(resolve => {
-		if(translateFrom == translateTo) {
+		if (translateFrom == translateTo) {
 			resolve(messageText);
 		}
 
-		for(let i in cachedTranslations[translateFrom][translateTo]) {
-			if(cachedTranslations[translateFrom][translateTo][i][0] == messageText) {
+		for (let i in cachedTranslations[translateFrom][translateTo]) {
+			if (cachedTranslations[translateFrom][translateTo][i][0] == messageText) {
 				logToConsole(LOG_DEBUG, `[Translate]: Using existing translation for ${getGlobalConfig().locale.locales[translateFrom].englishName} to ${getGlobalConfig().locale.locales[translateTo].englishName} - (${messageText}), (${cachedTranslations[translateFrom][translateTo][i][1]})`);
 				resolve(cachedTranslations[translateFrom][translateTo][i][1]);
 				return true;
@@ -220,13 +152,13 @@ async function translateMessage(messageText, translateFrom = getGlobalConfig().l
 		httpGet(
 			thisTranslationURL,
 			"",
-			function(data) {
+			function (data) {
 				data = ArrayBufferToString(data);
 				let translationData = JSON.parse(data);
 				cachedTranslations[translateFrom][translateTo].push([messageText, translationData.responseData.translatedText]);
 				resolve(translationData.responseData.translatedText);
 			},
-			function(data) {
+			function (data) {
 			}
 		);
 	});
