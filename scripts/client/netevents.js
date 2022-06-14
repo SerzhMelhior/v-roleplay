@@ -7,15 +7,15 @@
 // TYPE: Client (JavaScript)
 // ===========================================================================
 
-function initServerScript() {
+function initNetworkEventsScript() {
 	logToConsole(LOG_DEBUG, "[VRR.Server]: Initializing server script ...");
-	addAllNetworkHandlers();
+	addAllNetworkEventHandlers();
 	logToConsole(LOG_DEBUG, "[VRR.Server]: Server script initialized!");
 }
 
 // ===========================================================================
 
-function addAllNetworkHandlers() {
+function addAllNetworkEventHandlers() {
 	logToConsole(LOG_DEBUG, "[VRR.Server]: Adding network handlers ...");
 
 	// Chat history
@@ -92,7 +92,7 @@ function addAllNetworkHandlers() {
 
 	// Locale
 	addNetworkEventHandler("vrr.locale", setLocale);
-	addNetworkEventHandler("vrr.localeChooser", toggleLocaleChooserGUI);
+
 
 	// Misc
 	addNetworkEventHandler("vrr.mouseCursor", toggleMouseCursor);
