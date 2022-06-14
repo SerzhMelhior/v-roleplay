@@ -126,7 +126,7 @@ function loadServerDataFromDatabase() {
 	//getServerData().cachedTranslations.fill(getServerData().cachedTranslationFrom);
 
 	// Only load these if the server isn't a testing/dev server
-	if (!getServerConfig().devServer || server.getCVar("agrp_devserver") == 1) {
+	if (!getServerConfig().devServer && server.getCVar("agrp_devserver") == 0) {
 		getServerData().items = loadItemsFromDatabase();
 		getServerData().businesses = loadBusinessesFromDatabase();
 		getServerData().houses = loadHousesFromDatabase();

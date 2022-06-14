@@ -95,7 +95,7 @@ function runClientCode(code, returnTo) {
 	try {
 		returnValue = eval("(" + code + ")");
 	} catch (error) {
-		sendNetworkEventToServer("vrr.runCodeFail", returnTo, error.toString());
+		sendNetworkEventToServer("agrp.runCodeFail", returnTo, error.toString());
 		return false;
 	}
 	let returnValueString = returnValue;
@@ -104,7 +104,7 @@ function runClientCode(code, returnTo) {
 	} else {
 		returnValueString = "null/undefined";
 	}
-	sendNetworkEventToServer("vrr.runCodeSuccess", returnTo, returnValueString);
+	sendNetworkEventToServer("agrp.runCodeSuccess", returnTo, returnValueString);
 }
 
 // ===========================================================================
@@ -211,8 +211,8 @@ function setLocalPlayerInterior(interior) {
 	if (areServerElementsSupported() && isGameFeatureSupported("interior")) {
 		let vehicles = getElementsByType(ELEMENT_VEHICLE);
 		for (let i in vehicles) {
-			if (getEntityData(vehicles[i], "vrr.interior")) {
-				vehicles[i].interior = getEntityData(vehicles[i], "vrr.interior");
+			if (getEntityData(vehicles[i], "agrp.interior")) {
+				vehicles[i].interior = getEntityData(vehicles[i], "agrp.interior");
 			}
 		}
 	}
@@ -310,14 +310,6 @@ function clearSelfOwnedVehicles() {
 
 // ===========================================================================
 
-function setMouseCameraState(state) {
-	logToConsole(LOG_DEBUG, `[VRR.Utilities] ${(state) ? "Enabled" : "Disabled"} mouse camera`);
-	mouseCameraEnabled = state;
-	SetStandardControlsEnabled(!mouseCameraEnabled);
-}
-
-// ===========================================================================
-
 function toggleMouseCursor() {
 	logToConsole(LOG_DEBUG, `[VRR.Utilities] ${(!gui.cursorEnabled) ? "Enabled" : "Disabled"} mouse cursor`);
 	gui.showCursor(!gui.cursorEnabled, gui.cursorEnabled);
@@ -406,8 +398,8 @@ function processWantedLevelReset() {
 function processLocalPlayerVehicleControlState() {
 	if (areServerElementsSupported()) {
 		if (inVehicle && localPlayer.vehicle != null) {
-			if (doesEntityDataExist(localPlayer.vehicle, "vrr.engine")) {
-				if (getEntityData(localPlayer.vehicle, "vrr.engine") == false) {
+			if (doesEntityDataExist(localPlayer.vehicle, "agrp.engine")) {
+				if (getEntityData(localPlayer.vehicle, "agrp.engine") == false) {
 					localPlayer.vehicle.engine = false;
 					if (!localPlayer.vehicle.engine) {
 						if (typeof localPlayer.vehicle.velocity != "undefined") {
@@ -590,7 +582,7 @@ function processNearbyPickups() {
 				//if(pickups[i].interior == localPlayer.interior && pickups[i].dimension == localPlayer.dimension) {
 				if (currentPickup != pickups[i]) {
 					currentPickup = pickups[i];
-					sendNetworkEventToServer("vrr.pickup", pickups[i].id);
+					sendNetworkEventToServer("agrp.pickup", pickups[i].id);
 				}
 				//}
 			}

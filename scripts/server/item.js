@@ -123,7 +123,7 @@ class ItemData {
 		this.enabled = false;
 		this.extra = false;
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = toInteger(dbAssoc["item_id"]);
 			this.index = 0;
 			this.itemTypeIndex = 0;
@@ -188,7 +188,7 @@ class ItemTypeData {
 		this.takeAnimationIndex = false;
 		this.switchAnimationIndex = false;
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = toInteger(dbAssoc["item_type_id"]);
 			this.serverId = toInteger(dbAssoc["item_type_server"]);
 			this.name = dbAssoc["item_type_name"];
@@ -325,7 +325,7 @@ function createGroundItemObject(itemId) {
 		setElementRotation(getItemData(itemId).object, getItemTypeData(getItemData(itemId).itemTypeIndex).dropRotation);
 		setElementOnAllDimensions(getItemData(itemId).object, false);
 		setElementDimension(getItemData(itemId).object, getItemData(itemId).dimension);
-		//setEntityData(getItemData(itemId).object, "vrr.scale", getItemTypeData(getItemData(itemId).itemTypeIndex).dropScale, true);
+		//setEntityData(getItemData(itemId).object, "agrp.scale", getItemTypeData(getItemData(itemId).itemTypeIndex).dropScale, true);
 		addToWorld(getItemData(itemId).object);
 	}
 

@@ -321,7 +321,7 @@ function spawnAllVehicles() {
 	for (let i in getServerData().vehicles) {
 		let vehicle = spawnVehicle(getServerData().vehicles[i]);
 		getServerData().vehicles[i].vehicle = vehicle;
-		setEntityData(vehicle, "vrr.dataSlot", i, false);
+		setEntityData(vehicle, "agrp.dataSlot", i, false);
 		setAllVehicleIndexes();
 	}
 }
@@ -335,7 +335,7 @@ function spawnAllVehicles() {
 function getVehicleData(vehicle) {
 	if (getGame() != VRR_GAME_GTA_IV) {
 		if (isVehicleObject(vehicle)) {
-			let dataIndex = getEntityData(vehicle, "vrr.dataSlot");
+			let dataIndex = getEntityData(vehicle, "agrp.dataSlot");
 			if (typeof getServerData().vehicles[dataIndex] != "undefined") {
 				return getServerData().vehicles[dataIndex];
 			}
@@ -501,7 +501,7 @@ function deleteVehicleCommand(command, params, client) {
 		return false;
 	}
 
-	let dataIndex = getEntityData(vehicle, "vrr.dataSlot");
+	let dataIndex = getEntityData(vehicle, "agrp.dataSlot");
 	let vehicleName = getVehicleName(vehicle);
 
 	quickDatabaseQuery(`UPDATE veh_main SET veh_deleted = 1 WHERE veh_id = ${getVehicleData(vehicle).databaseId}`);
@@ -539,7 +539,7 @@ function vehicleEngineCommand(command, params, client) {
 
 	getVehicleData(vehicle).engine = !getVehicleData(vehicle).engine;
 	vehicle.engine = getVehicleData(vehicle).engine;
-	setEntityData(vehicle, "vrr.engine", getVehicleData(vehicle).engine, true);
+	setEntityData(vehicle, "agrp.engine", getVehicleData(vehicle).engine, true);
 
 	getVehicleData(vehicle).needsSaved = true;
 
@@ -665,7 +665,7 @@ function vehicleAdminLiveryCommand(command, params, client) {
 	getVehicleData(vehicle).livery = livery;
 	getVehicleData(vehicle).needsSaved = true;
 
-	setEntityData(vehicle, "vrr.livery", livery, true);
+	setEntityData(vehicle, "agrp.livery", livery, true);
 	forcePlayerToSyncElementProperties(null, vehicle);
 
 	meActionToNearbyPlayers(client, `sets the ${getVehicleName(vehicle)}'s livery/paintjob'`);
@@ -699,7 +699,7 @@ function buyVehicleCommand(command, params, client) {
 	getPlayerData(client).buyingVehicle = vehicle;
 	getVehicleData(vehicle).engine = true;
 	vehicle.engine = true;
-	setEntityData(vehicle, "vrr.engine", getVehicleData(vehicle).engine, true);
+	setEntityData(vehicle, "agrp.engine", getVehicleData(vehicle).engine, true);
 
 	getVehicleData(vehicle).needsSaved = true;
 	setPlayerBuyingVehicleState(client, VRR_VEHBUYSTATE_TESTDRIVE, vehicle.id, getVehiclePosition(vehicle));
@@ -770,7 +770,7 @@ function rentVehicleCommand(command, params, client) {
 // ===========================================================================
 
 function enterVehicleAsPassengerCommand(command, params, client) {
-	sendNetworkEventToPlayer("vrr.passenger", client);
+	sendNetworkEventToPlayer("agrp.passenger", client);
 }
 
 // ===========================================================================
@@ -1451,7 +1451,7 @@ function respawnVehicle(vehicle) {
 
 			let newVehicle = spawnVehicle(vehicles[i]);
 			vehicles[i].vehicle = newVehicle;
-			setEntityData(newVehicle, "vrr.dataSlot", i, false);
+			setEntityData(newVehicle, "agrp.dataSlot", i, false);
 		}
 	}
 
@@ -1503,10 +1503,10 @@ function spawnVehicle(vehicleData) {
 	//setVehicleHealth(vehicle, 1000);
 	repairVehicle(vehicle);
 
-	setEntityData(vehicle, "vrr.livery", vehicleData.livery, true);
-	setEntityData(vehicle, "vrr.upgrades", vehicleData.extras, true);
-	setEntityData(vehicle, "vrr.interior", vehicleData.interior, true);
-	setEntityData(vehicle, "vrr.engine", vehicleData.engine, true);
+	setEntityData(vehicle, "agrp.livery", vehicleData.livery, true);
+	setEntityData(vehicle, "agrp.upgrades", vehicleData.extras, true);
+	setEntityData(vehicle, "agrp.interior", vehicleData.interior, true);
+	setEntityData(vehicle, "agrp.engine", vehicleData.engine, true);
 
 	forcePlayerToSyncElementProperties(null, vehicle);
 
@@ -1592,7 +1592,7 @@ function createNewDealershipVehicle(modelIndex, spawnPosition, spawnRotation, pr
 	tempVehicleData.dimension = dimension;
 
 	let slot = getServerData().vehicles.push(tempVehicleData);
-	setEntityData(vehicle, "vrr.dataSlot", slot - 1, false);
+	setEntityData(vehicle, "agrp.dataSlot", slot - 1, false);
 }
 
 // ===========================================================================
@@ -1617,7 +1617,7 @@ function createTemporaryVehicle(modelIndex, position, heading, interior = 0, dim
 	}
 
 	let slot = getServerData().vehicles.push(tempVehicleData);
-	setEntityData(vehicle, "vrr.dataSlot", slot - 1, false);
+	setEntityData(vehicle, "agrp.dataSlot", slot - 1, false);
 
 	return vehicle;
 }
@@ -1645,7 +1645,7 @@ function createPermanentVehicle(modelIndex, position, heading, interior = 0, dim
 	let slot = getServerData().vehicles.push(tempVehicleData);
 
 	if (areServerElementsSupported()) {
-		setEntityData(vehicle, "vrr.dataSlot", slot - 1, false);
+		setEntityData(vehicle, "agrp.dataSlot", slot - 1, false);
 	}
 
 

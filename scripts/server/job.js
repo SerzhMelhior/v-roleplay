@@ -34,7 +34,7 @@ const VRR_JOBROUTESTATE_ATSTOP = 4;              // For bus/trash stops that fre
 /**
  * @class Representing a job's data. Loaded and saved in the database
  */
- class JobData {
+class JobData {
 	constructor(dbAssoc = false) {
 		this.databaseId = 0;
 		this.serverId = 0;
@@ -57,7 +57,7 @@ const VRR_JOBROUTESTATE_ATSTOP = 4;              // For bus/trash stops that fre
 		this.blackList = [];
 		this.routes = [];
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = dbAssoc["job_id"];
 			this.serverId = dbAssoc["job_server"];
 			this.type = dbAssoc["job_type"];
@@ -103,7 +103,7 @@ class JobRouteData {
 		this.locationNextMessage = "";
 		this.locations = [];
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = toInteger(dbAssoc["job_route_id"]);
 			this.name = toString(dbAssoc["job_route_name"]);
 			this.jobId = toInteger(dbAssoc["job_route_job"]);
@@ -112,7 +112,7 @@ class JobRouteData {
 			this.pay = toInteger(dbAssoc["job_route_pay"]);
 			this.startMessage = toString(dbAssoc["job_route_start_msg"]);
 			this.finishMessage = toString(dbAssoc["job_route_finish_msg"]);
-            this.locationArriveMessage = toString(dbAssoc["job_route_loc_arrive_msg"]);
+			this.locationArriveMessage = toString(dbAssoc["job_route_loc_arrive_msg"]);
 			this.locationNextMessage = toString(dbAssoc["job_route_loc_next_msg"]);
 			this.vehicleColour1 = toInteger(dbAssoc["job_route_veh_colour1"]);
 			this.vehicleColour2 = toInteger(dbAssoc["job_route_veh_colour2"]);
@@ -130,14 +130,14 @@ class JobRouteLocationData {
 		this.routeId = 0;
 		this.enabled = false;
 		this.index = -1;
-        this.jobIndex = -1;
+		this.jobIndex = -1;
 		this.routeIndex = -1;
 		this.needsSaved = false;
 		this.position = toVector3(0.0, 0.0, 0.0);
 		this.stopDelay = 0;
 		this.pay = 0;
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = toInteger(dbAssoc["job_route_loc_id"]);
 			this.name = toString(dbAssoc["job_route_loc_name"]);
 			this.routeId = toInteger(dbAssoc["job_route_loc_route"]);
@@ -166,7 +166,7 @@ class JobEquipmentData {
 		this.needsSaved = false;
 		this.items = [];
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = dbAssoc["job_equip_id"];
 			this.job = dbAssoc["job_equip_job"];
 			this.name = dbAssoc["job_equip_name"];
@@ -192,7 +192,7 @@ class JobEquipmentItemData {
 		this.jobIndex = -1;
 		this.needsSaved = false;
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = dbAssoc["job_equip_item_id"];
 			this.equipmentId = dbAssoc["job_equip_item_equip"];
 			this.itemType = dbAssoc["job_equip_item_type"];
@@ -220,26 +220,26 @@ class JobUniformData {
 		this.needsSaved = false;
 
 		this.bodyParts = {
-			hair: [0,0],
-			head: [0,0],
-			upper: [0,0],
-			lower: [0,0],
+			hair: [0, 0],
+			head: [0, 0],
+			upper: [0, 0],
+			lower: [0, 0],
 		};
 
 		this.bodyProps = {
-			hair: [0,0],
-			eyes: [0,0],
-			head: [0,0],
-			leftHand: [0,0],
-			rightHand: [0,0],
-			leftWrist: [0,0],
-			rightWrist: [0,0],
-			hip: [0,0],
-			leftFoot: [0,0],
-			rightFoot: [0,0],
+			hair: [0, 0],
+			eyes: [0, 0],
+			head: [0, 0],
+			leftHand: [0, 0],
+			rightHand: [0, 0],
+			leftWrist: [0, 0],
+			rightWrist: [0, 0],
+			hip: [0, 0],
+			leftFoot: [0, 0],
+			rightFoot: [0, 0],
 		};
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = dbAssoc["job_uniform_id"];
 			this.job = dbAssoc["job_uniform_job"];
 			this.name = dbAssoc["job_uniform_name"];
@@ -290,7 +290,7 @@ class JobLocationData {
 		this.needsSaved = false;
 		this.routeCache = [];
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = dbAssoc["job_loc_id"];
 			this.jobId = dbAssoc["job_loc_job"];
 			this.position = toVector3(dbAssoc["job_loc_pos_x"], dbAssoc["job_loc_pos_y"], dbAssoc["job_loc_pos_z"]);
@@ -315,7 +315,7 @@ class JobWhiteListData {
 		this.jobIndex = -1;
 		this.needsSaved = false;
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = dbAssoc["job_wl_id"];
 			this.job = dbAssoc["job_wl_job"];
 			this.subAccount = dbAssoc["job_wl_sacct"]
@@ -336,7 +336,7 @@ class JobBlackListData {
 		this.jobIndex = -1;
 		this.needsSaved = false;
 
-		if(dbAssoc) {
+		if (dbAssoc) {
 			this.databaseId = dbAssoc["job_bl_id"];
 			this.job = dbAssoc["job_bl_job"];
 			this.subAccount = dbAssoc["job_bl_sacct"]
@@ -624,11 +624,11 @@ function createAllJobPickups() {
 			for (let j in getServerData().jobs[i].locations) {
 				pickupCount++;
 				getServerData().jobs[i].locations[j].pickup = game.createPickup(getServerData().jobs[i].pickupModel, getServerData().jobs[i].locations[j].position);
-				setEntityData(getServerData().jobs[i].locations[j].pickup, "vrr.owner.type", VRR_PICKUP_JOB, false);
-				setEntityData(getServerData().jobs[i].locations[j].pickup, "vrr.owner.id", j, false);
-				setEntityData(getServerData().jobs[i].locations[j].pickup, "vrr.label.type", VRR_LABEL_JOB, true);
-				setEntityData(getServerData().jobs[i].locations[j].pickup, "vrr.label.name", getServerData().jobs[i].name, true);
-				setEntityData(getServerData().jobs[i].locations[j].pickup, "vrr.label.jobType", getServerData().jobs[i].databaseId, true);
+				setEntityData(getServerData().jobs[i].locations[j].pickup, "agrp.owner.type", VRR_PICKUP_JOB, false);
+				setEntityData(getServerData().jobs[i].locations[j].pickup, "agrp.owner.id", j, false);
+				setEntityData(getServerData().jobs[i].locations[j].pickup, "agrp.label.type", VRR_LABEL_JOB, true);
+				setEntityData(getServerData().jobs[i].locations[j].pickup, "agrp.label.name", getServerData().jobs[i].name, true);
+				setEntityData(getServerData().jobs[i].locations[j].pickup, "agrp.label.jobType", getServerData().jobs[i].databaseId, true);
 				setElementOnAllDimensions(getServerData().jobs[i].locations[j].pickup, false);
 				setElementDimension(getServerData().jobs[i].locations[j].pickup, getServerData().jobs[i].locations[j].dimension);
 				addToWorld(getServerData().jobs[i].locations[j].pickup);
@@ -2742,11 +2742,11 @@ function createJobLocationPickup(jobId, locationId) {
 				tempJobData.locations[locationId].pickup = pickup;
 				setElementDimension(pickup, tempJobData.locations[locationId].dimension);
 				setElementOnAllDimensions(pickup, false);
-				setEntityData(pickup, "vrr.owner.type", VRR_PICKUP_JOB, false);
-				setEntityData(pickup, "vrr.owner.id", locationId, false);
-				setEntityData(pickup, "vrr.label.type", VRR_LABEL_JOB, true);
-				setEntityData(pickup, "vrr.label.name", tempJobData.name, true);
-				setEntityData(pickup, "vrr.label.jobType", tempJobData.databaseId, true);
+				setEntityData(pickup, "agrp.owner.type", VRR_PICKUP_JOB, false);
+				setEntityData(pickup, "agrp.owner.id", locationId, false);
+				setEntityData(pickup, "agrp.label.type", VRR_LABEL_JOB, true);
+				setEntityData(pickup, "agrp.label.name", tempJobData.name, true);
+				setEntityData(pickup, "agrp.label.jobType", tempJobData.databaseId, true);
 				addToWorld(pickup);
 			}
 		} else {
