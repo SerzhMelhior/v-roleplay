@@ -29,7 +29,7 @@ function initServerScripts() {
 	initKeyBindScript();
 	initEventScript();
 	initAntiCheatScript();
-	initClientScript();
+	initNetworkEventsScript();
 	initMessagingScript();
 	initHelpScript();
 	initFishingScript();
@@ -126,7 +126,7 @@ function loadServerDataFromDatabase() {
 	//getServerData().cachedTranslations.fill(getServerData().cachedTranslationFrom);
 
 	// Only load these if the server isn't a testing/dev server
-	if (!getServerConfig().devServer) {
+	if (!getServerConfig().devServer || server.getCVar("agrp_devserver") == 1) {
 		getServerData().items = loadItemsFromDatabase();
 		getServerData().businesses = loadBusinessesFromDatabase();
 		getServerData().houses = loadHousesFromDatabase();
