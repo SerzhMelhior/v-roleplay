@@ -19,11 +19,11 @@ function loadItemsFromDatabase() {
 	let tempItems = [];
 	let dbConnection = connectToDatabase();
 	let dbFetchAssoc;
-	if(dbConnection) {
-		let dbQuery = queryDatabase(dbConnection, `SELECT * FROM item_main WHERE item_server = ${getServerId()}`);
-		if(dbQuery) {
-			if(dbQuery.numRows > 0) {
-				while(dbFetchAssoc = fetchQueryAssoc(dbQuery)) {
+	if (dbConnection) {
+		let dbQuery = queryDatabase(dbConnection, `SELECT * FROM item_main WHERE item_deleted = 0 AND item_server = ${getServerId()}`);
+		if (dbQuery) {
+			if (dbQuery.numRows > 0) {
+				while (dbFetchAssoc = fetchQueryAssoc(dbQuery)) {
 					let tempItemData = new ItemData(dbFetchAssoc);
 					tempItems.push(tempItemData);
 				}
@@ -41,11 +41,11 @@ function loadItemTypesFromDatabase() {
 	let tempItemTypes = [];
 	let dbConnection = connectToDatabase();
 	let dbFetchAssoc;
-	if(dbConnection) {
-		let dbQuery = queryDatabase(dbConnection, `SELECT * FROM item_type WHERE item_type_enabled = 1 AND item_type_server = ${getServerId()}`);
-		if(dbQuery) {
-			if(getQueryNumRows(dbQuery) > 0) {
-				while(dbFetchAssoc = fetchQueryAssoc(dbQuery)) {
+	if (dbConnection) {
+		let dbQuery = queryDatabase(dbConnection, `SELECT * FROM item_type WHERE item_type_deleted = 0 AND item_type_enabled = 1 AND item_type_server = ${getServerId()}`);
+		if (dbQuery) {
+			if (getQueryNumRows(dbQuery) > 0) {
+				while (dbFetchAssoc = fetchQueryAssoc(dbQuery)) {
 					let tempItemTypeData = new ItemTypeData(dbFetchAssoc);
 					tempItemTypes.push(tempItemTypeData);
 				}
@@ -60,7 +60,7 @@ function loadItemTypesFromDatabase() {
 
 // ===========================================================================
 
-function createItem(itemTypeId, value, ownerType, ownerId, amount=1) {
+function createItem(itemTypeId, value, ownerType, ownerId, amount = 1) {
 	let tempItemData = new ItemData(false);
 	tempItemData.itemType = getItemTypeData(itemTypeId).databaseId;
 	tempItemData.ownerType = ownerType;
@@ -69,9 +69,9 @@ function createItem(itemTypeId, value, ownerType, ownerId, amount=1) {
 	tempItemData.value = value;
 	tempItemData.needsSaved = true;
 	let slot = getServerData().items.push(tempItemData);
-	let index = slot-1;
-	getServerData().items[slot-1].index = index;
-	getServerData().items[slot-1].itemTypeIndex = itemTypeId;
+	let index = slot - 1;
+	getServerData().items[slot - 1].index = index;
+	getServerData().items[slot - 1].itemTypeIndex = itemTypeId;
 	return index;
 }
 
@@ -88,16 +88,16 @@ function createGroundItem(itemTypeId, value, position, dimension = 0) {
 // ===========================================================================
 
 function createGroundItemObject(itemId) {
-	if(!getItemData(itemId)) {
+	if (!getItemData(itemId)) {
 		return false;
 	}
 
-	if(getItemData(itemId).object != null) {
+	if (getItemData(itemId).object != null) {
 		deleteGroundItemObject(itemId);
 	}
 
 	let object = createGameObject(getItemTypeData(getItemData(itemId).itemTypeIndex).dropModel, applyOffsetToPos(getItemData(itemId).position, getItemTypeData(getItemData(itemId).itemTypeIndex).dropPosition));
-	if(object != false) {
+	if (object != false) {
 		getItemData(itemId).object = object;
 		setElementRotation(getItemData(itemId).object, getItemTypeData(getItemData(itemId).itemTypeIndex).dropRotation);
 		setElementOnAllDimensions(getItemData(itemId).object, false);
@@ -112,11 +112,11 @@ function createGroundItemObject(itemId) {
 // ===========================================================================
 
 function deleteGroundItemObject(itemId) {
-	if(getServerData().groundItemCache.indexOf(itemId) != -1) {
+	if (getServerData().groundItemCache.indexOf(itemId) != -1) {
 		getServerData().groundItemCache.splice(getServerData().groundItemCache.indexOf(itemId), 1);
 	}
 
-	if(getItemData(itemId).object != null) {
+	if (getItemData(itemId).object != null) {
 		destroyGameElement(getItemData(itemId).object);
 		getItemData(itemId).object = null;
 	}
@@ -138,7 +138,7 @@ function createGroundItemCommand(command, params, client) {
 	let itemType = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
 	let value = splitParams.slice(-1) || 1;
 
-	if(!getItemTypeData(itemType)) {
+	if (!getItemTypeData(itemType)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
 		return false;
 	}
@@ -169,7 +169,7 @@ function createItemCommand(command, params, client) {
 	let itemType = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
 	let value = splitParams.slice(-1) || 1;
 
-	if(!getItemTypeData(itemType)) {
+	if (!getItemTypeData(itemType)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
 		return false;
 	}
@@ -199,44 +199,44 @@ function useItemCommand(command, params, client) {
 	clearPlayerItemActionState(client);
 
 	let hotBarSlot = getPlayerData(client).activeHotBarSlot;
-	if(!areParamsEmpty(params)) {
+	if (!areParamsEmpty(params)) {
 		hotBarSlot = toInteger(params);
-		hotBarSlot = hotBarSlot-1;
+		hotBarSlot = hotBarSlot - 1;
 	}
 
-	if(hotBarSlot == -1) {
+	if (hotBarSlot == -1) {
 		return false;
 	}
 
-	if(getPlayerData(client).hotBarItems[hotBarSlot] == -1) {
+	if (getPlayerData(client).hotBarItems[hotBarSlot] == -1) {
 		return false;
 	}
 
 	let itemId = getPlayerData(client).hotBarItems[hotBarSlot];
 
-	if(!getItemData(itemId)) {
+	if (!getItemData(itemId)) {
 		messagePlayerError(client, getLocaleString(client, "UseItemBug"));
 		submitBugReport(client, `(AUTOMATED REPORT) Use Item: Getting item data for item ${itemId} in player hotbar slot ${hotBarSlot} (cache ${getPlayerData(client).hotBarItems[hotBarSlot]}) returned false.`);
 		return false;
 	}
 
-	if(!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
+	if (!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
 		messagePlayerError(client, getLocaleString(client, "UseItemBug"));
 		submitBugReport(client, `(AUTOMATED REPORT) Use Item: Getting item type ${getItemData(itemId).itemType} data for item ${itemId}/${getItemData(itemId).databaseId} in player hotbar slot ${hotBarSlot} (cache ${getPlayerData(client).hotBarItems[hotBarSlot]}) returned false.`);
 		return false;
 	}
 
-	if(getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
+	if (getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
 		messagePlayerError(client, getLocaleString(client, "HandsBusy"));
 		return false;
 	}
 
-	if(getPlayerData(client).usingSkinSelect) {
+	if (getPlayerData(client).usingSkinSelect) {
 		messagePlayerError(client, getLocaleString(client, "CantUseItemInSkinChange"));
 		return false;
 	}
 
-	if(getItemTypeData(getItemData(itemId).itemTypeIndex).useAnimationIndex != false) {
+	if (getItemTypeData(getItemData(itemId).itemTypeIndex).useAnimationIndex != false) {
 		forcePlayerPlayAnimation(client, getItemTypeData(getItemData(itemId).itemTypeIndex).useAnimationIndex, 0.0);
 	}
 
@@ -261,13 +261,13 @@ function useItemCommand(command, params, client) {
 function deleteGroundItemCommand(command, params, client) {
 	let itemId = getClosestItemOnGround(getPlayerPosition(client));
 
-	if(!getItemData(itemId)) {
+	if (!getItemData(itemId)) {
 		messagePlayerError(client, `The item you're trying to delete is bugged. A bug report has been sent to the server developers.`);
 		submitBugReport(client, `(AUTOMATED REPORT) Delete Ground Item: Getting item data for item ${itemId} on ground returned false.`);
 		return false;
 	}
 
-	if(!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
+	if (!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
 		messagePlayerError(client, `The item you're trying to delete is bugged. A bug report has been sent to the server developers.`);
 		submitBugReport(client, `(AUTOMATED REPORT) Delete Ground Item: Getting item type ${getItemData(itemId).itemType} data for item ${itemId}/${getItemData(itemId).databaseId} on ground returned false.`);
 		return false;
@@ -294,40 +294,42 @@ function pickupItemCommand(command, params, client) {
 
 	let itemId = getClosestItemOnGround(getPlayerPosition(client));
 
-	if(!getItemData(itemId)) {
+	if (!getItemData(itemId)) {
 		//messagePlayerError(client, `The item you're trying to pick up is bugged. A bug report has been sent to the server developers.`);
+		messagePlayerError(client, getPlayerLocale(client, "NoItemCloseEnough"));
 		submitBugReport(client, `(AUTOMATED REPORT) Pickup Item: Getting item data for item ${itemId} on ground returned false.`);
 		return false;
 	}
 
-	if(!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
+	if (!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
 		//messagePlayerError(client, `The item you're trying to pick up is bugged. A bug report has been sent to the server developers.`);
+		messagePlayerError(client, getPlayerLocale(client, "NoItemCloseEnough"));
 		submitBugReport(client, `(AUTOMATED REPORT) Pickup Item: Getting item type ${getItemData(itemId).itemType} data for item ${itemId}/${getItemData(itemId).databaseId} on ground returned false.`);
 		return false;
 	}
 
-	if(getDistance(getPlayerPosition(client), getItemData(itemId).position) > getGlobalConfig().droppedItemPickupRange) {
-		messagePlayerError(client, `You're too far away!`);
+	if (getDistance(getPlayerPosition(client), getItemData(itemId).position) > getGlobalConfig().droppedItemPickupRange) {
+		messagePlayerError(client, getPlayerLocale(client, "NoItemCloseEnough"));
 		return false;
 	}
 
 	let firstSlot = getPlayerFirstEmptyHotBarSlot(client);
-	if(firstSlot == -1) {
-		messagePlayerError(client, `You don't have any space to carry this (full inventory)!`);
+	if (firstSlot == -1) {
+		messagePlayerError(client, getPlayerLocale(client, "NoSpaceSelfInventory"));
 		return false;
 	}
 
-	if(getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
+	if (getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
 		messagePlayerError(client, getLocaleString(client, "HandsBusy"));
 		return false;
 	}
 
-	if(getPlayerData(client).usingSkinSelect) {
+	if (getPlayerData(client).usingSkinSelect) {
 		messagePlayerError(client, getLocaleString(client, "CantPickupItemInSkinChange"));
 		return false;
 	}
 
-	if(getItemTypeData(getItemData(itemId).itemTypeIndex).dropAnimationIndex != false) {
+	if (getItemTypeData(getItemData(itemId).itemTypeIndex).dropAnimationIndex != false) {
 		forcePlayerPlayAnimation(client, getItemTypeData(getItemData(itemId).itemTypeIndex).pickupAnimationIndex, 0.0);
 	}
 
@@ -353,51 +355,51 @@ function dropItemCommand(command, params, client) {
 	clearPlayerItemActionState(client);
 
 	let hotBarSlot = getPlayerData(client).activeHotBarSlot;
-	if(!areParamsEmpty(params)) {
+	if (!areParamsEmpty(params)) {
 		hotBarSlot = toInteger(params);
-		hotBarSlot = hotBarSlot-1;
+		hotBarSlot = hotBarSlot - 1;
 	}
 
-	if(hotBarSlot == -1) {
-		messagePlayerError(client, `You don't have any item selected/equipped.`);
+	if (hotBarSlot == -1) {
+		messagePlayerError(client, getLocaleString(client, "NoItemEquipped"));
 		return false;
 	}
 
-	if(getPlayerData(client).hotBarItems[hotBarSlot] == -1) {
-		messagePlayerError(client, `You don't have an item in your active slot.`);
+	if (getPlayerData(client).hotBarItems[hotBarSlot] == -1) {
+		messagePlayerError(client, getLocaleString(client, "NoItemInActiveSlot"));
 		return false;
 	}
 
 	let itemId = getPlayerData(client).hotBarItems[hotBarSlot];
 
-	if(!getItemData(itemId)) {
-		messagePlayerError(client, `The item you're trying to drop is bugged. A bug report has been sent to the server developers.`);
+	if (!getItemData(itemId)) {
+		messagePlayerError(client, getLocaleString(client, "DropItemBugged"));
 		submitBugReport(client, `(AUTOMATED REPORT) Drop Item: Getting item data for item ${itemId} in player hotbar slot ${hotBarSlot} (cache ${getPlayerData(client).hotBarItems[hotBarSlot]}) returned false.`);
 		return false;
 	}
 
-	if(!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
-		messagePlayerError(client, `The item you're trying to drop is bugged. A bug report has been sent to the server developers.`);
+	if (!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
+		messagePlayerError(client, getLocaleString(client, "DropItemBugged"));
 		submitBugReport(client, `(AUTOMATED REPORT) Drop Item: Getting item type ${getItemData(itemId).itemType} data for item ${itemId}/${getItemData(itemId).databaseId} in player hotbar slot ${hotBarSlot} (cache ${getPlayerData(client).hotBarItems[hotBarSlot]}) returned false.`);
 		return false;
 	}
 
-	if(getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
+	if (getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
 		messagePlayerError(client, getLocaleString(client, "HandsBusy"));
 		return false;
 	}
 
-	if(getPlayerData(client).usingSkinSelect) {
+	if (getPlayerData(client).usingSkinSelect) {
 		messagePlayerError(client, getLocaleString(client, "CantDropItemInSkinChange"));
 		return false;
 	}
 
-	if(isPlayerItemFromJobEquipment(client, hotBarSlot)) {
-		messagePlayerError(client, `You can't drop job items`);
+	if (isPlayerItemFromJobEquipment(client, hotBarSlot)) {
+		messagePlayerError(client, getLocaleString(client, "CantDropJobEquipmentItem"));
 		return false;
 	}
 
-	if(getItemTypeData(getItemData(itemId).itemTypeIndex).dropAnimationIndex != false) {
+	if (getItemTypeData(getItemData(itemId).itemTypeIndex).dropAnimationIndex != false) {
 		forcePlayerPlayAnimation(client, getItemTypeData(getItemData(itemId).itemTypeIndex).dropAnimationIndex, 0.0);
 	}
 
@@ -426,34 +428,34 @@ function putItemCommand(command, params, client) {
 
 	let itemId = getPlayerData(client).hotBarItems[hotBarSlot];
 
-	if(!getItemData(itemId)) {
+	if (!getItemData(itemId)) {
 		messagePlayerError(client, `The item you're trying to store is bugged. A bug report has been sent to the server developers.`);
 		submitBugReport(client, `(AUTOMATED REPORT) Put Item: Getting item data for item ${itemId} in player hotbar slot ${hotBarSlot} (cache ${getPlayerData(client).hotBarItems[hotBarSlot]}) returned false.`);
 		return false;
 	}
 
-	if(!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
+	if (!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
 		messagePlayerError(client, `The item you're trying to store is bugged. A bug report has been sent to the server developers.`);
 		submitBugReport(client, `(AUTOMATED REPORT) Put Item: Getting item type ${getItemData(itemId).itemType} data for item ${itemId}/${getItemData(itemId).databaseId} in player hotbar slot ${hotBarSlot} (cache ${getPlayerData(client).hotBarItems[hotBarSlot]}) returned false.`);
 		return false;
 	}
 
-	if(getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
+	if (getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
 		messagePlayerError(client, getLocaleString(client, "HandsBusy"));
 		return false;
 	}
 
-	if(getPlayerData(client).usingSkinSelect) {
+	if (getPlayerData(client).usingSkinSelect) {
 		messagePlayerError(client, getLocaleString(client, "CantPutItemInSkinChange"));
 		return false;
 	}
 
-	if(isPlayerItemFromJobEquipment(client, hotBarSlot)) {
-		messagePlayerError(client, `You can't put job items`);
+	if (isPlayerItemFromJobEquipment(client, hotBarSlot)) {
+		messagePlayerError(client, getLocaleString(client, "CantPutJobEquipmentItem"));
 		return false;
 	}
 
-	if(getItemTypeData(getItemData(itemId).itemTypeIndex).putAnimationIndex != false) {
+	if (getItemTypeData(getItemData(itemId).itemTypeIndex).putAnimationIndex != false) {
 		forcePlayerPlayAnimation(client, getItemTypeData(getItemData(itemId).itemTypeIndex).putAnimationIndex, 0.0);
 	}
 
@@ -479,27 +481,27 @@ function takeItemCommand(command, params, client) {
 	clearPlayerItemActionState(client);
 
 	let firstSlot = getPlayerFirstEmptyHotBarSlot(client);
-	if(firstSlot == -1) {
-		messagePlayerError(client, `You don't have any space to hold another item (full inventory)!`);
+	if (firstSlot == -1) {
+		messagePlayerError(client, getLocaleString(client, "NoSpaceSelfInventory"));
 		return false;
 	}
 
 	let itemSlot = toInteger(params) || 0;
 
-	let	bestOwner = getBestItemToTake(client, itemSlot);
+	let bestOwner = getBestItemToTake(client, itemSlot);
 	let itemId = bestOwner[2];
 
-	if(bestOwner[1] == VRR_ITEM_OWNER_NONE) {
-		messagePlayerError(client, `You aren't near anything to take items from!`);
+	if (bestOwner[1] == VRR_ITEM_OWNER_NONE) {
+		messagePlayerError(client, getLocaleString(client, "NothingToTakeItemFrom"));
 		return false;
 	}
 
-	if(getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
+	if (getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
 		messagePlayerError(client, getLocaleString(client, "HandsBusy"));
 		return false;
 	}
 
-	if(getPlayerData(client).usingSkinSelect) {
+	if (getPlayerData(client).usingSkinSelect) {
 		messagePlayerError(client, getLocaleString(client, "CantTakeItemInSkinChange"));
 		return false;
 	}
@@ -509,7 +511,7 @@ function takeItemCommand(command, params, client) {
 	//	return false;
 	//}
 
-	if(getItemTypeData(getItemData(itemId).itemTypeIndex).takeAnimationIndex != false) {
+	if (getItemTypeData(getItemData(itemId).itemTypeIndex).takeAnimationIndex != false) {
 		forcePlayerPlayAnimation(client, getItemTypeData(getItemData(itemId).itemTypeIndex).takeAnimationIndex, 0.0);
 	}
 
@@ -532,7 +534,7 @@ function takeItemCommand(command, params, client) {
  *
  */
 function createItemTypeCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
@@ -553,21 +555,22 @@ function createItemTypeCommand(command, params, client) {
  *
  */
 function setItemTypeDropModelCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
-	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0,-1).join(" "));
-	let modelId = splitParams[splitParams.length-1];
+	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
+	let modelIndex = getObjectModelIndexFromParams(splitParams.slice(-1).join(" "));
 
-	if(!getItemTypeData(itemTypeIndex)) {
+	if (!getItemTypeData(itemTypeIndex)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
 		return false;
 	}
 
-	getItemTypeData(itemTypeIndex).dropModel = modelId;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name} dropped object model to ${modelId}`);
+	getItemTypeData(itemTypeIndex).dropModel = modelIndex;
+	getItemTypeData(itemTypeIndex).needsSaved = true;
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}'s dropped object model index to ${modelIndex}`);
 }
 
 // ===========================================================================
@@ -582,20 +585,21 @@ function setItemTypeDropModelCommand(command, params, client) {
  *
  */
 function setItemTypeOrderPriceCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
-	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0,-1).join(" "));
-	let orderPrice = splitParams[splitParams.length-1];
+	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
+	let orderPrice = splitParams[splitParams.length - 1];
 
-	if(!getItemTypeData(itemTypeIndex)) {
+	if (!getItemTypeData(itemTypeIndex)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
 		return false;
 	}
 
 	getItemTypeData(itemTypeIndex).orderPrice = orderPrice;
+	getItemTypeData(itemTypeIndex).needsSaved = true;
 	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name} {MAINCOLOUR}base price to {ALTCOLOUR}$${orderPrice}`);
 }
 
@@ -611,21 +615,22 @@ function setItemTypeOrderPriceCommand(command, params, client) {
  *
  */
 function setItemTypeRiskMultiplierCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
-	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0,-1).join(" "));
-	let riskMultiplier = splitParams[splitParams.length-1];
+	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
+	let riskMultiplier = splitParams[splitParams.length - 1];
 
-	if(!getItemTypeData(itemTypeIndex)) {
+	if (!getItemTypeData(itemTypeIndex)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
 		return false;
 	}
 
 	getItemTypeData(itemTypeIndex).riskMultiplier = riskMultiplier;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name} {MAINCOLOUR}risk multilier to {ALTCOLOUR}$${riskMultiplier}`);
+	getItemTypeData(itemTypeIndex).needsSaved = true;
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} risk multiplier to {ALTCOLOUR}$${riskMultiplier}`);
 }
 
 // ===========================================================================
@@ -640,19 +645,20 @@ function setItemTypeRiskMultiplierCommand(command, params, client) {
  *
  */
 function toggleItemTypeEnabledCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
 	let itemTypeIndex = getItemTypeFromParams(params);
 
-	if(!getItemTypeData(itemTypeIndex)) {
+	if (!getItemTypeData(itemTypeIndex)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
 		return false;
 	}
 
 	getItemTypeData(itemTypeIndex).enabled = !getItemTypeData(itemTypeIndex).enabled;
+	getItemTypeData(itemTypeIndex).needsSaved = true;
 	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} ${getEnabledDisabledFromBool(getItemTypeData(itemTypeIndex).enabled)} item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}`);
 }
 
@@ -668,21 +674,22 @@ function toggleItemTypeEnabledCommand(command, params, client) {
  *
  */
 function setItemTypeUseTypeCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
-	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0,-1).join(" "));
-	let useType = splitParams[splitParams.length-1];
+	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
+	let useType = splitParams[splitParams.length - 1];
 
-	if(!getItemTypeData(itemTypeIndex)) {
+	if (!getItemTypeData(itemTypeIndex)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
 		return false;
 	}
 
 	getItemTypeData(itemTypeIndex).useType = useType;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name} {MAINCOLOUR}use type to {ALTCOLOUR}$${useType}`);
+	getItemTypeData(itemTypeIndex).needsSaved = true;
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} use type to {ALTCOLOUR}$${useType}`);
 }
 
 // ===========================================================================
@@ -697,21 +704,22 @@ function setItemTypeUseTypeCommand(command, params, client) {
  *
  */
 function setItemTypeUseValueCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
-	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0,-1).join(" "));
-	let useValue = splitParams[splitParams.length-1];
+	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
+	let useValue = splitParams[splitParams.length - 1];
 
-	if(!getItemTypeData(itemTypeIndex)) {
+	if (!getItemTypeData(itemTypeIndex)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
 		return false;
 	}
 
 	getItemTypeData(itemTypeIndex).useValue = useValue;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name} {MAINCOLOUR}use value to {ALTCOLOUR}$${useValue}`);
+	getItemTypeData(itemTypeIndex).needsSaved = true;
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} use value to {ALTCOLOUR}$${useValue}`);
 }
 
 // ===========================================================================
@@ -719,17 +727,24 @@ function setItemTypeUseValueCommand(command, params, client) {
 function playerUseItem(client, hotBarSlot) {
 	let itemIndex = getPlayerData(client).hotBarItems[hotBarSlot];
 
-	if(itemIndex == -1) {
+	if (itemIndex == -1) {
+		logToConsole(LOG_DEBUG | LOG_WARN, `[VRR.Item] ${getPlayerDisplayForConsole(client)} tried to use an empty hotbar slot ${hotBarSlot}`);
 		return false;
 	}
 
-	if(!getItemData(itemIndex)) {
+	if (!getItemData(itemIndex)) {
 		submitBugReport(client, `[AUTOMATED REPORT] Tried to use invalid item (index ${itemIndex} in player slot ${hotBarSlot})`);
 		cachePlayerHotBarItems(client);
 		return false;
 	}
 
-	switch(getItemTypeData(getItemData(itemIndex).itemTypeIndex).useType) {
+	let itemData = getItemData(itemIndex);
+	let itemTypeData = getItemTypeData(itemData.itemTypeIndex);
+	let hotBarItems = getPlayerData(client).hotBarItems;
+
+	logToConsole(LOG_DEBUG, `[VRR.Item] ${getPlayerDisplayForConsole(client)} used a ${itemTypeData.name} (use type ${itemTypeData.useType} - ${typeof itemTypeData.useType}) item (ID: ${itemData.index}/${itemData.databaseId}, TypeID: ${itemTypeData.index}/${itemTypeData.databaseId})`);
+
+	switch (toInteger(itemTypeData.useType)) {
 		case VRR_ITEM_USETYPE_SKIN: {
 			getPlayerData(client).itemActionItem = itemIndex;
 			forcePlayerIntoSkinSelect(client);
@@ -737,27 +752,33 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_WEAPON: {
-			for(let i in getPlayerData(client).hotBarItems) {
-				if(getPlayerData(client).hotBarItems[i] != -1) {
-					if(getItemData(getPlayerData(client).hotBarItems[i]) != false) {
-						if(getItemTypeData(getItemData(getPlayerData(client).hotBarItems[i]).itemTypeIndex).useType == VRR_ITEM_USETYPE_AMMO_CLIP) {
-							if(getItemTypeData(getItemData(getPlayerData(client).hotBarItems[i]).itemTypeIndex).useId == getItemTypeData(getItemData(itemIndex).itemTypeIndex).databaseId) {
-								givePlayerWeaponAmmo(client, getItemData(getPlayerData(client).hotBarItems[i]).value);
-								getItemData(getPlayerData(client).hotBarItems[hotBarSlot]).value = getItemData(getPlayerData(client).hotBarItems[hotBarSlot]).value + getItemData(getPlayerData(client).hotBarItems[i]).value;
-								deleteItem(getPlayerData(client).hotBarItems[i]);
-								meActionToNearbyPlayers(client, `loads some ammo into their ${getItemTypeData(getItemData(itemIndex).itemTypeIndex).name}`);
+			for (let i in hotBarItems) {
+				if (hotBarItems[i] != -1) {
+					if (getItemData(hotBarItems[i]) != false) {
+						if (getItemTypeData(getItemData(hotBarItems[i]).itemTypeIndex).useType == VRR_ITEM_USETYPE_AMMO_CLIP) {
+							let ammoItemData = getItemData(hotBarItems[i]);
+							let ammoItemTypeData = getItemTypeData(ammoItemData.itemTypeIndex);
+							if (ammoItemTypeData.useId == itemTypeData.databaseId) {
+								givePlayerWeaponAmmo(client, ammoItemData.value);
+								itemData.value = itemData.value + ammoItemData.value;
+								deleteItem(hotBarItems[i]);
+								meActionToNearbyPlayers(client, `loads some ammo into their ${itemTypeData.name}`);
 								return true;
 							}
 						}
 					}
 				}
 			}
-			messagePlayerError(client, `You don't have any ammo to load into your ${getItemTypeData(getItemData(itemIndex).itemTypeIndex).name}!`);
+			messagePlayerError(client, getLocaleString(client, "NoAmmoToLoadIntoWeapon", itemTypeData.name));
 			break;
 		}
 
 		case VRR_ITEM_USETYPE_AMMO_CLIP: {
-			messagePlayerError(client, `To load this ammo into a weapon, equip the weapon and ${(doesPlayerHaveKeyBindForCommand(client, "use")) ? `press {ALTCOLOUR}${toUpperCase(getKeyNameFromId(getPlayerKeyBindForCommand(client, "use").key))}` : `{ALTCOLOUR}/use`}`);
+			if (doesPlayerHaveKeyBindForCommand(client, "use")) {
+				messagePlayerError(client, getLocaleString(client, "LoadAmmoIntoWeaponHelpKeyPress", `{ALTCOLOUR}${toUpperCase(getKeyNameFromId(getPlayerKeyBindForCommand(client, "use").key))}{MAINCOLOUR}`));
+			} else {
+				messagePlayerError(client, getLocaleString(client, "LoadAmmoIntoWeaponHelpCommand", `{ALTCOLOUR}/use{MAINCOLOUR}`));
+			}
 			break;
 		}
 
@@ -767,10 +788,10 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_FOOD: {
-			meActionToNearbyPlayers(client, `eats some of their ${getItemName(itemIndex)}`);
-			givePlayerHealth(client, getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue);
-			getItemData(itemIndex).value = getItemData(itemIndex).value - getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue;
-			if(getItemData(itemIndex).value <= 0) {
+			meActionToNearbyPlayers(client, `eats some of their ${itemTypeData.name}`);
+			givePlayerHealth(client, itemTypeData.useValue);
+			itemData.value = itemData.value - tempItemTypeData.useValue;
+			if (getItemData(itemIndex).value <= 0) {
 				deleteItem(itemIndex);
 				switchPlayerActiveHotBarSlot(client, -1);
 			}
@@ -778,10 +799,10 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_DRINK: {
-			meActionToNearbyPlayers(client, `drinks some of their ${getItemName(itemIndex)}`);
-			givePlayerHealth(client, getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue);
-			getItemData(itemIndex).value = getItemData(itemIndex).value - getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue;
-			if(getItemData(itemIndex).value <= 0) {
+			meActionToNearbyPlayers(client, `drinks some of their ${itemTypeData.name}`);
+			givePlayerHealth(client, itemTypeData.useValue);
+			itemData.value = itemData.value - itemTypeData.useValue;
+			if (itemData.value <= 0) {
 				deleteItem(itemIndex);
 				switchPlayerActiveHotBarSlot(client, -1);
 			}
@@ -789,8 +810,8 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_ARMOUR: {
-			meActionToNearbyPlayers(client, `puts on a ${getItemName(itemIndex)}`);
-			givePlayerArmour(client, getItemData(itemIndex).useValue);
+			meActionToNearbyPlayers(client, `puts on a ${itemTypeData.name}`);
+			givePlayerArmour(client, itemTypeData.useValue);
 			deleteItem(itemIndex);
 			switchPlayerActiveHotBarSlot(client, -1);
 			break;
@@ -799,26 +820,26 @@ function playerUseItem(client, hotBarSlot) {
 		case VRR_ITEM_USETYPE_ROPE: {
 			let closestPlayer = getClosestPlayer(getPlayerPosition(client), client);
 
-			if(!getPlayerData(closestPlayer)) {
-				messagePlayerError(client, "There isn't anyone close enough to tie up!");
+			if (!getPlayerData(closestPlayer)) {
+				messagePlayerError(client, getLocaleString(client, "NobodyCloseEnoughToTie"));
 				return false;
 			}
 
-			if(getDistance(getPlayerPosition(closestPlayer), getPlayerPosition(client)) > getGlobalConfig().handcuffPlayerDistance) {
-				messagePlayerError(client, "There isn't anyone close enough to tie up!");
+			if (getDistance(getPlayerPosition(closestPlayer), getPlayerPosition(client)) > getGlobalConfig().handcuffPlayerDistance) {
+				messagePlayerError(client, getLocaleString(client, "NobodyCloseEnoughToTie"));
 				return false;
 			}
 
-			if(!isPlayerSurrendered(closestPlayer)) {
-				messagePlayerError(client, `${getCharacterFullName(closestPlayer)} can't be tied! They either need to have their hands up, be knocked out, or tazed`);
+			if (!isPlayerSurrendered(closestPlayer)) {
+				messagePlayerError(client, getLocaleString(client, "PlayerNotSurrenderedTie", getCharacterFullName(closestPlayer)));
 				return false;
 			}
 
-			if(isPlayerHandCuffed(closestPlayer)) {
+			if (isPlayerHandCuffed(closestPlayer)) {
 				ropeUnTiePlayer(closestPlayer);
 				meActionToNearbyPlayers(client, `unties the rope from ${getCharacterFullName(closestPlayer)}'s hands and feet`);
 			} else {
-				if(!isPlayerSurrendered(closestPlayer)) {
+				if (!isPlayerSurrendered(closestPlayer)) {
 					messagePlayerError(client, `${getCharacterFullName(closestPlayer)} can't be tied up! They either need to have their hands up, be knocked out, or tazed`);
 					return false;
 				}
@@ -832,22 +853,22 @@ function playerUseItem(client, hotBarSlot) {
 		case VRR_ITEM_USETYPE_HANDCUFF: {
 			let closestPlayer = getClosestPlayer(getPlayerPosition(client), client);
 
-			if(!getPlayerData(closestPlayer)) {
-				messagePlayerError(client, "There isn't anyone close enough to handcuff!");
+			if (!getPlayerData(closestPlayer)) {
+				messagePlayerError(client, getLocaleString(client, "NobodyCloseEnoughToHandcuff"));
 				return false;
 			}
 
-			if(getDistance(getPlayerPosition(closestPlayer), getPlayerPosition(client)) > getGlobalConfig().handcuffPlayerDistance) {
-				messagePlayerError(client, "There isn't anyone close enough to handcuff!");
+			if (getDistance(getPlayerPosition(closestPlayer), getPlayerPosition(client)) > getGlobalConfig().handcuffPlayerDistance) {
+				messagePlayerError(client, getLocaleString(client, "NobodyCloseEnoughToHandcuff"));
 				return false;
 			}
 
-			if(isPlayerHandCuffed(closestPlayer)) {
+			if (isPlayerHandCuffed(closestPlayer)) {
 				unHandCuffPlayer(closestPlayer);
 				meActionToNearbyPlayers(client, `takes their key and removes the handcuffs from ${getCharacterFullName(closestPlayer)}`);
 			} else {
-				if(!isPlayerSurrendered(closestPlayer)) {
-					messagePlayerError(client, `${getCharacterFullName(closestPlayer)} can't be cuffed! They either need to have their hands up, be knocked out, or tazed`);
+				if (!isPlayerSurrendered(closestPlayer)) {
+					messagePlayerError(client, getLocaleString(client, "PlayerNotSurrenderedHandcuffed", getCharacterFullName(closestPlayer)));
 					return false;
 				}
 
@@ -857,19 +878,14 @@ function playerUseItem(client, hotBarSlot) {
 			break;
 		}
 
-		case VRR_ITEM_USETYPE_NONE: {
-			messagePlayerError(client, `The ${getItemName(itemIndex)} doesn't do anything when you try to use it.`);
-			break;
-		}
-
 		case VRR_ITEM_USETYPE_VEHREPAIR: {
 			let vehicle = getClosestVehicle(getPlayerPosition(client));
-			if(getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
+			if (getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
 				meActionToNearbyPlayers(client, `takes their repair kit and fixes the vehicle`);
 				repairVehicle(vehicle);
 
-				getItemData(itemIndex).value = getItemData(itemIndex).value - getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue;
-				if(getItemData(itemIndex).value <= 0) {
+				itemData.value = itemData.value - itemTypeData.useValue;
+				if (itemData.value <= 0) {
 					destroyItem(itemIndex);
 				}
 			} else {
@@ -880,32 +896,32 @@ function playerUseItem(client, hotBarSlot) {
 
 		case VRR_ITEM_USETYPE_VEHUPGRADE_PART: {
 			let vehicle = getClosestVehicle(getPlayerPosition(client));
-			if(getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
-				meActionToNearbyPlayers(client, `takes their upgrade kit and adds a ${getItemName(itemIndex)} to the vehicle.`);
-				addVehicleUpgrade(vehicle, getItemData(itemIndex).useId);
+			if (getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
+				meActionToNearbyPlayers(client, `takes their upgrade kit and adds a ${itemTypeData.name} to the vehicle.`);
+				addVehicleUpgrade(vehicle, itemTypeData.useId);
 			}
 			break;
 		}
 
 		case VRR_ITEM_USETYPE_VEHLIVERY: {
 			let vehicle = getClosestVehicle(getPlayerPosition(client));
-			if(getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
+			if (getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
 				meActionToNearbyPlayers(client, `takes their decal kit and adds some decals to the vehicle.`);
-				setVehicleLivery(vehicle, getItemData(itemIndex).value);
+				setVehicleLivery(vehicle, itemData.value);
 			}
 			break;
 		}
 
 		case VRR_ITEM_USETYPE_VEHCOLOUR: {
 			let vehicle = getClosestVehicle(getPlayerPosition(client));
-			if(getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
-				if(getItemData(itemIndex).useId == 1) {
+			if (getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
+				if (itemData.useId == 1) {
 					meActionToNearbyPlayers(client, `takes their vehicle colour kit and changes the primary colour of the vehicle.`);
-					vehicle.colour1 = getItemData(itemIndex).value;
+					vehicle.colour1 = itemData.value;
 				} else {
-					if(getItemData(itemIndex).useId == 1) {
+					if (itemTypeData.useId == 1) {
 						meActionToNearbyPlayers(client, `takes their vehicle colour kit and changes the secondary colour of the vehicle.`);
-						vehicle.colour2 = getItemData(itemIndex).value;
+						vehicle.colour2 = itemData.value;
 					}
 				}
 			}
@@ -915,29 +931,29 @@ function playerUseItem(client, hotBarSlot) {
 		case VRR_ITEM_USETYPE_FUELCAN: {
 			let vehicle = getClosestVehicle(getPlayerPosition(client));
 			let fuelPump = getClosestFuelPump(getPlayerPosition(client));
-			if(getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getDistance(getPlayerPosition(client), getFuelPumpData(fuelPump).position)) {
-				if(getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
+			if (getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getDistance(getPlayerPosition(client), getFuelPumpData(fuelPump).position)) {
+				if (getDistance(getPlayerPosition(client), getVehiclePosition(vehicle)) <= getGlobalConfig().vehicleRepairDistance) {
 					meActionToNearbyPlayers(client, `takes their fuel can and refills the vehicle`);
-					if(getItemData(itemIndex).value < getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue) {
-						getVehicleData(vehicle).fuel += getItemData(itemIndex).value;
+					if (itemData.value < itemTypeData.useValue) {
+						getVehicleData(vehicle).fuel += itemData.value;
 					} else {
-						getVehicleData(vehicle).fuel += getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue;
+						getVehicleData(vehicle).fuel += itemTypeData.useValue;
 					}
 
-					getItemData(itemIndex).value = getItemData(itemIndex).value - getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue;
-					//if(getItemData(itemIndex).value <= 0) {
+					itemData.value = itemData.value - itemTypeData.useValue;
+					//if(itemData.value <= 0) {
 					//	destroyItem(itemIndex);
 					//}
 				}
 			} else {
-				if(getDistance(getPlayerPosition(client), getFuelPumpData(fuelPump).position) <= getGlobalConfig().vehicleRepairDistance) {
-					if(getItemData(itemIndex).useId == 1) {
+				if (getDistance(getPlayerPosition(client), getFuelPumpData(fuelPump).position) <= getGlobalConfig().vehicleRepairDistance) {
+					if (itemData.useId == 1) {
 						meActionToNearbyPlayers(client, `takes their vehicle colour kit and changes the primary colour of the vehicle.`);
-						vehicle.colour1 = getItemTypeData(itemIndex).value;
+						vehicle.colour1 = itemTypeData.value;
 					} else {
-						if(getItemData(itemIndex).useId == 1) {
+						if (itemData.useId == 1) {
 							meActionToNearbyPlayers(client, `takes their vehicle colour kit and changes the secondary colour of the vehicle.`);
-							vehicle.colour2 = getItemData(itemIndex).value;
+							vehicle.colour2 = itemData.value;
 						}
 					}
 				}
@@ -946,20 +962,19 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_WALKIETALKIE: {
-			getItemData(itemIndex).enabled = !getItemData(itemIndex).enabled;
-			//messagePlayerAlert(client, `You turned ${getBoolRedGreenInlineColour(getItemData(itemIndex).enabled)}${toUpperCase(getOnOffFromBool(getItemData(itemIndex).enabled))} {MAINCOLOUR}your walkie talkie in slot ${getPlayerData(client).activeHotBarSlot+1} {ALTCOLOUR}${getItemValueDisplayForItem(itemIndex)}`);
-			meActionToNearbyPlayers(client, `turns ${toLowerCase(getOnOffFromBool(getItemData(itemIndex).enabled))} their walkie-talkie`);
+			itemData.enabled = !itemData.enabled;
+			meActionToNearbyPlayers(client, `turns ${toLowerCase(getOnOffFromBool(itemData.enabled))} their walkie-talkie`);
 			break;
 		}
 
 		case VRR_ITEM_USETYPE_PHONE: {
-			if(getItemData(itemIndex).value == 0) {
+			if (itemData.value == 0) {
 				let phoneNumber = generateRandomPhoneNumber();
-				getItemData(itemIndex).value = phoneNumber;
-				messagePlayerAlert(client, `Your ${getItemName(itemIndex)} has been set up with number ${phoneNumber}`);
+				itemData.value = phoneNumber;
+				messagePlayerAlert(client, `Your ${itemTypeData.name} has been set up with number ${phoneNumber}`);
 			} else {
-				getItemData(itemIndex).enabled = !getItemData(itemIndex).enabled;
-				if(getItemData(itemIndex).enabled) {
+				itemData.enabled = !itemData.enabled;
+				if (itemData.enabled) {
 					//messagePlayerAlert(client, `You turned on your phone in slot ${getPlayerData(client).activeHotBarSlot+1} ${getItemValueDisplayForItem(itemIndex)}`);
 					meActionToNearbyPlayers(client, `turns on their phone`);
 				} else {
@@ -971,9 +986,9 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_SMOKEDRUG: {
-			meActionToNearbyPlayers(client, `smokes some ${getItemName(itemIndex)}`);
-			getPlayerData(client).incomingDamageMultiplier = getPlayerData(client).incomingDamageMultiplier-(getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue/100);
-			if(getPlayerData(client).incomingDamageMultiplier < 0.25) {
+			meActionToNearbyPlayers(client, `smokes some ${itemTypeData.name}`);
+			getPlayerData(client).incomingDamageMultiplier = getPlayerData(client).incomingDamageMultiplier - (itemTypeData.useValue / 100);
+			if (getPlayerData(client).incomingDamageMultiplier < 0.25) {
 				getPlayerData(client).incomingDamageMultiplier = 0.25;
 			}
 			deleteItem(itemIndex);
@@ -982,9 +997,9 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_SNORTDRUG: {
-			meActionToNearbyPlayers(client, `snorts some ${getItemName(itemIndex)}`);
-			getPlayerData(client).incomingDamageMultiplier = getPlayerData(client).incomingDamageMultiplier-(getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue/100);
-			if(getPlayerData(client).incomingDamageMultiplier < 0.25) {
+			meActionToNearbyPlayers(client, `snorts some ${itemTypeData.name}`);
+			getPlayerData(client).incomingDamageMultiplier = getPlayerData(client).incomingDamageMultiplier - (itemTypeData.useValue / 100);
+			if (getPlayerData(client).incomingDamageMultiplier < 0.25) {
 				getPlayerData(client).incomingDamageMultiplier = 0.25;
 			}
 			deleteItem(itemIndex);
@@ -993,9 +1008,9 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_INJECTDRUG: {
-			meActionToNearbyPlayers(client, `shoots up some ${getItemName(itemIndex)}`);
-			getPlayerData(client).incomingDamageMultiplier = getPlayerData(client).incomingDamageMultiplier-(getItemTypeData(getItemData(itemIndex).itemTypeIndex).useValue/100);
-			if(getPlayerData(client).incomingDamageMultiplier < 0.25) {
+			meActionToNearbyPlayers(client, `shoots up some ${itemTypeData.name}`);
+			getPlayerData(client).incomingDamageMultiplier = getPlayerData(client).incomingDamageMultiplier - (itemTypeData.useValue / 100);
+			if (getPlayerData(client).incomingDamageMultiplier < 0.25) {
 				getPlayerData(client).incomingDamageMultiplier = 0.25;
 			}
 			deleteItem(itemIndex);
@@ -1004,9 +1019,9 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_PLANT: {
-			meActionToNearbyPlayers(client, `bends down and plants a ${getItemName(itemIndex)} in the ground`);
+			meActionToNearbyPlayers(client, `bends down and plants a ${itemTypeData.name} in the ground`);
 			createGroundPlant(itemIndex);
-			if(getItemData(itemIndex).value == 0) {
+			if (itemData.value == 0) {
 				destroyItem(itemIndex);
 				switchPlayerActiveHotBarSlot(client, -1);
 			}
@@ -1016,8 +1031,8 @@ function playerUseItem(client, hotBarSlot) {
 		case VRR_ITEM_USETYPE_BADGE: {
 			meActionToNearbyPlayers(client, `shows their badge to everyone nearby.`);
 			let clients = getClients();
-			for(let i in clients) {
-				if(getDistance(getPlayerPosition(client), getPlayerPosition(clients[i])) <= 7) {
+			for (let i in clients) {
+				if (getDistance(getPlayerPosition(client), getPlayerPosition(clients[i])) <= 7) {
 					makeChatBoxSectionHeader(clients[i], getLocaleString(client, "HeaderBadgeInfo", getCharacterFullName(client)));
 					messagePlayerNormal(client, `{clanOrange}Type:{MAINCOLOUR} ${getJobData(getPlayerJob(client)).name}`);
 					messagePlayerNormal(client, `{clanOrange}ID:{MAINCOLOUR} ${addPrefixNumberFill(getPlayerCurrentSubAccount(client).databaseId, 5)}`);
@@ -1035,12 +1050,12 @@ function playerUseItem(client, hotBarSlot) {
 		case VRR_ITEM_USETYPE_HEALTH: {
 			let closestPlayer = getClosestPlayer(getPlayerPosition(client), client);
 
-			if(!getPlayerData(closestPlayer)) {
+			if (!getPlayerData(closestPlayer)) {
 				messagePlayerError(client, "There isn't anyone close enough to heal!");
 				return false;
 			}
 
-			if(getDistance(getPlayerPosition(closestPlayer), getPlayerPosition(client)) > getGlobalConfig().firstAidKitPlayerDistance) {
+			if (getDistance(getPlayerPosition(closestPlayer), getPlayerPosition(client)) > getGlobalConfig().firstAidKitPlayerDistance) {
 				messagePlayerError(client, "There isn't anyone close enough to heal!");
 				return false;
 			}
@@ -1048,30 +1063,36 @@ function playerUseItem(client, hotBarSlot) {
 		}
 
 		case VRR_ITEM_USETYPE_LOTTOTICKET: {
-
+			messagePlayerError(client, getLocaleString(client, "ItemDoesntDoAnythingOnUse", itemTypeData.name));
 			break;
 		}
 
 		case VRR_ITEM_USETYPE_AREARADIO: {
-			let state = getItemData(itemIndex)
-			meActionToNearbyPlayers(client, `turns ${getOnOffFromBool(state)} the boombox radio`);
-			messagePlayerAlert(client, `Use /radiostation to set the radio station and drop it on the ground to play`);
+			itemData.enabled = !itemData.enabled;
+			meActionToNearbyPlayers(client, `turns ${getOnOffFromBool(itemData.enabled)} the boombox radio`);
+			messagePlayerAlert(client, getLocaleString(client, "ItemRadioStationTip", `{ALTCOLOUR}/radiostation{MAINCOLOUR}`));
 			break;
 		}
 
 		case VRR_ITEM_USETYPE_PERSONALRADIO: {
-			meActionToNearbyPlayers(client, `turns ${getOnOffFromBool(state)} the boombox radio`);
-			messagePlayerAlert(client, `Use /radiostation to set the radio station`);
+			itemData.enabled = !itemData.enabled;
+			meActionToNearbyPlayers(client, `turns ${getOnOffFromBool(itemData.enabled)} their personal radio`);
+			messagePlayerAlert(client, getLocaleString(client, "ItemRadioStationTip", `{ALTCOLOUR}/radiostation{MAINCOLOUR}`));
+			break;
+		}
+
+		case VRR_ITEM_USETYPE_NONE: {
+			messagePlayerError(client, getLocaleString(client, "ItemDoesntDoAnythingOnUse", itemTypeData.name));
 			break;
 		}
 
 		default: {
-			messagePlayerError(client, `The ${getItemName(itemIndex)} doesn't do anything when you try to use it.`);
+			messagePlayerError(client, getLocaleString(client, "ItemDoesntDoAnythingOnUse", itemTypeData.name));
 			break;
 		}
 	}
 
-	if(getItemData(itemIndex) != false) {
+	if (getItemData(itemIndex) != false) {
 		getItemData(itemIndex).needsSaved = true;
 	}
 
@@ -1083,7 +1104,7 @@ function playerUseItem(client, hotBarSlot) {
 
 function playerDropItem(client, hotBarSlot) {
 	let itemId = getPlayerData(client).hotBarItems[hotBarSlot];
-	if(itemId != -1) {
+	if (itemId != -1) {
 		meActionToNearbyPlayers(client, `drops ${getProperDeterminerForName(getItemName(itemId))} ${getItemName(itemId)} on the ground`);
 
 		resyncWeaponItemAmmo(client);
@@ -1106,7 +1127,7 @@ function playerDropItem(client, hotBarSlot) {
 function playerPutItem(client, hotBarSlot) {
 	let itemId = getPlayerData(client).hotBarItems[hotBarSlot];
 
-	let	bestNewOwner = getBestNewOwnerToPutItem(client);
+	let bestNewOwner = getBestNewOwnerToPutItem(client);
 
 	getItemData(itemId).ownerType = bestNewOwner[0];
 	getItemData(itemId).ownerId = bestNewOwner[1];
@@ -1120,7 +1141,7 @@ function playerPutItem(client, hotBarSlot) {
 	getPlayerData(client).hotBarItems[hotBarSlot] = -1;
 	updatePlayerHotBar(client);
 
-	switch(bestNewOwner[0]) {
+	switch (bestNewOwner[0]) {
 		case VRR_ITEM_OWNER_HOUSE:
 			meActionToNearbyPlayers(client, `places ${getProperDeterminerForName(getItemName(itemId))} ${getItemName(itemId)} in the house`);
 			break;
@@ -1145,7 +1166,7 @@ function playerPickupItem(client, itemId) {
 	meActionToNearbyPlayers(client, `picks up ${getProperDeterminerForName(getItemName(itemId))} ${getItemName(itemId)} from the ground`);
 
 	let firstSlot = getPlayerFirstEmptyHotBarSlot(client);
-	if(firstSlot != -1) {
+	if (firstSlot != -1) {
 		getItemData(itemId).ownerType = VRR_ITEM_OWNER_PLAYER;
 		getItemData(itemId).ownerId = getPlayerCurrentSubAccount(client).databaseId;
 		getItemData(itemId).position = toVector3(0.0, 0.0, 0.0);
@@ -1161,7 +1182,7 @@ function playerPickupItem(client, itemId) {
 
 function playerTakeItem(client, itemId) {
 	let firstSlot = getPlayerFirstEmptyHotBarSlot(client);
-	if(firstSlot == -1) {
+	if (firstSlot == -1) {
 		messagePlayerError(client, getLocaleString(client, "NoSpaceSelfInventory"));
 		return false;
 	}
@@ -1174,7 +1195,7 @@ function playerTakeItem(client, itemId) {
 	getPlayerData(client).hotBarItems[firstSlot] = itemId;
 	updatePlayerHotBar(client);
 
-	switch(bestOwner[1]) {
+	switch (bestOwner[1]) {
 		case VRR_ITEM_OWNER_HOUSE:
 			meActionToNearbyPlayers(client, getLocaleString(client, "TakeItemFromHouse", getItemName(itemId)));
 			break;
@@ -1204,7 +1225,7 @@ function playerTakeItem(client, itemId) {
 // ===========================================================================
 
 function playerSwitchItem(client, newHotBarSlot) {
-	if(newHotBarSlot < -1 || newHotBarSlot > 9) {
+	if (newHotBarSlot < -1 || newHotBarSlot > 9) {
 		return false;
 	}
 
@@ -1216,17 +1237,17 @@ function playerSwitchItem(client, newHotBarSlot) {
 
 	// Check if new slot is the same as the current one
 	// If true, clear active item slot (puts current item away)
-	if(currentHotBarSlot != -1 && newHotBarSlot != -1) {
-		if(currentHotBarSlot == newHotBarSlot) {
+	if (currentHotBarSlot != -1 && newHotBarSlot != -1) {
+		if (currentHotBarSlot == newHotBarSlot) {
 			newHotBarSlot = -1;
 		}
 	}
 
-	if(currentHotBarSlot != -1) {
+	if (currentHotBarSlot != -1) {
 		currentHotBarItem = getPlayerData(client).hotBarItems[currentHotBarSlot];
 	}
 
-	if(newHotBarSlot != -1) {
+	if (newHotBarSlot != -1) {
 		newHotBarItem = getPlayerData(client).hotBarItems[newHotBarSlot];
 	}
 
@@ -1241,16 +1262,16 @@ function playerSwitchItem(client, newHotBarSlot) {
 	//	}
 	//}
 
-	if(newHotBarItem != -1) {
-		if(getItemData(newHotBarItem)) {
-			if(getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useType == VRR_ITEM_USETYPE_WEAPON) {
-				if(getItemData(newHotBarItem).value > 0 || isMeleeWeapon(toInteger(getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useId))) {
+	if (newHotBarItem != -1) {
+		if (getItemData(newHotBarItem)) {
+			if (getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useType == VRR_ITEM_USETYPE_WEAPON) {
+				if (getItemData(newHotBarItem).value > 0 || isMeleeWeapon(toInteger(getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useId))) {
 					givePlayerWeapon(client, toInteger(getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useId), toInteger(getItemData(newHotBarItem).value), true, true);
 					setPlayerWeaponDamageEnabled(client, true);
 					setPlayerWeaponDamageEvent(client, VRR_WEAPON_DAMAGE_EVENT_NORMAL);
 				} else {
 					let ammoItemSlot = getPlayerFirstAmmoItemForWeapon(client, getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useId);
-					if(ammoItemSlot != false) {
+					if (ammoItemSlot != false) {
 						getItemData(newHotBarItem).value = getItemData(getPlayerData(client).hotBarItems[ammoItemSlot]).value;
 						givePlayerWeapon(client, toInteger(getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useId), toInteger(getItemData(newHotBarItem).value), true, true);
 						setPlayerWeaponDamageEnabled(client, true);
@@ -1260,8 +1281,8 @@ function playerSwitchItem(client, newHotBarSlot) {
 						messagePlayerError(client, getLocaleString(client, "ItemUnequippableNoAmmo", getItemName(newHotBarItem), newHotBarSlot));
 					}
 				}
-			} else if(getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useType == VRR_ITEM_USETYPE_TAZER) {
-				if(getItemData(newHotBarItem).value > 0) {
+			} else if (getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useType == VRR_ITEM_USETYPE_TAZER) {
+				if (getItemData(newHotBarItem).value > 0) {
 					givePlayerWeapon(client, toInteger(getItemTypeData(getItemData(newHotBarItem).itemTypeIndex).useId), toInteger(getItemData(newHotBarItem).value), true, true);
 					setPlayerWeaponDamageEnabled(client, false);
 					setPlayerWeaponDamageEvent(client, VRR_WEAPON_DAMAGE_EVENT_TAZER);
@@ -1272,13 +1293,13 @@ function playerSwitchItem(client, newHotBarSlot) {
 		}
 	}
 
-	if(currentHotBarItem != -1 && newHotBarItem != -1) {
+	if (currentHotBarItem != -1 && newHotBarItem != -1) {
 		// Player switches from item to item
 		meActionToNearbyPlayers(client, `puts away ${getProperDeterminerForName(getItemName(currentHotBarItem))} ${getItemName(currentHotBarItem)} and pulls out ${getProperDeterminerForName(getItemName(newHotBarItem))} ${getItemName(newHotBarItem)}`);
-	} else if(currentHotBarItem != -1 && newHotBarItem == -1) {
+	} else if (currentHotBarItem != -1 && newHotBarItem == -1) {
 		// Player switches from item to none
 		meActionToNearbyPlayers(client, `puts away ${getProperDeterminerForName(getItemName(currentHotBarItem))} ${getItemName(currentHotBarItem)}`);
-	} else if(currentHotBarItem == -1 && newHotBarItem != -1) {
+	} else if (currentHotBarItem == -1 && newHotBarItem != -1) {
 		// Player switches from none to item
 		meActionToNearbyPlayers(client, `pulls out ${getProperDeterminerForName(getItemName(newHotBarItem))} ${getItemName(newHotBarItem)}`);
 	} else {
@@ -1303,36 +1324,36 @@ function playerSwitchItem(client, newHotBarSlot) {
 function playerSwitchHotBarSlotCommand(command, params, client) {
 	clearPlayerItemActionState(client);
 
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
 
 	let hotBarSlot = toInteger(params);
 
-	if(hotBarSlot < 0 || hotBarSlot > 9) {
+	if (hotBarSlot < 0 || hotBarSlot > 9) {
 		messagePlayerError(client, getLocaleString(client, "ItemSlotMustBeBetween", "1", "9"));
 		return false;
 	}
 
-	if(hotBarSlot == 0) {
+	if (hotBarSlot == 0) {
 		hotBarSlot = -1;
 	} else {
-		hotBarSlot = hotBarSlot-1;
+		hotBarSlot = hotBarSlot - 1;
 	}
 
-	if(hotBarSlot != -1) {
-		if(getPlayerData(client).activeHotBarSlot == hotBarSlot) {
+	if (hotBarSlot != -1) {
+		if (getPlayerData(client).activeHotBarSlot == hotBarSlot) {
 			hotBarSlot = -1;
 		}
 	}
 
-	if(getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
+	if (getPlayerData(client).itemActionState != VRR_ITEM_ACTION_NONE) {
 		messagePlayerError(client, getLocaleString(client, "HandsBusy"));
 		return false;
 	}
 
-	if(getPlayerData(client).usingSkinSelect) {
+	if (getPlayerData(client).usingSkinSelect) {
 		messagePlayerError(client, getLocaleString(client, "CantSwitchItemInSkinChange"));
 		return false;
 	}
@@ -1345,8 +1366,8 @@ function playerSwitchHotBarSlotCommand(command, params, client) {
 function getClosestItemOnGround(position) {
 	let items = getServerData().groundItemCache;
 	let closest = 0;
-	for(let i in items) {
-		if(getDistance(getItemData(items[i]).position, position) <= getDistance(getItemData(items[closest]).position, position)) {
+	for (let i in items) {
+		if (getDistance(getItemData(items[i]).position, position) <= getDistance(getItemData(items[closest]).position, position)) {
 			closest = i;
 		}
 	}
@@ -1357,8 +1378,8 @@ function getClosestItemOnGround(position) {
 // ===========================================================================
 
 function setAllItemDataIndexes() {
-	for(let i in getServerData().items) {
-		if(getServerData().items[i]) {
+	for (let i in getServerData().items) {
+		if (getServerData().items[i]) {
 			getServerData().items[i].index = i;
 			getServerData().items[i].itemTypeIndex = getItemTypeIndexFromDatabaseId(getServerData().items[i].itemType);
 		}
@@ -1368,8 +1389,8 @@ function setAllItemDataIndexes() {
 // ===========================================================================
 
 function setAllItemTypeDataIndexes() {
-	for(let i in getServerData().itemTypes) {
-		if(getServerData().itemTypes[i]) {
+	for (let i in getServerData().itemTypes) {
+		if (getServerData().itemTypes[i]) {
 			getServerData().itemTypes[i].index = i;
 			getServerData().itemTypes[i].useAnimationIndex = getAnimationFromParams(getServerData().itemTypes[i].useAnimationName);
 			getServerData().itemTypes[i].switchAnimationIndex = getAnimationFromParams(getServerData().itemTypes[i].switchAnimationName);
@@ -1386,8 +1407,8 @@ function setAllItemTypeDataIndexes() {
 
 function cacheAllGroundItems() {
 	clearArray(getServerData().groundItemCache);
-	for(let i in getServerData().items) {
-		if(getServerData().items[i].ownerType == VRR_ITEM_OWNER_GROUND) {
+	for (let i in getServerData().items) {
+		if (getServerData().items[i].ownerType == VRR_ITEM_OWNER_GROUND) {
 			getServerData().groundItemCache.push(i);
 		}
 	}
@@ -1396,7 +1417,7 @@ function cacheAllGroundItems() {
 // ===========================================================================
 
 function createAllGroundItemObjects() {
-	for(let i in getServerData().groundItemCache) {
+	for (let i in getServerData().groundItemCache) {
 		createGroundItemObject(i);
 	}
 }
@@ -1410,8 +1431,8 @@ function syncPlayerInventoryWeapons(client) {
 // ===========================================================================
 
 function getPlayerFirstEmptyHotBarSlot(client) {
-	for(let i in getPlayerData(client).hotBarItems) {
-		if(getPlayerData(client).hotBarItems[i] == -1) {
+	for (let i in getPlayerData(client).hotBarItems) {
+		if (getPlayerData(client).hotBarItems[i] == -1) {
 			return i;
 		}
 	}
@@ -1422,19 +1443,19 @@ function getPlayerFirstEmptyHotBarSlot(client) {
 // ===========================================================================
 
 function cachePlayerHotBarItems(client) {
-	if(isPlayerWorking(client)) {
+	if (isPlayerWorking(client)) {
 		return false;
 	}
 
-	for(let i = 0 ; i < 9 ; i++) {
+	for (let i = 0; i < 9; i++) {
 		getPlayerData(client).hotBarItems[i] = -1;
 	}
 
-	for(let i in getServerData().items) {
-		if(getItemData(i).ownerType == VRR_ITEM_OWNER_PLAYER) {
-			if(getItemData(i).ownerId == getPlayerCurrentSubAccount(client).databaseId) {
+	for (let i in getServerData().items) {
+		if (getItemData(i).ownerType == VRR_ITEM_OWNER_PLAYER) {
+			if (getItemData(i).ownerId == getPlayerCurrentSubAccount(client).databaseId) {
 				let firstSlot = getPlayerFirstEmptyHotBarSlot(client);
-				if(firstSlot != -1) {
+				if (firstSlot != -1) {
 					getPlayerData(client).hotBarItems[firstSlot] = i;
 				}
 			}
@@ -1444,10 +1465,10 @@ function cachePlayerHotBarItems(client) {
 
 // ===========================================================================
 
-function deleteItem(itemId) {
+function deleteItem(itemId, whoDeleted = -1) {
 	let owner = -1;
 	let ownerTypeString = "Unknown";
-	switch(getItemData(itemId).ownerType) {
+	switch (getItemData(itemId).ownerType) {
 		case VRR_ITEM_OWNER_GROUND:
 			ownerTypeString = "Ground/Dropped";
 			deleteGroundItemObject(itemId);
@@ -1457,7 +1478,7 @@ function deleteItem(itemId) {
 		case VRR_ITEM_OWNER_PLAYER:
 			ownerTypeString = "Player";
 			owner = getPlayerFromCharacterId(getItemData(itemId).ownerId);
-			if(getPlayerData(owner) != false) {
+			if (getPlayerData(owner) != false) {
 				switchPlayerActiveHotBarSlot(owner, -1);
 				getPlayerData(owner).hotBarItems[getPlayerData(owner).hotBarItems.indexOf(itemId)] = -1;
 				updatePlayerHotBar(owner);
@@ -1467,7 +1488,7 @@ function deleteItem(itemId) {
 		case VRR_ITEM_OWNER_JOBLOCKER:
 			ownerTypeString = "Job Locker";
 			owner = getPlayerFromCharacterId(getItemData(itemId).ownerId);
-			if(getPlayerData(owner) != false) {
+			if (getPlayerData(owner) != false) {
 				getPlayerData(owner).jobLockerCache.splice(getPlayerData(owner).jobLockerCache.indexOf(itemId), 1);
 			}
 			break;
@@ -1475,7 +1496,7 @@ function deleteItem(itemId) {
 		case VRR_ITEM_OWNER_LOCKER:
 			ownerTypeString = "Locker";
 			owner = getPlayerFromCharacterId(getItemData(itemId).ownerId);
-			if(getPlayerData(owner) != false) {
+			if (getPlayerData(owner) != false) {
 				getPlayerData(owner).lockerCache.splice(getPlayerData(owner).lockerCache.indexOf(itemId), 1);
 			}
 			break;
@@ -1483,7 +1504,7 @@ function deleteItem(itemId) {
 		case VRR_ITEM_OWNER_VEHTRUNK:
 			ownerTypeString = "Vehicle Trunk";
 			owner = getVehicleFromDatabaseId(getItemData(itemId).ownerId)
-			if(getVehicleData(owner) != false) {
+			if (getVehicleData(owner) != false) {
 				getVehicleDataIndex(getItemData(itemId).ownerId).trunkItemCache.splice(getVehicleData(owner).trunkItemCache.indexOf(itemId), 1);
 			}
 			break;
@@ -1491,7 +1512,7 @@ function deleteItem(itemId) {
 		case VRR_ITEM_OWNER_BIZFLOOR:
 			ownerTypeString = "Business Floor";
 			owner = getBusinessIdFromDatabaseId(getItemData(itemId).ownerId);
-			if(getBusinessData(owner) != false) {
+			if (getBusinessData(owner) != false) {
 				getBusinessData(owner).floorItemCache.splice(getBusinessData(owner).floorItemCache.indexOf(itemId), 1);
 			}
 			break;
@@ -1499,7 +1520,7 @@ function deleteItem(itemId) {
 		case VRR_ITEM_OWNER_BIZSTORAGE:
 			ownerTypeString = "Business Storage";
 			owner = getBusinessIdFromDatabaseId(getItemData(itemId).ownerId);
-			if(getBusinessData(owner) != false) {
+			if (getBusinessData(owner) != false) {
 				getBusinessData(owner).storageItemCache.splice(getBusinessData(owner).storageItemCache.indexOf(itemId), 1);
 			}
 			break;
@@ -1507,15 +1528,15 @@ function deleteItem(itemId) {
 		case VRR_ITEM_OWNER_HOUSE:
 			ownerTypeString = "House";
 			owner = getHouseIdFromDatabaseId(getItemData(itemId).ownerId);
-			if(getHouseData(owner) != false) {
+			if (getHouseData(owner) != false) {
 				getHouseData(owner).itemCache.splice(getHouseData(owner).itemCache.indexOf(itemId), 1);
 			}
 			break;
 	}
 	logToConsole(LOG_DEBUG, `Deleted item ${itemId} (DBID: ${getItemData(itemId).databaseId}, Owner Type: ${ownerTypeString}, Owner ID: ${getItemData(itemId).ownerId})`);
 
-	if(getItemData(itemId).databaseId > 0) {
-		quickDatabaseQuery(`DELETE FROM item_main WHERE item_id = ${getItemData(itemId).databaseId}`);
+	if (getItemData(itemId).databaseId > 0) {
+		quickDatabaseQuery(`UPDATE item_main SET item_deleted = 1, item_when_deleted = UNIX_TIMESTAMP() WHERE item_id = ${getItemData(itemId).databaseId}`);
 	}
 	getServerData().items[itemId] = false;
 	setAllItemDataIndexes();
@@ -1528,17 +1549,17 @@ function getBestNewOwnerToPutItem(client) {
 	let position = getPlayerPosition(client);
 
 	let possibleHouse = getPlayerHouse(client);
-	if(getHouseData(possibleHouse)) {
+	if (getHouseData(possibleHouse)) {
 		return [VRR_ITEM_OWNER_HOUSE, possibleHouse];
 	}
 
 	let possibleBusiness = getPlayerBusiness(client);
-	if(getBusinessData(possibleBusiness)) {
+	if (getBusinessData(possibleBusiness)) {
 		return [VRR_ITEM_OWNER_BIZSTORAGE, possibleBusiness];
 	}
 
 	let possibleVehicle = getClosestVehicle(position);
-	if(getDistance(getVehicleTrunkPosition(possibleVehicle), position) <= closestDistance) {
+	if (getDistance(getVehicleTrunkPosition(possibleVehicle), position) <= closestDistance) {
 		return [VRR_ITEM_OWNER_VEHTRUNK, possibleVehicle];
 	}
 
@@ -1555,8 +1576,8 @@ function getBestItemToTake(client, slot) {
 	let ownerId = 0;
 
 	let possibleHouse = getPlayerHouse(client);
-	if(getHouseData(possibleHouse)) {
-		if(typeof getHouseData(possibleHouse).itemCache[slot] != "undefined") {
+	if (getHouseData(possibleHouse)) {
+		if (typeof getHouseData(possibleHouse).itemCache[slot] != "undefined") {
 			itemId = getHouseData(possibleHouse).itemCache[slot];
 			ownerType = VRR_ITEM_OWNER_HOUSE;
 			ownerId = possibleHouse;
@@ -1564,8 +1585,8 @@ function getBestItemToTake(client, slot) {
 	}
 
 	let possibleBusiness = getPlayerBusiness(client);
-	if(getBusinessData(possibleBusiness)) {
-		if(typeof getBusinessData(possibleBusiness).floorItemCache[slot] != "undefined") {
+	if (getBusinessData(possibleBusiness)) {
+		if (typeof getBusinessData(possibleBusiness).floorItemCache[slot] != "undefined") {
 			itemId = getBusinessData(possibleBusiness).floorItemCache[slot];
 			ownerType = VRR_ITEM_OWNER_BIZFLOOR;
 			ownerId = possibleBusiness;
@@ -1573,9 +1594,9 @@ function getBestItemToTake(client, slot) {
 	}
 
 	let possibleVehicle = getClosestVehicle(position);
-	if(getVehicleData(possibleVehicle)) {
-		if(getDistance(getVehicleTrunkPosition(possibleVehicle), position) <= closestDistance) {
-			if(typeof getVehicleData(possibleVehicle).trunkItemCache[slot] != "undefined") {
+	if (getVehicleData(possibleVehicle)) {
+		if (getDistance(getVehicleTrunkPosition(possibleVehicle), position) <= closestDistance) {
+			if (typeof getVehicleData(possibleVehicle).trunkItemCache[slot] != "undefined") {
 				itemId = getVehicleData(possibleVehicle).trunkItemCache[slot];
 				ownerType = VRR_ITEM_OWNER_VEHTRUNK;
 				ownerId = possibleVehicle;
@@ -1628,12 +1649,12 @@ function listPlayerInventoryCommand(command, params, client) {
 function listBusinessStorageInventoryCommand(command, params, client) {
 	let businessId = getPlayerBusiness(client);
 
-	if(!getBusinessData(businessId)) {
+	if (!getBusinessData(businessId)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidBusiness"));
 		return false;
 	}
 
-	if(getBusinessData(businessId).locked) {
+	if (getBusinessData(businessId).locked) {
 		messagePlayerError(client, "This business is closed!");
 		return false;
 	}
@@ -1655,12 +1676,12 @@ function listBusinessStorageInventoryCommand(command, params, client) {
 function listBusinessFloorInventoryCommand(command, params, client) {
 	let businessId = getPlayerBusiness(client);
 
-	if(!getBusinessData(businessId)) {
+	if (!getBusinessData(businessId)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidBusiness"));
 		return false;
 	}
 
-	if(getBusinessData(businessId).locked) {
+	if (getBusinessData(businessId).locked) {
 		messagePlayerError(client, "This business is closed!");
 		return false;
 	}
@@ -1682,12 +1703,12 @@ function listBusinessFloorInventoryCommand(command, params, client) {
 function listHouseInventoryCommand(command, params, client) {
 	let houseId = getPlayerHouse(client);
 
-	if(!getHouseData(houseId)) {
+	if (!getHouseData(houseId)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidHouse"));
 		return false;
 	}
 
-	if(getHouseData(houseId).locked) {
+	if (getHouseData(houseId).locked) {
 		messagePlayerError(client, "This house is locked!");
 		return false;
 	}
@@ -1709,12 +1730,12 @@ function listHouseInventoryCommand(command, params, client) {
 function listItemInventoryCommand(command, params, client) {
 	let itemId = getClosestItemOnGround(getPlayerPosition(client));
 
-	if(getDistance(getPlayerPosition(client), getItemData(itemId).position) > getGlobalConfig().droppedItemPickupRange) {
+	if (getDistance(getPlayerPosition(client), getItemData(itemId).position) > getGlobalConfig().droppedItemPickupRange) {
 		messagePlayerError(client, `You're too far away!`);
 		return false;
 	}
 
-	if(getItemTypeData(getItemData(itemId).itemTypeIndex).useType != VRR_ITEM_USETYPE_STORAGE) {
+	if (getItemTypeData(getItemData(itemId).itemTypeIndex).useType != VRR_ITEM_USETYPE_STORAGE) {
 		messagePlayerError(client, "This item can't hold anything!");
 		return false;
 	}
@@ -1729,7 +1750,7 @@ function listItemInventoryCommand(command, params, client) {
  * @return {ItemData} The item's data (class instance)
  */
 function getItemData(itemId) {
-	if(typeof getServerData().items[itemId] != "undefined") {
+	if (typeof getServerData().items[itemId] != "undefined") {
 		return getServerData().items[itemId];
 	}
 
@@ -1743,7 +1764,7 @@ function getItemData(itemId) {
  * @return {ItemTypeData} The item type's data (class instance)
  */
 function getItemTypeData(itemTypeId) {
-	if(typeof getServerData().itemTypes[itemTypeId] != "undefined") {
+	if (typeof getServerData().itemTypes[itemTypeId] != "undefined") {
 		return getServerData().itemTypes[itemTypeId];
 	}
 
@@ -1753,11 +1774,11 @@ function getItemTypeData(itemTypeId) {
 // ===========================================================================
 
 function saveAllItemsToDatabase() {
-	if(getServerConfig().devServer) {
+	if (getServerConfig().devServer) {
 		return false;
 	}
 
-	for(let i in getServerData().items) {
+	for (let i in getServerData().items) {
 		saveItemToDatabase(i);
 	}
 }
@@ -1765,11 +1786,11 @@ function saveAllItemsToDatabase() {
 // ===========================================================================
 
 function saveAllItemTypesToDatabase() {
-	if(getServerConfig().devServer) {
+	if (getServerConfig().devServer) {
 		return false;
 	}
 
-	for(let i in getServerData().itemTypes) {
+	for (let i in getServerData().itemTypes) {
 		saveItemTypeToDatabase(i);
 	}
 }
@@ -1778,22 +1799,22 @@ function saveAllItemTypesToDatabase() {
 
 function saveItemToDatabase(itemId) {
 	let itemData = getItemData(itemId);
-	if(itemData == false) {
+	if (itemData == false) {
 		return false;
 	}
 
-	if(itemData.databaseId == -1) {
+	if (itemData.databaseId == -1) {
 		return false;
 	}
 
-	if(!itemData.needsSaved) {
+	if (!itemData.needsSaved) {
 		return false;
 	}
 
 	logToConsole(LOG_VERBOSE, `[VRR.Item]: Saving item '${itemData.index}' to database ...`);
 
 	let dbConnection = connectToDatabase();
-	if(dbConnection) {
+	if (dbConnection) {
 		let data = [
 			["item_server", getServerId()],
 			["item_type", itemData.itemType],
@@ -1811,7 +1832,7 @@ function saveItemToDatabase(itemId) {
 		];
 
 		let dbQuery = null;
-		if(itemData.databaseId == 0) {
+		if (itemData.databaseId == 0) {
 			let queryString = createDatabaseInsertQuery("item_main", data);
 			dbQuery = queryDatabase(dbConnection, queryString);
 			itemData.databaseId = getDatabaseInsertId(dbConnection);
@@ -1833,22 +1854,22 @@ function saveItemToDatabase(itemId) {
 
 function saveItemTypeToDatabase(itemTypeId) {
 	let itemTypeData = getItemTypeData(itemTypeId);
-	if(itemTypeData == false) {
+	if (itemTypeData == false) {
 		return false;
 	}
 
-	if(itemTypeData.databaseId == -1) {
+	if (itemTypeData.databaseId == -1) {
 		return false;
 	}
 
-	if(!itemTypeData.needsSaved) {
+	if (!itemTypeData.needsSaved) {
 		return false;
 	}
 
 	logToConsole(LOG_VERBOSE, `[VRR.Item]: Saving item type '${itemTypeData.name}' to database ...`);
 
 	let dbConnection = connectToDatabase();
-	if(dbConnection) {
+	if (dbConnection) {
 		let safeItemTypeName = escapeDatabaseString(dbConnection, itemTypeData.name);
 		let safeAnimationUse = escapeDatabaseString(dbConnection, itemTypeData.useAnimationName);
 		let safeAnimationDrop = escapeDatabaseString(dbConnection, itemTypeData.dropAnimationName);
@@ -1900,7 +1921,7 @@ function saveItemTypeToDatabase(itemTypeId) {
 		];
 
 		let dbQuery = null;
-		if(itemTypeData.databaseId == 0) {
+		if (itemTypeData.databaseId == 0) {
 			let queryString = createDatabaseInsertQuery("item_type", data);
 			dbQuery = queryDatabase(dbConnection, queryString);
 			itemTypeData.databaseId = getDatabaseInsertId(dbConnection);
@@ -1921,7 +1942,7 @@ function saveItemTypeToDatabase(itemTypeId) {
 // ===========================================================================
 
 function storePlayerItemsInJobLocker(client) {
-	for(let i = 0 ; i < 9 ; i++) {
+	for (let i = 0; i < 9; i++) {
 		getPlayerData(client).jobLockerCache[i] = getPlayerData(client).hotBarItems[i];
 		getPlayerData(client).hotBarItems[i] = -1;
 	}
@@ -1933,13 +1954,13 @@ function storePlayerItemsInJobLocker(client) {
 // ===========================================================================
 
 function restorePlayerJobLockerItems(client) {
-	for(let i in getPlayerData(client).jobEquipmentCache) {
-		if(getPlayerData(client).jobEquipmentCache[i] != -1) {
+	for (let i in getPlayerData(client).jobEquipmentCache) {
+		if (getPlayerData(client).jobEquipmentCache[i] != -1) {
 			deleteItem(getPlayerData(client).jobEquipmentCache[i]);
 		}
 	}
 
-	for(let i = 0 ; i < 9 ; i++) {
+	for (let i = 0; i < 9; i++) {
 		getPlayerData(client).hotBarItems[i] = getPlayerData(client).jobLockerCache[i];
 		getPlayerData(client).jobLockerCache[i] = -1;
 	}
@@ -1951,8 +1972,8 @@ function restorePlayerJobLockerItems(client) {
 // ===========================================================================
 
 function getItemIndexFromDatabaseId(databaseId) {
-	for(let i in getServerData().items) {
-		if(getServerData().items[i].databaseId == databaseId) {
+	for (let i in getServerData().items) {
+		if (getServerData().items[i].databaseId == databaseId) {
 			return i;
 		}
 	}
@@ -1962,8 +1983,8 @@ function getItemIndexFromDatabaseId(databaseId) {
 // ===========================================================================
 
 function getItemTypeIndexFromDatabaseId(databaseId) {
-	for(let i in getServerData().itemTypes) {
-		if(getServerData().itemTypes[i].databaseId == databaseId) {
+	for (let i in getServerData().itemTypes) {
+		if (getServerData().itemTypes[i].databaseId == databaseId) {
 			return i;
 		}
 	}
@@ -1974,7 +1995,7 @@ function getItemTypeIndexFromDatabaseId(databaseId) {
 
 function playerItemActionDelayComplete(client) {
 	logToConsole(LOG_VERBOSE, `[VRR.Item]: Player ${getPlayerDisplayForConsole(client)} item action delay complete (State: ${getPlayerData(client).itemActionState})`);
-	switch(getPlayerData(client).itemActionState) {
+	switch (getPlayerData(client).itemActionState) {
 		case VRR_ITEM_ACTION_USE:
 			playerUseItem(client, getPlayerData(client).itemActionItem);
 			break;
@@ -2009,11 +2030,11 @@ function playerItemActionDelayComplete(client) {
 // ===========================================================================
 
 function getItemValueDisplayForItem(itemId) {
-	if(!getItemData(itemId)) {
+	if (!getItemData(itemId)) {
 		return "[unknown]";
 	}
 
-	if(isMeleeWeapon(getItemTypeData(getItemData(itemId).itemTypeIndex).useId)) {
+	if (isMeleeWeapon(getItemTypeData(getItemData(itemId).itemTypeIndex).useId)) {
 		return "";
 	}
 
@@ -2023,20 +2044,20 @@ function getItemValueDisplayForItem(itemId) {
 // ===========================================================================
 
 function getItemValueDisplay(itemType, value) {
-	if(getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_SKIN) {
+	if (getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_SKIN) {
 		return "any";
-	} else if(getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_FOOD || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_DRINK || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_EXTINGUISHER || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_SPRAYPAINT || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_PEPPERSPRAY) {
-		return getPercentage(toString(value), getItemTypeData(itemType).capacity)+"%";
-	} else if(getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_PHONE) {
+	} else if (getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_FOOD || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_DRINK || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_EXTINGUISHER || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_SPRAYPAINT || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_PEPPERSPRAY) {
+		return getPercentage(toString(value), getItemTypeData(itemType).capacity) + "%";
+	} else if (getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_PHONE) {
 		return toString(value);
-	} else if(getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_WEAPON || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_TAZER) {
-		if(isMeleeWeapon(getItemTypeData(itemType).useId)) {
+	} else if (getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_WEAPON || getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_TAZER) {
+		if (isMeleeWeapon(getItemTypeData(itemType).useId)) {
 			return false;
 		}
-		return toString(value)+" rounds";
-	} else if(getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_WALKIETALKIE) {
-		return toString(toString(value).slice(0,-2)+"."+toString(value).slice(-1)+"MHz");
-	} else if(getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_VEHCOLOUR) {
+		return toString(value) + " rounds";
+	} else if (getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_WALKIETALKIE) {
+		return toString(toString(value).slice(0, -2) + "." + toString(value).slice(-1) + "MHz");
+	} else if (getItemTypeData(itemType).useType == VRR_ITEM_USETYPE_VEHCOLOUR) {
 		return `[${getGameConfig().vehicleColourHex[value]}]SAMPLE[#FFFFFF]`;
 	} else {
 		return value;
@@ -2047,10 +2068,10 @@ function getItemValueDisplay(itemType, value) {
 // ===========================================================================
 
 function getPlayerFirstItemSlotByUseType(client, useType) {
-	for(let i in getPlayerData(client).hotBarItems) {
-		if(getPlayerData(client).hotBarItems[i] != -1) {
-			if(getItemData(getPlayerData(client).hotBarItems[i])) {
-				if(getItemTypeData(getItemData(getPlayerData(client).hotBarItems[i]).itemTypeIndex).useType == useType) {
+	for (let i in getPlayerData(client).hotBarItems) {
+		if (getPlayerData(client).hotBarItems[i] != -1) {
+			if (getItemData(getPlayerData(client).hotBarItems[i])) {
+				if (getItemTypeData(getItemData(getPlayerData(client).hotBarItems[i]).itemTypeIndex).useType == useType) {
 					return i;
 				}
 			}
@@ -2072,12 +2093,12 @@ function getPlayerFirstItemSlotByUseType(client, useType) {
  *
  */
 function toggleItemEnabledCommand(command, params, client) {
-	if(!getPlayerActiveItem(client)) {
+	if (!getPlayerActiveItem(client)) {
 		messagePlayerError(client, `You aren't holding anything!`);
 		return false;
 	}
 
-	if(!getItemData(getPlayerActiveItem(client))) {
+	if (!getItemData(getPlayerActiveItem(client))) {
 		messagePlayerError(client, `You aren't holding anything!`);
 		return false;
 	}
@@ -2098,7 +2119,7 @@ function toggleItemEnabledCommand(command, params, client) {
  *
  */
 function deleteItemInPlayerInventoryCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
@@ -2106,33 +2127,33 @@ function deleteItemInPlayerInventoryCommand(command, params, client) {
 	let targetClient = getPlayerFromParams(getParam(params, " ", 1));
 	let hotBarSlot = getParam(params, " ", 2);
 
-	if(!targetClient) {
+	if (!targetClient) {
 		messagePlayerError(client, getLocaleString(client, "InvalidPlayer"));
 		return false;
 	}
 
-	if(isNaN(hotBarSlot)) {
+	if (isNaN(hotBarSlot)) {
 		messagePlayerError(client, getLocaleString(client, "ItemSlotNotNumber"));
 		return false;
 	}
 
-	if(toInteger(hotBarSlot) <= 0 || toInteger(hotBarSlot) > 9) {
+	if (toInteger(hotBarSlot) <= 0 || toInteger(hotBarSlot) > 9) {
 		messagePlayerError(client, getLocaleString(client, "ItemSlotMustBeBetween", "1", "9"));
 		return false;
 	}
 
-	if(getPlayerData(targetClient).hotBarItems[hotBarSlot-1] == -1) {
+	if (getPlayerData(targetClient).hotBarItems[hotBarSlot - 1] == -1) {
 		messagePlayerError(client, `${getCharacterFullName(targetClient)} doesn't have anything in that slot!`);
 		return false;
 	}
 
-	if(!getItemData(getPlayerData(targetClient).hotBarItems[hotBarSlot-1])) {
+	if (!getItemData(getPlayerData(targetClient).hotBarItems[hotBarSlot - 1])) {
 		messagePlayerError(client, `${getCharacterFullName(targetClient)} doesn't have anything in that slot!`);
 		return false;
 	}
 
-	let tempName = getItemTypeData(getItemData(getPlayerData(targetClient).hotBarItems[hotBarSlot-1]).itemTypeIndex).name
-	deleteItem(getPlayerData(targetClient).hotBarItems[hotBarSlot-1]);
+	let tempName = getItemTypeData(getItemData(getPlayerData(targetClient).hotBarItems[hotBarSlot - 1]).itemTypeIndex).name
+	deleteItem(getPlayerData(targetClient).hotBarItems[hotBarSlot - 1]);
 	messagePlayerSuccess(client, `You deleted the {ALTCOLOUR}${tempName} {MAINCOLOUR}item in {ALTCOLOUR}${getCharacterFullName(targetClient)}'s {MAINCOLOUR}inventory`);
 }
 
@@ -2148,7 +2169,7 @@ function deleteItemInPlayerInventoryCommand(command, params, client) {
  *
  */
 function deleteAllItemsInPlayerInventoryCommand(command, params, client) {
-	if(areParamsEmpty(params)) {
+	if (areParamsEmpty(params)) {
 		messagePlayerSyntax(client, getCommandSyntaxText(command));
 		return false;
 	}
@@ -2156,12 +2177,12 @@ function deleteAllItemsInPlayerInventoryCommand(command, params, client) {
 	let targetClient = getPlayerFromParams(getParam(params, " ", 1));
 	let hotBarSlot = getParam(params, " ", 2);
 
-	if(!targetClient) {
+	if (!targetClient) {
 		messagePlayerError(client, getLocaleString(client, "InvalidPlayer"));
 		return false;
 	}
 
-	for(let i = 0; i < 9; i++) {
+	for (let i = 0; i < 9; i++) {
 		deleteItem(getPlayerData(targetClient).hotBarItems[i]);
 	}
 
@@ -2171,7 +2192,7 @@ function deleteAllItemsInPlayerInventoryCommand(command, params, client) {
 // ===========================================================================
 
 function getItemName(itemId) {
-	if(getItemData(itemId)) {
+	if (getItemData(itemId)) {
 		return getItemTypeData(getItemData(itemId).itemTypeIndex).name;
 	}
 }
@@ -2179,8 +2200,8 @@ function getItemName(itemId) {
 // ===========================================================================
 
 function getPlayerActiveItem(client) {
-	if(getPlayerData(client).activeHotBarSlot != -1) {
-		if(getPlayerData(client).hotBarItems[getPlayerData(client).activeHotBarSlot] != -1) {
+	if (getPlayerData(client).activeHotBarSlot != -1) {
+		if (getPlayerData(client).hotBarItems[getPlayerData(client).activeHotBarSlot] != -1) {
 			return getPlayerData(client).hotBarItems[getPlayerData(client).activeHotBarSlot];
 		}
 	}
@@ -2189,8 +2210,8 @@ function getPlayerActiveItem(client) {
 // ===========================================================================
 
 function getPlayerItemSlot(client, slot) {
-	if(slot != -1) {
-		if(getPlayerData(client).hotBarItems[slot] != -1) {
+	if (slot != -1) {
+		if (getPlayerData(client).hotBarItems[slot] != -1) {
 			return getPlayerData(client).hotBarItems[slot];
 		}
 	}
@@ -2199,11 +2220,11 @@ function getPlayerItemSlot(client, slot) {
 // ===========================================================================
 
 function resyncWeaponItemAmmo(client) {
-	if(getPlayerData(client).currentHotBarItem != -1) {
-		if(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem] != -1) {
-			if(getItemData(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem])) {
-				if(getGlobalConfig().weaponEquippableTypes.indexOf(getItemTypeData(getItemData(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem]).itemTypeIndex).useType)) {
-					if(getPlayerWeaponAmmo(client) <= getItemData(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem]).value) {
+	if (getPlayerData(client).currentHotBarItem != -1) {
+		if (getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem] != -1) {
+			if (getItemData(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem])) {
+				if (getGlobalConfig().weaponEquippableTypes.indexOf(getItemTypeData(getItemData(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem]).itemTypeIndex).useType)) {
+					if (getPlayerWeaponAmmo(client) <= getItemData(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem]).value) {
 						getItemData(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem]).value = getPlayerWeaponAmmo(client);
 					} else {
 						setPlayerWeaponAmmo(client, getItemTypeData(getItemData(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem]).itemTypeIndex).useId, getItemData(getPlayerData(client).hotBarItems[getPlayerData(client).currentHotBarItem]).value);
@@ -2217,21 +2238,66 @@ function resyncWeaponItemAmmo(client) {
 // ===========================================================================
 
 function getOrderPriceForItemType(itemType) {
-	return getItemTypeData(itemType).orderPrice*getServerConfig().inflationMultiplier*getItemTypeData(itemType).demandMultiplier*getItemTypeData(itemType).supplyMultiplier*getItemTypeData(itemType).riskMultiplier;
+	return getItemTypeData(itemType).orderPrice * getServerConfig().inflationMultiplier * getItemTypeData(itemType).demandMultiplier * getItemTypeData(itemType).supplyMultiplier * getItemTypeData(itemType).riskMultiplier;
 }
 
 // ===========================================================================
 
 function clearPlayerItemActionState(client) {
+	if (getPlayerData(client).itemActionItem != -1) {
+		switch (getPlayerData(client).itemActionState) {
+			case VRR_ITEM_ACTION_DROP: {
+				if (getItemTypeData(getItemData(getPlayerData(client).itemActionItem).itemTypeIndex).dropAnimationIndex != -1) {
+					makePlayerStopAnimation(client);
+				}
+				break;
+			}
+
+			case VRR_ITEM_ACTION_USE: {
+				if (getItemTypeData(getItemData(getPlayerData(client).itemActionItem).itemTypeIndex).useAnimationIndex != -1) {
+					makePlayerStopAnimation(client);
+				}
+				break;
+			}
+
+			case VRR_ITEM_ACTION_PICKUP: {
+				if (getItemTypeData(getItemData(getPlayerData(client).itemActionItem).itemTypeIndex).pickupAnimationIndex != -1) {
+					makePlayerStopAnimation(client);
+				}
+				break;
+			}
+
+			case VRR_ITEM_ACTION_TAKE: {
+				if (getItemTypeData(getItemData(getPlayerData(client).itemActionItem).itemTypeIndex).takeAnimationIndex != -1) {
+					makePlayerStopAnimation(client);
+				}
+				break;
+			}
+
+			case VRR_ITEM_ACTION_PUT: {
+				if (getItemTypeData(getItemData(getPlayerData(client).itemActionItem).itemTypeIndex).putAnimationIndex != -1) {
+					makePlayerStopAnimation(client);
+				}
+				break;
+			}
+
+			case VRR_ITEM_ACTION_SWITCH: {
+				if (getItemTypeData(getItemData(getPlayerData(client).itemActionItem).itemTypeIndex).switchAnimationIndex != -1) {
+					makePlayerStopAnimation(client);
+				}
+				break;
+			}
+		}
+	}
+
 	getPlayerData(client).itemActionState = VRR_ITEM_ACTION_NONE;
 	getPlayerData(client).itemActionItem = -1;
-	makePlayerStopAnimation(client);
 }
 
 // ===========================================================================
 
 function clearPlayerItemActionStateAfterDelay(client, delay) {
-	setTimeout(function() {
+	setTimeout(function () {
 		clearPlayerItemActionState(client);
 	}, delay);
 }
@@ -2241,17 +2307,17 @@ function clearPlayerItemActionStateAfterDelay(client, delay) {
 function showBusinessFloorInventoryToPlayer(client, businessId) {
 	let itemDisplay = [];
 
-	for(let i in getBusinessData(businessId).floorItemCache) {
-		if(getBusinessData(businessId).floorItemCache == -1) {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}{ALTCOLOUR}(Empty)`);
+	for (let i in getBusinessData(businessId).floorItemCache) {
+		if (getBusinessData(businessId).floorItemCache == -1) {
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}{ALTCOLOUR}(Empty)`);
 		} else {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: {ALTCOLOUR}${getItemTypeData(getItemData(getBusinessData(businessId).floorItemCache[i]).itemTypeIndex).name} - ${(getPlayerCurrentSubAccount(client).cash > getItemData(getBusinessData(businessId).floorItemCache[i]).buyPrice) ? "{softGreen}" : "{softRed}"}$${getItemData(getBusinessData(businessId).floorItemCache[i]).buyPrice}`);
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getBusinessData(businessId).floorItemCache[i]).itemTypeIndex).name} - ${(getPlayerCurrentSubAccount(client).cash > getItemData(getBusinessData(businessId).floorItemCache[i]).buyPrice) ? "{softGreen}" : "{softRed}"}$${getItemData(getBusinessData(businessId).floorItemCache[i]).buyPrice}`);
 		}
 	}
 
 	messagePlayerNormal(client, makeChatBoxSectionHeader(getLocaleString(client, "HeaderBusinessFloorItemList")));
 	let chunkedList = splitArrayIntoChunks(itemDisplay, 5);
-	for(let i in chunkedList) {
+	for (let i in chunkedList) {
 		messagePlayerNormal(client, chunkedList[i].join(`{MAINCOLOUR} • `), COLOUR_WHITE);
 	}
 }
@@ -2260,18 +2326,18 @@ function showBusinessFloorInventoryToPlayer(client, businessId) {
 
 function showBusinessStorageInventoryToPlayer(client, businessId) {
 	let itemDisplay = [];
-	for(let i in getBusinessData(businessId).storageItemCache) {
-		if(getBusinessData(businessId).storageItemCache == -1) {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}{ALTCOLOUR}(Empty)`);
+	for (let i in getBusinessData(businessId).storageItemCache) {
+		if (getBusinessData(businessId).storageItemCache == -1) {
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}{ALTCOLOUR}(Empty)`);
 		} else {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: {ALTCOLOUR}${getItemTypeData(getItemData(getBusinessData(businessId).storageItemCache[i]).itemTypeIndex).name}`);
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getBusinessData(businessId).storageItemCache[i]).itemTypeIndex).name}`);
 		}
 	}
 
 	messagePlayerNormal(client, makeChatBoxSectionHeader(getLocaleString(client, "HeaderBusinessStorageItemList")));
 
 	let chunkedList = splitArrayIntoChunks(itemDisplay, 5);
-	for(let i in chunkedList) {
+	for (let i in chunkedList) {
 		messagePlayerNormal(client, chunkedList[i].join(`{MAINCOLOUR} • `), COLOUR_WHITE);
 	}
 }
@@ -2280,18 +2346,18 @@ function showBusinessStorageInventoryToPlayer(client, businessId) {
 
 function showItemInventoryToPlayer(client, itemId) {
 	let itemDisplay = [];
-	for(let i in getItemData(itemId).itemCache) {
-		if(getItemData(itemId).itemCache == -1) {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}{ALTCOLOUR}(Empty)`);
+	for (let i in getItemData(itemId).itemCache) {
+		if (getItemData(itemId).itemCache == -1) {
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}{ALTCOLOUR}(Empty)`);
 		} else {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: {ALTCOLOUR}${getItemTypeData(getItemData(getItemData(itemId).itemCache[i]).itemTypeIndex).name}`);
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getItemData(itemId).itemCache[i]).itemTypeIndex).name}`);
 		}
 	}
 
 	messagePlayerNormal(client, makeChatBoxSectionHeader(getLocaleString(client, "HeaderItemItemsList")));
 
 	let chunkedList = splitArrayIntoChunks(itemDisplay, 5);
-	for(let i in chunkedList) {
+	for (let i in chunkedList) {
 		messagePlayerNormal(client, chunkedList[i].join(`{MAINCOLOUR} • `), COLOUR_WHITE);
 	}
 }
@@ -2301,31 +2367,31 @@ function showItemInventoryToPlayer(client, itemId) {
 function showPlayerInventoryToPlayer(showToClient, targetClient) {
 	resyncWeaponItemAmmo(targetClient);
 	let itemDisplay = [];
-	for(let i in getPlayerData(targetClient).hotBarItems) {
+	for (let i in getPlayerData(targetClient).hotBarItems) {
 		let colour = "{ALTCOLOUR}";
-		if(getPlayerData(targetClient).activeHotBarSlot == i) {
+		if (getPlayerData(targetClient).activeHotBarSlot == i) {
 			colour = "{yellow}";
 		}
-		if(getPlayerData(targetClient).hotBarItems[i] == -1) {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: ${colour}(Empty)`);
+		if (getPlayerData(targetClient).hotBarItems[i] == -1) {
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: ${colour}(Empty)`);
 		} else {
 			let itemTypeData = getItemTypeData(getItemData(getPlayerData(targetClient).hotBarItems[i]).itemTypeIndex);
-			if(itemTypeData != false) {
-				itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: ${colour}${itemTypeData.name}`);
+			if (itemTypeData != false) {
+				itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: ${colour}${itemTypeData.name}`);
 			} else {
-				itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: ${colour}(Empty)`);
+				itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: ${colour}(Empty)`);
 			}
 		}
 	}
 
-	if(showToClient == targetClient) {
+	if (showToClient == targetClient) {
 		messagePlayerNormal(showToClient, makeChatBoxSectionHeader(getLocaleString(showToClient, "HeaderSelfItemList")));
 	} else {
 		messagePlayerNormal(showToClient, makeChatBoxSectionHeader(getLocaleString(showToClient, "HeaderPlayerItemList", getCharacterFullName(targetClient))));
 	}
 
 	let chunkedList = splitArrayIntoChunks(itemDisplay, 5);
-	for(let i in chunkedList) {
+	for (let i in chunkedList) {
 		messagePlayerNormal(showToClient, chunkedList[i].join(`{MAINCOLOUR} • `), COLOUR_WHITE);
 	}
 }
@@ -2334,18 +2400,18 @@ function showPlayerInventoryToPlayer(showToClient, targetClient) {
 
 function showHouseInventoryToPlayer(client, houseId) {
 	let itemDisplay = [];
-	for(let i in getHouseData(houseId).itemCache) {
-		if(getHouseData(houseId).itemCache == -1) {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}{ALTCOLOUR}(Empty)`);
+	for (let i in getHouseData(houseId).itemCache) {
+		if (getHouseData(houseId).itemCache == -1) {
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}{ALTCOLOUR}(Empty)`);
 		} else {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i)+1}: {ALTCOLOUR}${getItemTypeData(getItemData(getHouseData(houseId).itemCache[i]).itemTypeIndex).name}`);
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getHouseData(houseId).itemCache[i]).itemTypeIndex).name}`);
 		}
 	}
 
 	messagePlayerNormal(client, makeChatBoxSectionHeader(getLocaleString(client, "HeaderHouseItemList")));
 	let chunkedList = splitArrayIntoChunks(itemDisplay, 5);
 
-	for(let i in chunkedList) {
+	for (let i in chunkedList) {
 		messagePlayerNormal(client, chunkedList[i].join(`{MAINCOLOUR} • `), COLOUR_WHITE);
 	}
 }
@@ -2355,7 +2421,7 @@ function showHouseInventoryToPlayer(client, houseId) {
 function switchPlayerActiveHotBarSlot(client, slotId) {
 	getPlayerData(client).itemActionItem = slotId;
 	getPlayerData(client).itemActionState = VRR_ITEM_ACTION_SWITCH;
-	if(slotId != -1) {
+	if (slotId != -1) {
 		showPlayerItemSwitchDelay(client, slotId);
 	}
 	//clearPlayerItemActionStateAfterDelay(client, getGlobalConfig().itemActionStateReset);
@@ -2365,11 +2431,11 @@ function switchPlayerActiveHotBarSlot(client, slotId) {
 
 function isPlayerItemFromJobEquipment(client, hotBarSlot) {
 	let itemId = getPlayerData(client).hotBarItems[hotBarSlot];
-	if(!getItemData(itemId)) {
+	if (!getItemData(itemId)) {
 		return false;
 	}
 
-	if(getItemData(itemId).databaseId == -1) {
+	if (getItemData(itemId).databaseId == -1) {
 		return true;
 	}
 
@@ -2379,7 +2445,7 @@ function isPlayerItemFromJobEquipment(client, hotBarSlot) {
 // ===========================================================================
 
 function getItemPosition(itemId) {
-	switch(getItemData(itemId).ownerType) {
+	switch (getItemData(itemId).ownerType) {
 		case VRR_ITEM_OWNER_PLAYER:
 			return getPlayerPosition(getPlayerFromCharacterId(getItemData(itemId).ownerId));
 
@@ -2403,14 +2469,14 @@ function createGroundPlant(itemId) {
 // ===========================================================================
 
 function getItemTypeFromParams(params) {
-	if(isNaN(params)) {
-		for(let i in getServerData().itemTypes) {
-			if(toLowerCase(getServerData().itemTypes[i].name).indexOf(toLowerCase(params)) != -1) {
+	if (isNaN(params)) {
+		for (let i in getServerData().itemTypes) {
+			if (toLowerCase(getServerData().itemTypes[i].name).indexOf(toLowerCase(params)) != -1) {
 				return i;
 			}
 		}
 	} else {
-		if(typeof getServerData().itemTypes[params] != "undefined") {
+		if (typeof getServerData().itemTypes[params] != "undefined") {
 			return toInteger(params);
 		}
 	}
@@ -2420,11 +2486,11 @@ function getItemTypeFromParams(params) {
 // ===========================================================================
 
 function getPlayerFirstAmmoItemForWeapon(client, weaponId) {
-	for(let i in getPlayerData(client).hotBarItems) {
-		if(getPlayerData(client).hotBarItems[i] != -1) {
-			if(getItemData(getPlayerData(client).hotBarItems[i]) != false) {
-				if(getItemTypeData(getItemData(getPlayerData(client).hotBarItems[i]).itemTypeIndex).useType == VRR_ITEM_USETYPE_AMMO_CLIP) {
-					if(getItemTypeData(getItemData(getPlayerData(client).hotBarItems[i]).itemTypeIndex).useId == weaponId) {
+	for (let i in getPlayerData(client).hotBarItems) {
+		if (getPlayerData(client).hotBarItems[i] != -1) {
+			if (getItemData(getPlayerData(client).hotBarItems[i]) != false) {
+				if (getItemTypeData(getItemData(getPlayerData(client).hotBarItems[i]).itemTypeIndex).useType == VRR_ITEM_USETYPE_AMMO_CLIP) {
+					if (getItemTypeData(getItemData(getPlayerData(client).hotBarItems[i]).itemTypeIndex).useId == weaponId) {
 						return i;
 					}
 				}
