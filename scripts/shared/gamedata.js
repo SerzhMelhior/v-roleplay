@@ -6706,6 +6706,14 @@ let gameData = {
 			GunMuzzleFlashStays: 20,
 			SingleSparking: 21,
 		}
+	},
+	bodyParts: {
+		[AGRP_GAME_GTA_IV]: {
+			[AGRP_SKINSELECT_HEAD]: { LocaleStringIndex: "Head", Type: AGRP_BODY_PART_TYPE_PART, Slot: 0 },
+			[AGRP_SKINSELECT_UPPER]: { LocaleStringIndex: "UpperBody", Type: AGRP_BODY_PART_TYPE_PART, Slot: 1 },
+			[AGRP_SKINSELECT_LOWER]: { LocaleStringIndex: "LowerBody", Type: AGRP_BODY_PART_TYPE_PART, Slot: 2 },
+			[AGRP_SKINSELECT_HAT]: { LocaleStringIndex: "Hat", Type: AGRP_BODY_PART_TYPE_PROP, Slot: 0 },
+		}
 	}
 };
 
