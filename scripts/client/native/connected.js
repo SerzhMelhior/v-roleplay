@@ -90,7 +90,18 @@ function deleteLocalGameElement(element) {
 // ===========================================================================
 
 function createGameVehicle(modelIndex, position, heading) {
-	return game.createVehicle(getGameConfig().vehicles[getGame()][modelIndex][0], position, heading);
+	if (getGame() != AGRP_GAME_GTA_IV) {
+		return game.createVehicle(getGameConfig().vehicles[getGame()][modelIndex][0], position, heading);
+	} else {
+		let modelId = getGameConfig().vehicles[getGame()][modelIndex][0];
+		if (natives.isModelInCdimage(modelId)) {
+			natives.requestModel(modelId);
+			natives.loadAllObjectsNow();
+			return natives.createCar(modelId, position, true);
+		}
+	}
+
+	return null;
 }
 
 // ===========================================================================
