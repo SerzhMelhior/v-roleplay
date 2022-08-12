@@ -571,16 +571,24 @@ function repairVehicle(vehicle) {
 
 // ===========================================================================
 
-function setVehicleLights(vehicle, lights) {
-	setEntityData(vehicle, "agrp.lights", lights, true);
-	sendNetworkEventToPlayer("agrp.veh.lights", null, vehicle.id, lights);
+function setVehicleLights(vehicleId, lights) {
+	if (areServerElementsSupported()) {
+		setEntityData(getElementFromId(vehicleId), "agrp.lights", lights, true);
+		sendNetworkEventToPlayer("agrp.veh.lights", null, vehicleId, lights);
+	} else {
+		sendNetworkEventToPlayer("agrp.veh.lights", null, getVehicleData(vehicleId).ivNetworkId, lights);
+	}
 }
 
 // ===========================================================================
 
-function setVehicleEngine(vehicle, engine) {
-	vehicle.engine = engine;
-	setEntityData(vehicle, "agrp.engine", engine, true);
+function setVehicleEngine(vehicleId, engine) {
+	if (areServerElementsSupported()) {
+		vehicle.engine = engine;
+		setEntityData(getElementFromId(vehicleId), "agrp.engine", engine, true);
+	} else {
+		sendNetworkEventToPlayer("agrp.veh.engine", null, getVehicleData(vehicleId).ivNetworkId, engine);
+	}
 }
 
 // ===========================================================================
