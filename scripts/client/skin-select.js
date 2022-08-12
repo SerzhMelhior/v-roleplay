@@ -21,24 +21,12 @@ let skinSelectorIndex = 0;
 let skinSelectPosition = null;
 let skinSelectHeading = null;
 
-let lastSkinSelectKeyPress = 0;
-let skinSelectKeyPressCooldown = 250;
-
-let skinSelectChoosingPart = AGRP_SKINSELECT_NONE;
-let skinSelectBodyParts = {
-	[AGRP_SKINSELECT_HEAD]: [0, 0],
-	[AGRP_SKINSELECT_UPPER]: [0, 0],
-	[AGRP_SKINSELECT_LOWER]: [0, 0],
-	[AGRP_SKINSELECT_HAT]: [0, 0],
-};
-
 // ===========================================================================
 
 function initSkinSelectScript() {
 	logToConsole(LOG_DEBUG, "[VRR.SkinSelect]: Initializing skin selector script ...");
 	skinSelectMessageFontTop = loadSkinSelectMessageFontTop();
-	skinSelectMessageFontBottomUpper = loadSkinSelectMessageFontBottom();
-	skinSelectMessageFontBottomLower = loadSkinSelectMessageFontBottom();
+	skinSelectMessageFontBottom = loadSkinSelectMessageFontBottom();
 	logToConsole(LOG_DEBUG, "[VRR.SkinSelect]: Skin selector script initialized!");
 }
 
@@ -57,13 +45,6 @@ function loadSkinSelectMessageFontBottom() {
 // ===========================================================================
 
 function processSkinSelectKeyPress(keyCode) {
-	// Make sure they aren't spamming it (causes crashes)
-	if (sdl.ticks - lastSkinSelectKeyPress < skinSelectKeyPressCooldown) {
-		return false;
-	}
-
-	lastSkinSelectKeyPress = sdl.ticks;
-
 	if (usingSkinSelector) {
 		if (keyCode == SDLK_LEFT || keyCode == SDLK_A) {
 			if (skinSelectorIndex >= allowedSkins.length - 1) {
@@ -79,15 +60,6 @@ function processSkinSelectKeyPress(keyCode) {
 				skinSelectorIndex = allowedSkins.length - 1;
 			} else {
 				skinSelectorIndex = skinSelectorIndex - 1;
-			}
-			logToConsole(LOG_DEBUG, `Switching to skin ${allowedSkins[skinSelectorIndex][1]} (Index: ${skinSelectorIndex}, Skin: ${allowedSkins[skinSelectorIndex][0]})`);
-			skinSelectMessageTextTop = allowedSkins[skinSelectorIndex][1];
-			setLocalPlayerSkin(allowedSkins[skinSelectorIndex][0]);
-		} else if (keyCode == SDLK_UP || keyCode == SDLK_W) {
-			if (skinSelectorIndex >= allowedSkins.length - 1) {
-				skinSelectorIndex = 1;
-			} else {
-				skinSelectorIndex = skinSelectorIndex + 1;
 			}
 			logToConsole(LOG_DEBUG, `Switching to skin ${allowedSkins[skinSelectorIndex][1]} (Index: ${skinSelectorIndex}, Skin: ${allowedSkins[skinSelectorIndex][0]})`);
 			skinSelectMessageTextTop = allowedSkins[skinSelectorIndex][1];
@@ -109,13 +81,10 @@ function processSkinSelectKeyPress(keyCode) {
 
 function processSkinSelectRendering() {
 	if (usingSkinSelector) {
-		if (skinSelectMessageFontTop != null && skinSelectMessageFontBottomUpper != null && skinSelectMessageFontBottomLower != null) {
-			if (skinSelectMessageTextTop != "" && skinSelectMessageTextBottomUpper != "" && skinSelectMessageTextBottomLower != "") {
+		if (skinSelectMessageFontTop != null && skinSelectMessageFontBottom != null) {
+			if (skinSelectMessageTextTop != "" && skinSelectMessageTextBottom != "") {
 				skinSelectMessageFontTop.render(skinSelectMessageTextTop, [0, game.height - 100], game.width, 0.5, 0.0, skinSelectMessageFontTop.size, skinSelectMessageColourTop, true, true, false, true);
-				skinSelectMessageFontBottomUpper.render(skinSelectMessageTextBottomUpper, [0, game.height - 65], game.width, 0.5, 0.0, skinSelectMessageTextBottomUpper.size, skinSelectMessageColourBottom, true, true, false, true);
-				if (getGame() == AGRP_GAME_GTA_IV) {
-					skinSelectMessageFontBottomLower.render(skinSelectMessageTextBottomLower, [0, game.height - 65], game.width, 0.5, 0.0, skinSelectMessageTextBottomLower.size, skinSelectMessageColourBottom, true, true, false, true);
-				}
+				skinSelectMessageFontBottom.render(skinSelectMessageTextBottom, [0, game.height - 65], game.width, 0.5, 0.0, skinSelectMessageFontBottom.size, skinSelectMessageColourBottom, true, true, false, true);
 			}
 		}
 	}
