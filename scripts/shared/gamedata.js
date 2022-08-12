@@ -174,8 +174,8 @@ let supportedFeatures = {
 		[AGRP_GAME_GTA_III]: true,
 		[AGRP_GAME_GTA_VC]: true,
 		[AGRP_GAME_GTA_SA]: true,
-		[AGRP_GAME_GTA_IV]: false,
-		[AGRP_GAME_GTA_IV]: false,
+		[AGRP_GAME_GTA_IV]: true,
+		[AGRP_GAME_GTA_IV]: true,
 		[AGRP_GAME_GTA_IV_EFLC]: false,
 		[AGRP_GAME_MAFIA_ONE]: false,
 		[AGRP_GAME_MAFIA_TWO]: false,
@@ -202,8 +202,8 @@ let supportedFeatures = {
 		[AGRP_GAME_MAFIA_THREE]: false
 	},
 	pedScale: {
-		[AGRP_GAME_GTA_III]: false,
-		[AGRP_GAME_GTA_VC]: false,
+		[AGRP_GAME_GTA_III]: true,
+		[AGRP_GAME_GTA_VC]: true,
 		[AGRP_GAME_GTA_SA]: false,
 		[AGRP_GAME_GTA_IV]: false,
 		[AGRP_GAME_GTA_IV_EFLC]: false,
@@ -215,8 +215,8 @@ let supportedFeatures = {
 		[AGRP_GAME_GTA_III]: true,
 		[AGRP_GAME_GTA_VC]: true,
 		[AGRP_GAME_GTA_SA]: true,
-		[AGRP_GAME_GTA_IV]: true,
-		[AGRP_GAME_GTA_IV_EFLC]: true,
+		[AGRP_GAME_GTA_IV]: false,
+		[AGRP_GAME_GTA_IV_EFLC]: false,
 		[AGRP_GAME_MAFIA_ONE]: false,
 		[AGRP_GAME_MAFIA_TWO]: false,
 		[AGRP_GAME_MAFIA_THREE]: false
