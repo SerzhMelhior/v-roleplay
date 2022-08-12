@@ -1891,3 +1891,9 @@ function isPlayerInVehicleDriverSeat(client) {
 }
 
 // ===========================================================================
+
+function vehicleSpawnedByPlayer(client, vehicleIndex, networkId) {
+	getVehicleData(vehicleIndex).ivNetworkId = networkId;
+}
+
+// ===========================================================================
