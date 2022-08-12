@@ -74,6 +74,8 @@ function addAllNetworkEventHandlers() {
 	addNetworkEventHandler("agrp.vehBuyState", receiveVehiclePurchaseStateUpdateFromClient);
 	addNetworkEventHandler("agrp.playerPedId", receivePlayerPedNetworkId);
 	addNetworkEventHandler("agrp.playerCop", setPlayerAsCopState);
+
+	addNetworkEventHandler("agrp.vehicleSpawned", vehicleSpawnedByPlayer)
 }
 
 // ===========================================================================
@@ -1114,7 +1116,7 @@ function sendJobToPlayer(client, jobId, jobLocationId, name, position) {
 
 // ==========================================================================
 
-function sendVehicleToPlayer(client, vehicleId, model, position, heading, colour1, colour2, colour3, colour4) {
+function sendVehicleToPlayer(client, vehicleId, networkId, model, position, heading, colour1, colour2, colour3, colour4) {
 	sendNetworkEventToPlayer("agrp.vehicle", client, vehicleId, model, position, heading, colour1, colour2, colour3, colour4);
 }
 
@@ -1152,7 +1154,7 @@ function sendAllJobsToPlayer(client) {
 function sendAllVehiclesToPlayer(client) {
 	let vehicles = getServerData().vehicles;
 	for (let i in vehicles) {
-		sendVehicleToPlayer(client, vehicles[i].index, vehicles[i].model, vehicles[i].syncPosition, vehicles[i].syncHeading, vehicles[i].colour1, vehicles[i].colour2, vehicles[i].colour3, vehicles[i].colour4);
+		sendVehicleToPlayer(client, vehicles[i].index, vehicles[i].ivNetworkId, vehicles[i].model, vehicles[i].syncPosition, vehicles[i].syncHeading, vehicles[i].colour1, vehicles[i].colour2, vehicles[i].colour3, vehicles[i].colour4);
 	}
 }
 
