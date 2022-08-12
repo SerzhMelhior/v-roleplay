@@ -138,3 +138,8 @@ const AGRP_NPC_ACTION_SPRINTTO = 4;
 const AGRP_NPC_ACTION_FOLLOW = 5;
 const AGRP_NPC_ACTION_DEFEND = 6;
 const AGRP_NPC_ACTION_GUARD_AREA = 7;
+
+// Body Part Types (for HD universe GTA games)
+const AGRP_BODY_PART_TYPE_NONE = 0; 				// None
+const AGRP_BODY_PART_TYPE_PART = 1; 				// Body part (head, upper body, lower body, etc)
+const AGRP_BODY_PART_TYPE_PROP = 2; 				// Prop (hat, watch, glasses, etc)
