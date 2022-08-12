@@ -30,7 +30,7 @@ class VehicleData {
 
 // ===========================================================================
 
-function receiveVehicleFromServer(vehicleId, position, model, colour1, colour2, colour3 = 0, colour4 = 0, locked = false, lights = false, engine = false, licensePlate = "") {
+function receiveVehicleFromServer(vehicleId, networkId, position, model, colour1, colour2, colour3 = 0, colour4 = 0, locked = false, lights = false, engine = false, licensePlate = "") {
 	logToConsole(LOG_DEBUG, `[VRR.Vehicle] Received vehicle ${vehicleId} (${getVehicleNameFromModel(model, getGame())}) from server`);
 
 	if (getGame() != AGRP_GAME_GTA_IV) {
@@ -50,8 +50,16 @@ function receiveVehicleFromServer(vehicleId, position, model, colour1, colour2, 
 		vehicleData.lights = lights;
 		vehicleData.locked = locked;
 		vehicleData.licensePlate = "";
+		vehicleData.networkId = networkId;
 
-		let vehicle = natives.getVehicleFromNetworkId(vehicleId.ivNetworkId);
+		if (natives.getVehicleFromNetworkId(vehicleId.ivNetworkId) != null) {
+			vehicleData.vehicle = natives.getVehicleFromNetworkId(vehicleId.ivNetworkId);
+		} else {
+			let vehicle = createGameVehicle(model, position, heading, colour1, colour2, colour3, colour4);
+			vehicleData.vehicle = vehicle;
+
+			sendNetworkEventToServer("agrp.vehicleCreated", vehicleId, natives.getNetworkIdFromVehicle(vehicle));
+		}
 	} else {
 		//logToConsole(LOG_DEBUG, `[VRR.Vehicle] Vehicle ${vehicleId} doesn't exist. Adding ...`);
 		//let tempVehicleData = new VehicleData(vehicleId, name, position, blipModel, pickupModel);
