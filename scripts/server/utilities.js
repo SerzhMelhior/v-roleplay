@@ -473,3 +473,23 @@ function updateAllPlayerWeaponDamageStates() {
 }
 
 // ===========================================================================
+
+function moveAllPlayersToNewLobby(hostClient) {
+
+}
+
+// ===========================================================================
+
+function resetPlayerForLobbySwitch(client) {
+	clearPlayerWeapons(client);
+	setPlayerPosition(client, getPlayerData(client).syncPosition);
+	setPlayerHeading(client, getPlayerData(client).syncHeading);
+	//setPlayerInterior(client, spawnInterior);
+	//setPlayerDimension(client, spawnDimension);
+	restorePlayerCamera(client);
+	setPlayerSkin(client, getPlayerCurrentSubAccount(client).skin);
+
+	onPlayerSpawn(client);
+}
+
+// ===========================================================================
