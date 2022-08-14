@@ -565,80 +565,97 @@ function isVehicleObject(vehicle) {
 
 // ===========================================================================
 
-function repairVehicle(vehicle) {
-	vehicle.fix();
-}
-
-// ===========================================================================
-
-function setVehicleLights(vehicleId, lights) {
+function repairVehicle(vehicleIndex) {
 	if (areServerElementsSupported()) {
-		setEntityData(getElementFromId(vehicleId), "agrp.lights", lights, true);
-		sendNetworkEventToPlayer("agrp.veh.lights", null, vehicleId, lights);
+		getElementFromId(vehicleIndex).vehicle.fix();
 	} else {
-		sendNetworkEventToPlayer("agrp.veh.lights", null, getVehicleData(vehicleId).ivNetworkId, lights);
+		sendNetworkEventToPlayer("agrp.veh.fix", null, vehicleIndex);
 	}
 }
 
 // ===========================================================================
 
-function setVehicleEngine(vehicleId, engine) {
+
+function setVehicleLights(vehicleIndex, lights) {
 	if (areServerElementsSupported()) {
-		vehicle.engine = engine;
-		setEntityData(getElementFromId(vehicleId), "agrp.engine", engine, true);
+		setEntityData(getElementFromId(vehicleIndex), "agrp.lights", lights, true);
+		sendNetworkEventToPlayer("agrp.veh.lights", null, vehicleIndex, lights);
 	} else {
-		sendNetworkEventToPlayer("agrp.veh.engine", null, getVehicleData(vehicleId).ivNetworkId, engine);
+		sendNetworkEventToPlayer("agrp.veh.lights", null, vehicleIndex, lights);
 	}
 }
 
 // ===========================================================================
 
-function setVehicleLocked(vehicle, locked) {
-	vehicle.locked = locked;
-}
-
-// ===========================================================================
-
-function setVehicleSiren(vehicle, siren) {
-	vehicle.siren = siren;
-}
-
-// ===========================================================================
-
-function getVehicleLights(vehicle) {
-	return vehicle.lights;
-}
-
-// ===========================================================================
-
-function getVehicleEngine(vehicle) {
-	return vehicle.engine;
-}
-
-// ===========================================================================
-
-function getVehicleLocked(vehicle) {
-	return vehicle.lockedStatus;
-}
-
-// ===========================================================================
-
-function getVehicleSiren(vehicle) {
-	return vehicle.siren;
-}
-
-// ===========================================================================
-
-function setVehicleColours(vehicle, colour1, colour2, colour3 = -1, colour4 = -1) {
-	vehicle.colour1 = colour1;
-	vehicle.colour2 = colour2;
-
-	if (colour3 != -1) {
-		vehicle.colour3 = colour3;
+function setVehicleEngine(vehicleIndex, engine) {
+	if (areServerElementsSupported()) {
+		getElementFromId(vehicleIndex).engine = engine;
+		setEntityData(getElementFromId(vehicleIndex), "agrp.engine", engine, true);
+	} else {
+		sendNetworkEventToPlayer("agrp.veh.engine", null, vehicleIndex, engine);
 	}
+}
 
-	if (colour4 != -1) {
-		vehicle.colour4 = colour4;
+// ===========================================================================
+
+function setVehicleLocked(vehicleIndex, locked) {
+	if (areServerElementsSupported()) {
+		getElementFromId(vehicleIndex).vehicle.locked = locked;
+	} else {
+		sendNetworkEventToPlayer("agrp.veh.locked", null, vehicleIndex, locked);
+	}
+}
+
+// ===========================================================================
+
+function setVehicleSiren(vehicleIndex, siren) {
+	if (areServerElementsSupported()) {
+		getVehicleData(vehicleIndex).vehicle.siren = siren;
+	} else {
+		sendNetworkEventToPlayer("agrp.veh.siren", null, vehicleIndex, siren);
+	}
+}
+
+// ===========================================================================
+
+function getVehicleLights(vehicleIndex) {
+	return getVehicleData(vehicleIndex).lights;
+}
+
+// ===========================================================================
+
+function getVehicleEngine(vehicleIndex) {
+	return getVehicleData(vehicleIndex).engine;
+}
+
+// ===========================================================================
+
+function getVehicleLocked(vehicleIndex) {
+	return getVehicleData(vehicleIndex).locked;
+}
+
+// ===========================================================================
+
+function getVehicleSiren(vehicleIndex) {
+	return getVehicleData(vehicleIndex).siren;
+}
+
+// ===========================================================================
+
+function setVehicleColours(vehicleIndex, colour1, colour2, colour3 = -1, colour4 = -1) {
+	if (areServerElementsSupported()) {
+		getVehicleData(vehicleIndex).vehicle.colour1 = colour1;
+		getVehicleData(vehicleIndex).vehicle.colour2 = colour2;
+
+		if (colour3 != -1) {
+			getVehicleData(vehicleIndex).vehicle.colour3 = colour3;
+		}
+
+		if (colour4 != -1) {
+			getVehicleData(vehicleIndex).vehicle.colour4 = colour4;
+		}
+	} else {
+		sendNetworkEventToPlayer("agrp.veh.colours", null, vehicleIndex, colour1, colour2, colour3, colour4);
 	}
 }
 
@@ -717,7 +734,7 @@ function setPlayerFightStyle(client, fightStyleId) {
 		return false;
 	}
 
-	if (!areFightStylesSupported()) {
+	if (!isGameFeatureSupported("fightStyles")) {
 		return false;
 	}
 
