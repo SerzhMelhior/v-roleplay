@@ -3,7 +3,7 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: localechooser.js
+// FILE: locale-chooser.js
 // DESC: Provides locale chooser GUI
 // TYPE: Client (JavaScript)
 // ===========================================================================

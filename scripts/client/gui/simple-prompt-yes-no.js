@@ -3,8 +3,8 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: yesno.js
-// DESC: Provides yes/no prompt dialog GUI
+// FILE: simple-prompt-yes-no.js
+// DESC: Provides simple yes/no prompt dialog GUI
 // TYPE: Client (JavaScript)
 // ===========================================================================
 

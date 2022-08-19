@@ -90,21 +90,24 @@
 	<file type="client" src="files/images/asshat-logo.png" />
 
 	<!-- GUI -->
-	<script src="scripts/client/gui/2fa.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/bizmgr.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/changepass.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/charselect.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/clanmgr.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/error.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/housemgr.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/info.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/two-factor-authentication.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/business-manager.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/change-password.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/character-select.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/clan-manager.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/simple-error.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/house-manager.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/simple-info.js" type="client" language="javascript" />
 	<script src="scripts/client/gui/login.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/list.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/newchar.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/simple-list.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/new-character.js" type="client" language="javascript" />
 	<script src="scripts/client/gui/register.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/resetpass.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/yesno.js" type="client" language="javascript" />
-	<script src="scripts/client/gui/localechooser.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/reset-password.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/simple-prompt-yes-no.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/locale-chooser.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/keybind-manager.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/account-settings.js" type="client" language="javascript" />
+	<script src="scripts/client/gui/server-settings.js" type="client" language="javascript" />
 
 	<!-- Client Scripts -->
 	<script src="scripts/client/afk.js" type="client" language="javascript" />

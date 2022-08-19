@@ -3,7 +3,7 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: resetpass.js
+// FILE: reset-password.js
 // DESC: Provides password reset GUI
 // TYPE: Client (JavaScript)
 // ===========================================================================

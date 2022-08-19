@@ -3,7 +3,7 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: list.js
+// FILE: simple-list.js
 // DESC: Provides simple list GUI
 // TYPE: Client (JavaScript)
 // ===========================================================================

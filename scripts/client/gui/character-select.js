@@ -3,7 +3,7 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: charselect.js
+// FILE: character-select.js
 // DESC: Provides character select GUI
 // TYPE: Client (JavaScript)
 // ===========================================================================

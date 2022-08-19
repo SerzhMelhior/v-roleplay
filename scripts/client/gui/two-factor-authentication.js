@@ -3,7 +3,7 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: 2fa.js
+// FILE: two-factor-authentication.js
 // DESC: Provides two factor authentication GUI
 // TYPE: Client (JavaScript)
 // ===========================================================================

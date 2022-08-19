@@ -3,12 +3,12 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: error.js
-// DESC: Provides error box GUI
+// FILE: simple-info.js
+// DESC: Provides info dialog box GUI
 // TYPE: Client (JavaScript)
 // ===========================================================================
 
-let errorDialog = {
+let infoDialog = {
 	window: null,
 	messageLabel: null,
 	okayButton: null,
@@ -16,12 +16,11 @@ let errorDialog = {
 
 // ===========================================================================
 
-function initErrorDialogGUI() {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Creating error GUI ...`);
-	errorDialog.window = mexui.window(getScreenWidth() / 2 - 200, getScreenHeight() / 2 - 70, 400, 140, 'ERROR', {
+function initInfoDialogGUI() {
+	logToConsole(LOG_DEBUG, `[VRR.GUI] Creating info dialog GUI ...`);
+	infoDialog.window = mexui.window(getScreenWidth() / 2 - 200, getScreenHeight() / 2 - 70, 400, 140, 'Information', {
 		main: {
 			backgroundColour: toColour(secondaryColour[0], secondaryColour[1], secondaryColour[2], windowAlpha),
-			transitionTime: 500,
 		},
 		title: {
 			textSize: 11.0,
@@ -35,11 +34,11 @@ function initErrorDialogGUI() {
 		},
 	});
 
-	errorDialog.messageLabel = errorDialog.window.text(15, 50, 370, 20, 'Error Message', {
+	infoDialog.messageLabel = infoDialog.window.text(15, 50, 370, 20, 'Information Message', {
 		main: {
 			textSize: 10.0,
 			textAlign: 0.5,
-			textColour: toColour(255, 255, 255, 255),
+			textColour: toColour(255, 255, 255, 220),
 			textFont: mainFont,
 		},
 		focused: {
@@ -47,7 +46,7 @@ function initErrorDialogGUI() {
 		},
 	});
 
-	errorDialog.okayButton = errorDialog.window.button(5, 105, 390, 30, 'OK', {
+	infoDialog.okayButton = infoDialog.window.button(5, 105, 390, 30, 'OK', {
 		main: {
 			backgroundColour: toColour(primaryColour[0], primaryColour[1], primaryColour[2], buttonAlpha),
 			textColour: toColour(primaryTextColour[0], primaryTextColour[1], primaryTextColour[2], 255),
@@ -58,29 +57,28 @@ function initErrorDialogGUI() {
 		focused: {
 			borderColour: toColour(primaryColour[0], primaryColour[1], primaryColour[2], 255),
 		},
-	}, closeErrorDialog);
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Created error GUI ...`);
+	}, closeInfoDialog);
+	logToConsole(LOG_DEBUG, `[VRR.GUI] Created info dialog GUI`);
 }
 
 // ===========================================================================
 
-function showErrorGUI(errorMessage, errorTitle, buttonText) {
-	closeAllWindows();
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Showing error window. Error: ${errorTitle} - ${errorMessage}`);
-	setChatWindowEnabled(false);
-	mexui.setInput(true);
-	errorDialog.messageLabel.text = errorMessage;
-	errorDialog.okayButton.text = buttonText;
-	errorDialog.window.title = errorTitle;
-	errorDialog.window.shown = true;
-}
-
-// ===========================================================================
-
-function closeErrorDialog() {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Closing error dialog`);
-	errorDialog.window.shown = false;
+function closeInfoDialog() {
+	logToConsole(LOG_DEBUG, `[VRR.GUI] Closing info dialog`);
+	infoDialog.window.shown = false;
 	mexui.setInput(false);
+}
+
+// ===========================================================================
+
+function showInfoGUI(infoMessage, infoTitle, buttonText) {
+	closeAllWindows();
+	logToConsole(LOG_DEBUG, `[VRR.GUI] Showing info dialog window. Info: ${infoTitle} - ${infoMessage}`);
+	mexui.setInput(true);
+	infoDialog.messageLabel.text = infoMessage;
+	infoDialog.okayButton.text = buttonText;
+	infoDialog.window.title = infoTitle;
+	infoDialog.window.shown = true;
 }
 
 // ===========================================================================

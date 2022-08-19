@@ -3,7 +3,7 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: changepass.js
+// FILE: change-password.js
 // DESC: Provides change password GUI
 // TYPE: Client (JavaScript)
 // ===========================================================================

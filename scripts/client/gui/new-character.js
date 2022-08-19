@@ -3,7 +3,7 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: newchar.js
+// FILE: new-character.js
 // DESC: Provides new character creation GUI
 // TYPE: Client (JavaScript)
 // ===========================================================================
