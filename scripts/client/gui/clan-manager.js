@@ -205,7 +205,7 @@ function initClanManagerGUI() {
 
 	let gridWidth = 80 * (clanManager.window.width / 100);
 	let gridHeight = 80 * (clanManager.window.height / 100);
-	clanManager.ranksTab.grid = clanManager.window.grid(5, 30, 450, 200, {
+	clanManager.ranksTab.grid = clanManager.window.grid(5, 30, gridWidth, gridHeight, {
 		main: {
 			backgroundColour: toColour(secondaryColour[0], secondaryColour[1], secondaryColour[2], windowAlpha),
 		},
