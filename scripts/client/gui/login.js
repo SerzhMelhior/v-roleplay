@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: login.js
 // DESC: Provides login GUI
@@ -20,7 +21,7 @@ let login = {
 // ===========================================================================
 
 let loginHTML =
-`<html>
+	`<html>
     <head>
         <title>Asshat Gaming Roleplay: Login</title>
         <style type="text/css" rel="stylesheet">
@@ -42,8 +43,8 @@ let loginHTML =
 // ===========================================================================
 
 function initLoginGUI() {
-    logToConsole(LOG_DEBUG, `[VRR.GUI] Creating login GUI ...`);
-	login.window = mexui.window(getScreenWidth()/2-150, getScreenHeight()/2-135, 300, 275, 'LOGIN', {
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Creating login GUI ...`);
+	login.window = mexui.window(getScreenWidth() / 2 - 150, getScreenHeight() / 2 - 135, 300, 275, 'LOGIN', {
 		main: {
 			backgroundColour: toColour(secondaryColour[0], secondaryColour[1], secondaryColour[2], windowAlpha),
 			transitionTime: 500,
@@ -60,7 +61,7 @@ function initLoginGUI() {
 			borderColour: toColour(0, 0, 0, 0),
 		},
 	});
-	login.window.titleBarIconSize = toVector2(0,0);
+	login.window.titleBarIconSize = toVector2(0, 0);
 	login.window.titleBarHeight = 0;
 	login.window.titleBarShown = false;
 
@@ -108,7 +109,7 @@ function initLoginGUI() {
 	login.loginButton = login.window.button(20, 205, 260, 30, 'LOGIN', {
 		main: {
 			backgroundColour: toColour(primaryColour[0], primaryColour[1], primaryColour[2], buttonAlpha),
-			textColour: toColour(0, 0, 0, 255),
+			textColour: toColour(primaryTextColour[0], primaryTextColour[1], primaryTextColour[2], 255),
 			textSize: 12.0,
 			textFont: mainFont,
 			textAlign: 0.5,
@@ -121,7 +122,7 @@ function initLoginGUI() {
 	login.forgotPasswordButton = login.window.button(180, 240, 100, 15, 'RESET PASS', {
 		main: {
 			backgroundColour: toColour(primaryColour[0], primaryColour[1], primaryColour[2], buttonAlpha),
-			textColour: toColour(0, 0, 0, 255),
+			textColour: toColour(primaryTextColour[0], primaryTextColour[1], primaryTextColour[2], 255),
 			textSize: 8.0,
 			textFont: mainFont,
 			textAlign: 0.5,
@@ -143,35 +144,35 @@ function initLoginGUI() {
 		},
 	});
 
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Created login GUI`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Created login GUI`);
 }
 
 // ===========================================================================
 
 function showLoginGUI() {
 	closeAllWindows();
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Showing login window`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Showing login window`);
 	setChatWindowEnabled(false);
 	mexui.setInput(true);
 	login.window.shown = true;
 	mexui.focusedControl = login.passwordInput;
 	guiSubmitKey = checkLogin;
 
-	showLocaleChooserGUI(new Vec2(getScreenWidth()/2-(localeChooser.window.size.x/2), login.window.position.y+login.window.size.y+20));
+	showLocaleChooserGUI(new Vec2(getScreenWidth() / 2 - (localeChooser.window.size.x / 2), login.window.position.y + login.window.size.y + 20));
 	//showSmallGameMessage(`If you don't have a mouse cursor, press ${toUpperCase(getKeyNameFromId(disableGUIKey))} to disable GUI`, COLOUR_WHITE, 7500);
 }
 
 // ===========================================================================
 
 function checkLogin() {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Checking login with server ...`);
-	sendNetworkEventToServer("vrr.checkLogin", login.passwordInput.lines[0]);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Checking login with server ...`);
+	sendNetworkEventToServer("agrp.checkLogin", login.passwordInput.lines[0]);
 }
 
 // ===========================================================================
 
 function loginFailed(errorMessage) {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Server reports login failed`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Server reports login failed`);
 	login.messageLabel.text = errorMessage;
 	login.messageLabel.styles.main.textColour = toColour(180, 32, 32, 255);
 	login.passwordInput.text = "";
@@ -180,7 +181,7 @@ function loginFailed(errorMessage) {
 // ===========================================================================
 
 function loginSuccess() {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Server reports login was successful`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Server reports login was successful`);
 	guiSubmitKey = false;
 	closeAllWindows();
 }
@@ -189,9 +190,9 @@ function loginSuccess() {
 
 function switchToPasswordResetGUI() {
 	//closeAllWindows();
-	//logToConsole(LOG_DEBUG, `[VRR.GUI] Showing password reset dialog window`);
+	//logToConsole(LOG_DEBUG, `[AGRP.GUI] Showing password reset dialog window`);
 	//showResetPasswordGUI();
-	sendNetworkEventToServer("vrr.checkResetPassword", "");
+	sendNetworkEventToServer("agrp.checkResetPassword", "");
 	return false;
 }
 

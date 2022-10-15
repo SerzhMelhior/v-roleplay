@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: clanmgr.js
 // DESC: Provides clan manager GUI
@@ -9,12 +10,16 @@
 
 let clanManager = {
 	window: null,
-	generalTab: null,
-	ranksTab: null,
-	membersTab: null,
-	vehiclesTab: null,
-	businessesTab: null,
-	housesTab: null,
+	generalTabButton: null,
+	ranksTabButton: null,
+	membersTabButton: null,
+	vehiclesTabButton: null,
+	businessesTabButton: null,
+	housesTabButton: null,
 };
 
 // ===========================================================================
+
+function initClanManagerGUI() {
+
+}

@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: afk.js
 // DESC: Provides AFK detection
@@ -9,8 +10,8 @@
 
 // Init AFK script
 function initAFKScript() {
-	logToConsole(LOG_DEBUG, "[VRR.AFK]: Initializing AFK script ...");
-	logToConsole(LOG_DEBUG, "[VRR.AFK]: AFK script initialized!");
+	logToConsole(LOG_DEBUG, "[AGRP.AFK]: Initializing AFK script ...");
+	logToConsole(LOG_DEBUG, "[AGRP.AFK]: AFK script initialized!");
 }
 
 // ===========================================================================

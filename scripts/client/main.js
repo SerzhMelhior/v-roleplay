@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: main.js
 // DESC: Main client script (will be reorganized into individual files later)
@@ -18,8 +19,8 @@ let isSpawned = false;
 
 let garbageCollectorInterval = null;
 
-let parkedVehiclePosition = false;
-let parkedVehicleHeading = false;
+//let parkedVehiclePosition = false;
+//let parkedVehicleHeading = false;
 
 let renderHUD = true;
 let renderLabels = true;
@@ -30,7 +31,7 @@ let renderHotBar = true;
 let renderItemActionDelay = true;
 let renderInteriorLights = true;
 
-let logLevel = LOG_INFO|LOG_DEBUG|LOG_VERBOSE;
+let logLevel = LOG_INFO | LOG_DEBUG;
 
 let weaponDamageEnabled = {};
 let weaponDamageEvent = {};
@@ -60,10 +61,11 @@ let interiorLightsEnabled = true;
 let interiorLightsColour = toColour(0, 0, 0, 150);
 
 let mouseCameraEnabled = false;
+let mouseCursorEnabled = false;
 
 let currentPickup = false;
 
-let vehiclePurchaseState = VRR_VEHBUYSTATE_NONE;
+let vehiclePurchaseState = AGRP_VEHBUYSTATE_NONE;
 let vehiclePurchasing = null;
 let vehiclePurchasePosition = null;
 
@@ -78,6 +80,8 @@ let guiDownKey = false;
 // Pre-cache all allowed skins
 let allowedSkins = getAllowedSkins(getGame());
 
+let profanityFilterEnabled = false;
+
 let localLocaleId = 0;
 
 let serverData = {
@@ -88,5 +92,15 @@ let serverData = {
 	vehicles: [],
 	jobs: [],
 };
+
+let localPlayerMoney = 0;
+let localPlayerMoneyInterval = null;
+
+let currencyString = "${AMOUNT}";
+
+let mapChangeWarning = false;
+
+let cruiseControlEnabled = false;
+let cruiseControlSpeed = 0.0;
 
 // ===========================================================================

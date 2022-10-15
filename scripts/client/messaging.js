@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: messaging.js
 // DESC: Provides messaging/textdraw functions and usage
@@ -22,10 +23,10 @@ let smallGameMessageTimer = null;
 // ===========================================================================
 
 function initMessagingScript() {
-	logToConsole(LOG_DEBUG, "[VRR.Messaging]: Initializing messaging script ...");
+	logToConsole(LOG_DEBUG, "[AGRP.Messaging]: Initializing messaging script ...");
 	smallGameMessageFonts = loadSmallGameMessageFonts();
 	bigGameMessageFonts = loadSmallGameMessageFonts();
-	logToConsole(LOG_DEBUG, "[VRR.Messaging]: Messaging script initialized!");
+	logToConsole(LOG_DEBUG, "[AGRP.Messaging]: Messaging script initialized!");
 }
 
 // ===========================================================================
@@ -33,8 +34,14 @@ function initMessagingScript() {
 function loadSmallGameMessageFonts() {
 	let tempSmallGameMessageFonts = {};
 	let fontStream = openFile("files/fonts/pricedown.ttf");
-	if(fontStream != null) {
+	if (fontStream != null) {
 		tempSmallGameMessageFonts["Pricedown"] = lucasFont.createFont(fontStream, 20.0);
+		fontStream.close();
+	}
+
+	fontStream = openFile("files/fonts/aurora-bold-condensed.ttf");
+	if (fontStream != null) {
+		tempSmallGameMessageFonts["AuroraBdCnBT"] = lucasFont.createFont(fontStream, 20.0);
 		fontStream.close();
 	}
 
@@ -49,8 +56,14 @@ function loadSmallGameMessageFonts() {
 function loadBigGameMessageFont() {
 	let tempBigGameMessageFonts = {};
 	let fontStream = openFile("files/fonts/pricedown.ttf");
-	if(fontStream != null) {
+	if (fontStream != null) {
 		tempBigGameMessageFonts["Pricedown"] = lucasFont.createFont(fontStream, 28.0);
+		fontStream.close();
+	}
+
+	fontStream = openFile("files/fonts/aurora-bold-condensed.ttf");
+	if (fontStream != null) {
+		tempBigGameMessageFonts["AuroraBdCnBT"] = lucasFont.createFont(fontStream, 20.0);
 		fontStream.close();
 	}
 
@@ -63,10 +76,12 @@ function loadBigGameMessageFont() {
 // ===========================================================================
 
 function processSmallGameMessageRendering() {
-	if(renderSmallGameMessage) {
-		if(smallGameMessageText != "") {
-			if(smallGameMessageFonts[smallGameMessageFontName] != null) {
-				smallGameMessageFonts[smallGameMessageFontName].render(smallGameMessageText, [0, game.height-90], game.width, 0.5, 0.0, smallGameMessageFonts[smallGameMessageFontName].size, smallGameMessageColour, true, true, false, true);
+	logToConsole(LOG_VERBOSE, "[AGRP.Messaging]: Processing small game message rendering ...");
+	if (renderSmallGameMessage) {
+		if (smallGameMessageText != "") {
+			logToConsole(LOG_VERBOSE, `[AGRP.Messaging]: Rendering small game message: ${smallGameMessageText}`);
+			if (smallGameMessageFonts[smallGameMessageFontName] != null) {
+				smallGameMessageFonts[smallGameMessageFontName].render(smallGameMessageText, [0, game.height - 90], game.width, 0.5, 0.0, smallGameMessageFonts[smallGameMessageFontName].size, smallGameMessageColour, true, true, false, true);
 			}
 		}
 	}
@@ -75,8 +90,8 @@ function processSmallGameMessageRendering() {
 // ===========================================================================
 
 function showSmallGameMessage(text, colour, duration, fontName) {
-	logToConsole(LOG_DEBUG, `[VRR.Messaging] Showing small game message '${text}' using font ${fontName} for ${duration}ms`);
-	if(smallGameMessageText != "") {
+	logToConsole(LOG_DEBUG, `[AGRP.Messaging] Showing small game message '${text}' using font ${fontName} for ${duration}ms`);
+	if (smallGameMessageText != "") {
 		clearTimeout(smallGameMessageTimer);
 	}
 
@@ -84,7 +99,7 @@ function showSmallGameMessage(text, colour, duration, fontName) {
 	smallGameMessageColour = colour;
 	smallGameMessageText = text;
 
-	smallGameMessageTimer = setTimeout(function() {
+	smallGameMessageTimer = setTimeout(function () {
 		smallGameMessageText = "";
 		smallGameMessageColour = COLOUR_WHITE;
 		smallGameMessageTimer = null;

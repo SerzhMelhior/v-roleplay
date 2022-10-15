@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: newchar.js
 // DESC: Provides new character creation GUI
@@ -19,8 +20,8 @@ let newCharacter = {
 // ===========================================================================
 
 function initNewCharacterGUI() {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Creating new character GUI ...`);
-	newCharacter.window = mexui.window(getScreenWidth()/2-130, getScreenHeight()/2-115, 300, 230, 'NEW CHARACTER', {
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Creating new character GUI ...`);
+	newCharacter.window = mexui.window(getScreenWidth() / 2 - 130, getScreenHeight() / 2 - 115, 300, 230, 'NEW CHARACTER', {
 		main: {
 			backgroundColour: toColour(secondaryColour[0], secondaryColour[1], secondaryColour[2], windowAlpha),
 			transitionTime: 500,
@@ -110,19 +111,19 @@ function initNewCharacterGUI() {
 			borderColour: toColour(primaryColour[0], primaryColour[1], primaryColour[2], buttonAlpha),
 		},
 	}, checkNewCharacter);
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Created new character GUI`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Created new character GUI`);
 }
 
 // ===========================================================================
 
 function newCharacterFailed(errorMessage) {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Server reports new character creation failed. Reason: ${errorMessage}`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Server reports new character creation failed. Reason: ${errorMessage}`);
 	newCharacter.messageLabel.text = errorMessage;
 	newCharacter.messageLabel.styles.main.textColour = toColour(180, 32, 32, 255);
 	newCharacter.firstNameInput.text = "";
 	newCharacter.lastNameInput.text = "";
 
-	if(!newCharacter.window.shown) {
+	if (!newCharacter.window.shown) {
 		closeAllWindows();
 		setChatWindowEnabled(false);
 		mexui.setInput(true);
@@ -134,16 +135,16 @@ function newCharacterFailed(errorMessage) {
 // ===========================================================================
 
 function checkNewCharacter() {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Checking new character with server ...`);
-	if(newCharacter.firstNameInput.lines[0].length < 2) {
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Checking new character with server ...`);
+	if (newCharacter.firstNameInput.lines[0].length < 2) {
 		return false;
 	}
 
-	if(newCharacter.lastNameInput.lines[0].length < 2) {
+	if (newCharacter.lastNameInput.lines[0].length < 2) {
 		return false;
 	}
 
-	sendNetworkEventToServer("vrr.checkNewCharacter",
+	sendNetworkEventToServer("agrp.checkNewCharacter",
 		newCharacter.firstNameInput.lines[0],
 		newCharacter.lastNameInput.lines[0],
 	);
@@ -152,7 +153,7 @@ function checkNewCharacter() {
 // ===========================================================================
 
 function showNewCharacterGUI() {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Showing new character window`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Showing new character window`);
 	closeAllWindows();
 	setChatWindowEnabled(false);
 	mexui.setInput(true);
@@ -160,7 +161,7 @@ function showNewCharacterGUI() {
 	mexui.focusedInput = newCharacter.firstNameInput;
 	guiSubmitKey = checkNewCharacter;
 
-	showLocaleChooserGUI(new Vec2(getScreenWidth()/2-(localeChooser.window.size.x/2), newCharacter.window.position.y+newCharacter.window.size.y+20));
+	showLocaleChooserGUI(new Vec2(getScreenWidth() / 2 - (localeChooser.window.size.x / 2), newCharacter.window.position.y + newCharacter.window.size.y + 20));
 }
 
 // ===========================================================================

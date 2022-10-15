@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: database.js
 // DESC: Provides database handling, functions and usage
@@ -14,8 +15,8 @@ let persistentDatabaseConnection = null;
 // ===========================================================================
 
 function initDatabaseScript() {
-	logToConsole(LOG_INFO, "[VRR.Database]: Initializing database script ...");
-	logToConsole(LOG_INFO, "[VRR.Database]: Database script initialized successfully!");
+	logToConsole(LOG_INFO, "[AGRP.Database]: Initializing database script ...");
+	logToConsole(LOG_INFO, "[AGRP.Database]: Database script initialized successfully!");
 }
 
 // ===========================================================================
@@ -24,13 +25,13 @@ function createDatabaseInsertQuery(tableName, data) {
 	let fields = [];
 	let values = [];
 
-	for(let i in data) {
-		if(data[i][1] != "undefined" && data[i][1] != NaN && data[i][0] != 'NaN') {
-			if(data[i][1] != "undefined" && data[i][1] != NaN && data[i][1] != 'NaN') {
+	for (let i in data) {
+		if (data[i][1] != "undefined" && data[i][1] != NaN && data[i][0] != 'NaN') {
+			if (data[i][1] != "undefined" && data[i][1] != NaN && data[i][1] != 'NaN') {
 				fields.push(data[i][0]);
 
-				if(typeof data[i][1] == "string") {
-					if(data[i][1] == "{UNIXTIMESTAMP}") {
+				if (typeof data[i][1] == "string") {
+					if (data[i][1] == "{UNIXTIMESTAMP}") {
 						values.push("UNIX_TIMESTAMP()");
 					} else {
 						values.push(`'${data[i][1]}'`);
@@ -51,11 +52,11 @@ function createDatabaseInsertQuery(tableName, data) {
 function createDatabaseUpdateQuery(tableName, data, whereClause) {
 	let values = [];
 
-	for(let i in data) {
-		if(data[i][0] != "undefined" && data[i][0] != NaN && data[i][0] != 'NaN') {
-			if(data[i][1] != "undefined" && data[i][1] != NaN && data[i][1] != 'NaN') {
-				if(typeof data[i][1] == "string") {
-					if(data[i][1] == "{UNIXTIMESTAMP}") {
+	for (let i in data) {
+		if (data[i][0] != "undefined" && data[i][0] != NaN && data[i][0] != 'NaN') {
+			if (data[i][1] != "undefined" && data[i][1] != NaN && data[i][1] != 'NaN') {
+				if (typeof data[i][1] == "string") {
+					if (data[i][1] == "{UNIXTIMESTAMP}") {
 						values.push(`${data[i][0]}=UNIX_TIMESTAMP()`);
 					} else {
 						values.push(`${data[i][0]}='${data[i][1]}'`);

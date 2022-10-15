@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: vehicle.js
 // DESC: Provides vehicle functions and arrays with data
@@ -30,13 +31,13 @@ class VehicleData {
 // ===========================================================================
 
 function receiveVehicleFromServer(vehicleId, position, model, colour1, colour2, colour3 = 0, colour4 = 0, locked = false, lights = false, engine = false, licensePlate = "") {
-	logToConsole(LOG_DEBUG, `[VRR.Vehicle] Received vehicle ${vehicleId} (${getVehicleNameFromModel(model, getGame())}) from server`);
+	logToConsole(LOG_DEBUG, `[AGRP.Vehicle] Received vehicle ${vehicleId} (${getVehicleNameFromModel(model, getGame())}) from server`);
 
-	if(getGame() != VRR_GAME_GTA_IV) {
+	if (getGame() != AGRP_GAME_GTA_IV) {
 		return false;
 	}
 
-	if(getVehicleData(vehicleId) != false) {
+	if (getVehicleData(vehicleId) != false) {
 		let vehicleData = getVehicleData(vehicleId);
 		//vehicleData.position = position;
 		//vehicleData.heading = heading;
@@ -52,7 +53,7 @@ function receiveVehicleFromServer(vehicleId, position, model, colour1, colour2, 
 
 		let vehicle = natives.getVehicleFromNetworkId(vehicleId.ivNetworkId);
 	} else {
-		//logToConsole(LOG_DEBUG, `[VRR.Vehicle] Vehicle ${vehicleId} doesn't exist. Adding ...`);
+		//logToConsole(LOG_DEBUG, `[AGRP.Vehicle] Vehicle ${vehicleId} doesn't exist. Adding ...`);
 		//let tempVehicleData = new VehicleData(vehicleId, name, position, blipModel, pickupModel);
 
 		//vehicles.push(tempVehicleData);
@@ -63,20 +64,20 @@ function receiveVehicleFromServer(vehicleId, position, model, colour1, colour2, 
 // ===========================================================================
 
 function processVehiclePurchasing() {
-	if(vehiclePurchaseState == VRR_VEHBUYSTATE_TESTDRIVE) {
-		if(getLocalPlayerVehicle() == false) {
-			vehiclePurchaseState = VRR_VEHBUYSTATE_EXITVEH;
-			sendNetworkEventToServer("vrr.vehBuyState", VRR_VEHBUYSTATE_EXITVEH);
+	if (vehiclePurchaseState == AGRP_VEHBUYSTATE_TESTDRIVE) {
+		if (getLocalPlayerVehicle() == false) {
+			vehiclePurchaseState = AGRP_VEHBUYSTATE_EXITVEH;
+			sendNetworkEventToServer("agrp.vehBuyState", AGRP_VEHBUYSTATE_EXITVEH);
 			return false;
 		} else {
-			if(vehiclePurchasing == getLocalPlayerVehicle()) {
-				if(getDistance(getLocalPlayerVehicle().position, vehiclePurchasePosition) >= 25) {
-					vehiclePurchaseState = VRR_VEHBUYSTATE_FARENOUGH;
-					sendNetworkEventToServer("vrr.vehBuyState", VRR_VEHBUYSTATE_FARENOUGH);
+			if (vehiclePurchasing == getLocalPlayerVehicle()) {
+				if (getDistance(getLocalPlayerVehicle().position, vehiclePurchasePosition) >= 25) {
+					vehiclePurchaseState = AGRP_VEHBUYSTATE_FARENOUGH;
+					sendNetworkEventToServer("agrp.vehBuyState", AGRP_VEHBUYSTATE_FARENOUGH);
 				}
 			} else {
-				vehiclePurchaseState = VRR_VEHBUYSTATE_WRONGVEH;
-				sendNetworkEventToServer("vrr.vehBuyState", VRR_VEHBUYSTATE_WRONGVEH);
+				vehiclePurchaseState = AGRP_VEHBUYSTATE_WRONGVEH;
+				sendNetworkEventToServer("agrp.vehBuyState", AGRP_VEHBUYSTATE_WRONGVEH);
 			}
 		}
 	}
@@ -95,7 +96,7 @@ function processVehicleBurning() {
 function setVehiclePurchaseState(state, vehicleId, position) {
 	vehiclePurchaseState = state;
 
-	if(vehicleId != null) {
+	if (vehicleId != null) {
 		vehiclePurchasing = getElementFromId(vehicleId);
 	} else {
 		vehiclePurchasing = null;
@@ -110,9 +111,9 @@ function setVehiclePurchaseState(state, vehicleId, position) {
  * @param {number} vehicleId - The ID of the job (initially provided by server)
  * @return {VehicleData} The vehicle's data (class instance)
  */
- function getVehicleData(vehicleId) {
-	for(let i in getServerData().vehicles) {
-		if(getServerData().vehicles[i].vehicleId == vehicleId) {
+function getVehicleData(vehicleId) {
+	for (let i in getServerData().vehicles) {
+		if (getServerData().vehicles[i].vehicleId == vehicleId) {
 			return getServerData().vehicles[i];
 		}
 	}
@@ -123,9 +124,44 @@ function setVehiclePurchaseState(state, vehicleId, position) {
 // ===========================================================================
 
 function setAllVehicleDataIndexes() {
-	for(let i in getServerData().vehicles) {
+	for (let i in getServerData().vehicles) {
 		getServerData().vehicles[i].index = i;
 	}
+}
+
+// ===========================================================================
+
+function toggleLocalVehicleCruiseControl() {
+	if (!localPlayer.vehicle.isSyncer) {
+		return false;
+	}
+
+	cruiseControlEnabled = !cruiseControlEnabled;
+	cruiseControlSpeed = getVehicleSpeed(vehicle);
+}
+
+// ===========================================================================
+
+function getVehicleSpeed(vehicle) {
+	let matrix = vehicle.matrix;
+	let frontSpeed = true;
+	let vecMoveSpeed = vehicle.velocity;
+	let speed;
+
+	if (frontSpeed) {
+		speed = getDotProduct(vecMoveSpeed[0], vecMoveSpeed[1], vecMoveSpeed[2], matrix.getElement(1 * 4 + 0), matrix.getElement(1 * 4 + 1), matrix.getElement(1 * 4 + 2));
+	} else {
+		speed = getLength(vecMoveSpeed[0], vecMoveSpeed[1], vecMoveSpeed[2]);
+	}
+
+	if (getGame() == AGRP_GAME_GTA_IV || getGame() == AGRP_GAME_GTA_IV_EFLC) {
+		speed /= 40.0;
+	}
+
+	speed = speed * 90;
+	speed = Math.abs(speed);
+
+	return speed;
 }
 
 // ===========================================================================

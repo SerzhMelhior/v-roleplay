@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: startup.js
 // DESC: Provides startup/shutdown procedures
@@ -10,7 +11,6 @@
 function initServerScripts() {
 	checkForAllRequiredModules();
 
-	initClassScript();
 	initDatabaseScript();
 	initConfigScript();
 	initEmailScript();
@@ -48,8 +48,10 @@ function initServerScripts() {
 	// Load all the server data
 	loadServerDataFromDatabase();
 	setAllServerDataIndexes();
-	createAllServerElements();
 
+	checkServerGameTime();
+	createAllServerElements();
+	addAllNetworkEventHandlers();
 	initAllClients();
 	initTimers();
 
@@ -59,7 +61,16 @@ function initServerScripts() {
 // ===========================================================================
 
 function checkForHashingModule() {
-	if(typeof module.hashing == "undefined") {
+	if (typeof module.hashing == "undefined") {
+		return false;
+	}
+	return true;
+}
+
+// ===========================================================================
+
+function checkForGeoIPModule() {
+	if (typeof module.geoip == "undefined") {
 		return false;
 	}
 	return true;
@@ -68,7 +79,7 @@ function checkForHashingModule() {
 // ===========================================================================
 
 function checkForMySQLModule() {
-	if(typeof module.mysql == "undefined") {
+	if (typeof module.mysql == "undefined") {
 		return false;
 	}
 
@@ -78,9 +89,9 @@ function checkForMySQLModule() {
 // ===========================================================================
 
 function checkForSMTPModule() {
-	if(typeof module.smtp == "undefined") {
-		return false;
-	}
+	//if (typeof module.smtp == "undefined") {
+	//	return false;
+	//}
 
 	return true;
 }
@@ -88,37 +99,38 @@ function checkForSMTPModule() {
 // ===========================================================================
 
 function checkForAllRequiredModules() {
-	logToConsole(LOG_DEBUG, "[VRR.Startup]: Checking for required modules ...");
+	logToConsole(LOG_DEBUG, "[AGRP.Startup]: Checking for required modules ...");
 
-	if(!checkForHashingModule()) {
-		logToConsole(LOG_WARN, "[VRR.Startup]: Hashing module is not loaded!");
-		logToConsole(LOG_WARN, "[VRR.Startup]: This resource will now shutdown.");
-		thisResource.stop();
+	if (!checkForHashingModule()) {
+		logToConsole(LOG_WARN, "[AGRP.Startup]: Hashing module is not loaded!");
+		logToConsole(LOG_ERROR, "[AGRP.Startup]: This server will now shutdown.");
+		shutdownServer();
 	}
 
-	if(!checkForMySQLModule()) {
-		logToConsole(LOG_WARN, "[VRR.Startup]: MySQL module is not loaded!");
-		logToConsole(LOG_WARN, "[VRR.Startup]: This resource will now shutdown.");
-		thisResource.stop();
+	if (!checkForMySQLModule()) {
+		logToConsole(LOG_WARN, "[AGRP.Startup]: MySQL module is not loaded!");
+		logToConsole(LOG_ERROR, "[AGRP.Startup]: This server will now shutdown.");
+		shutdownServer();
 	}
 
-	if(!checkForSMTPModule()) {
-		logToConsole(LOG_WARN, "[VRR.Startup]: SMTP Email module is not loaded!");
-		logToConsole(LOG_WARN, "[VRR.Startup]: Email features will NOT be available!");
-	}
+	//if (!checkForSMTPModule()) {
+	//	logToConsole(LOG_WARN, "[AGRP.Startup]: SMTP Email module is not loaded!");
+	//	logToConsole(LOG_WARN, "[AGRP.Startup]: Email features will NOT be available!");
+	//}
 
-	logToConsole(LOG_DEBUG, "[VRR.Startup]: All required modules loaded!");
+	logToConsole(LOG_DEBUG, "[AGRP.Startup]: All required modules loaded!");
 	return true;
 }
 
 // ===========================================================================
 
 function loadServerDataFromDatabase() {
-	logToConsole(LOG_INFO, "[VRR.Config]: Loading server data ...");
+	logToConsole(LOG_INFO, "[AGRP.Config]: Loading server data ...");
 
 	// Always load these regardless of "test server" status
 	getServerData().localeStrings = loadAllLocaleStrings();
 	getServerData().allowedSkins = getAllowedSkins(getGame());
+	getServerData().itemTypes = loadItemTypesFromDatabase();
 
 	// Translation Cache
 	getServerData().cachedTranslations = new Array(getGlobalConfig().locale.locales.length);
@@ -127,8 +139,7 @@ function loadServerDataFromDatabase() {
 	getServerData().cachedTranslations.fill(getServerData().cachedTranslationFrom);
 
 	// Only load these if the server isn't a testing/dev server
-	if(!getServerConfig().devServer) {
-		getServerData().itemTypes = loadItemTypesFromDatabase();
+	if (!getServerConfig().devServer) {
 		getServerData().items = loadItemsFromDatabase();
 		getServerData().businesses = loadBusinessesFromDatabase();
 		getServerData().houses = loadHousesFromDatabase();
@@ -158,7 +169,9 @@ function setAllServerDataIndexes() {
 	setAllRadioStationIndexes();
 	cacheAllGroundItems();
 	cacheAllBusinessItems();
+	cacheAllItemItems();
 	cacheAllCommandsAliases();
+	cacheAllPaintBallItemTypes();
 }
 
 // ===========================================================================
@@ -174,6 +187,9 @@ function createAllServerElements() {
 	spawnAllVehicles();
 	spawnAllNPCs();
 	addAllCommandHandlers();
+
+	// Using client-side spheres since server-side ones don't show on GTAC atm (bug)
+	//createAllJobRouteLocationMarkers();
 }
 
 // ===========================================================================

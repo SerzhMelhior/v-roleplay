@@ -1,6 +1,7 @@
 // ===========================================================================
-// Vortrex's Roleplay Resource
-// https://github.com/VortrexFTW/gtac_roleplay
+// Asshat Gaming Roleplay
+// https://github.com/VortrexFTW/agrp_main
+// (c) 2022 Asshat Gaming
 // ===========================================================================
 // FILE: changepass.js
 // DESC: Provides change password GUI
@@ -19,8 +20,8 @@ let passwordChange = {
 // ===========================================================================
 
 function initChangePasswordGUI() {
-    logToConsole(LOG_DEBUG, `[VRR.GUI] Creating password change GUI ...`);
-	passwordChange.window = mexui.window(game.width/2-130, game.height/2-125, 300, 250, 'Change Password', {
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Creating password change GUI ...`);
+	passwordChange.window = mexui.window(game.width / 2 - 130, game.height / 2 - 125, 300, 250, 'Change Password', {
 		main: {
 			backgroundColour: toColour(secondaryColour[0], secondaryColour[1], secondaryColour[2], windowAlpha),
 			transitionTime: 500,
@@ -36,17 +37,17 @@ function initChangePasswordGUI() {
 			backgroundColour: toColour(primaryColour[0], primaryColour[1], primaryColour[2], windowTitleAlpha),
 		}
 	});
-	passwordChange.window.titleBarIconSize = toVector2(0,0);
+	passwordChange.window.titleBarIconSize = toVector2(0, 0);
 	passwordChange.window.titleBarHeight = 0;
 	passwordChange.window.titleBarShown = false;
 
-	passwordChange.window.image(85, -10, 140, 140, mainLogoPath, {
+	passwordChange.window.image(100, 20, 75, 75, mainLogoPath, {
 		focused: {
 			borderColour: toColour(0, 0, 0, 0),
 		},
 	});
 
-	passwordChange.messageLabel = passwordChange.window.text(20, 75, 260, 20, 'Enter a new password', {
+	passwordChange.messageLabel = passwordChange.window.text(20, 95, 260, 20, 'Enter a new password', {
 		main: {
 			textSize: 10.0,
 			textAlign: 0.5,
@@ -110,13 +111,13 @@ function initChangePasswordGUI() {
 			borderColour: toColour(primaryColour[0], primaryColour[1], primaryColour[2], buttonAlpha),
 		},
 	}, checkChangePassword);
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Created change password GUI`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Created change password GUI`);
 }
 
 // ===========================================================================
 
 function passwordChangeFailed(errorMessage) {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Server reports change password failed. Reason: ${errorMessage}`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Server reports change password failed. Reason: ${errorMessage}`);
 	passwordChange.messageLabel.text = errorMessage;
 	passwordChange.messageLabel.styles.main.textColour = toColour(180, 32, 32, 255);
 	passwordChange.passwordInput.text = "";
@@ -127,14 +128,14 @@ function passwordChangeFailed(errorMessage) {
 // ===========================================================================
 
 function checkChangePassword() {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Checking password change with server ...`);
-	sendNetworkEventToServer("vrr.checkChangePassword", passwordChange.passwordInput.lines[0], passwordChange.confirmPasswordInput.lines[0]);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Checking password change with server ...`);
+	sendNetworkEventToServer("agrp.checkChangePassword", passwordChange.passwordInput.lines[0], passwordChange.confirmPasswordInput.lines[0]);
 }
 
 // ===========================================================================
 
 function showChangePasswordGUI(errorMessage) {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Showing change password window`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Showing change password window`);
 	closeAllWindows();
 	setChatWindowEnabled(false);
 	mexui.setInput(true);
@@ -143,13 +144,13 @@ function showChangePasswordGUI(errorMessage) {
 	mexui.focusedControl = passwordChange.passwordInput;
 	guiSubmitKey = checkChangePassword;
 
-	showLocaleChooserGUI(new Vec2(getScreenWidth()/2-(localeChooser.window.size.x/2), passwordChange.window.position.y+passwordChange.window.size.y+20));
+	showLocaleChooserGUI(new Vec2(getScreenWidth() / 2 - (localeChooser.window.size.x / 2), passwordChange.window.position.y + passwordChange.window.size.y + 20));
 }
 
 // ===========================================================================
 
 function passwordChangeSuccess() {
-	logToConsole(LOG_DEBUG, `[VRR.GUI] Server reports password change was successful`);
+	logToConsole(LOG_DEBUG, `[AGRP.GUI] Server reports password change was successful`);
 	guiSubmitKey = false;
 	closeAllWindows();
 }
