@@ -9,16 +9,6 @@
 // ===========================================================================
 
 let builtInCommands = [
-	"refresh",
-	"restart",
-	"stop",
-	"start",
-	"reconnect",
-	"setname",
-	"connect",
-	"disconnect",
-	"say",
-	"dumpdoc",
 ];
 
 // ===========================================================================
@@ -1265,6 +1255,12 @@ function setServerName(name) {
 
 function setServerPassword(password) {
 	server.setPassword(password);
+}
+
+// ===========================================================================
+
+function getContentsOfTextFile(filePath) {
+	return "";
 }
 
 // ===========================================================================

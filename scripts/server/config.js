@@ -982,7 +982,7 @@ function getServerIntroMusicURL() {
 
 function loadLocaleConfig() {
 	logToConsole(LOG_DEBUG, "[AGRP.Config] Loading locale configuration");
-	let localeConfig = JSON.parse(loadTextFile(`config/locale.json`));
+	let localeConfig = JSON.parse(getContentsOfTextFile(`config/locale.json`));
 	if (localeConfig != null) {
 		return localeConfig;
 	}
@@ -992,7 +992,7 @@ function loadLocaleConfig() {
 
 function loadEconomyConfig() {
 	logToConsole(LOG_DEBUG, "[AGRP.Config] Loading economy configuration");
-	let economyConfig = JSON.parse(loadTextFile(`config/economy.json`));
+	let economyConfig = JSON.parse(getContentsOfTextFile(`config/economy.json`));
 	if (economyConfig != null) {
 		return economyConfig;
 	}
@@ -1002,7 +1002,7 @@ function loadEconomyConfig() {
 
 function loadAccentConfig() {
 	logToConsole(LOG_DEBUG, "[AGRP.Config] Loading accents configuration");
-	let accentConfig = JSON.parse(loadTextFile(`config/accents.json`));
+	let accentConfig = JSON.parse(getContentsOfTextFile(`config/accents.json`));
 	if (accentConfig != null) {
 		return accentConfig;
 	}
@@ -1012,7 +1012,7 @@ function loadAccentConfig() {
 
 function loadDiscordConfig() {
 	logToConsole(LOG_DEBUG, "[AGRP.Config] Loading discord configuration");
-	let discordConfig = JSON.parse(loadTextFile(`config/discord.json`));
+	let discordConfig = JSON.parse(getContentsOfTextFile(`config/discord.json`));
 	if (discordConfig != null) {
 		return discordConfig;
 	}
@@ -1023,7 +1023,7 @@ function loadDiscordConfig() {
 
 function loadDatabaseConfig() {
 	logToConsole(LOG_DEBUG, "[AGRP.Config] Loading database configuration");
-	let databaseConfig = JSON.parse(loadTextFile("config/database.json"));
+	let databaseConfig = JSON.parse(getContentsOfTextFile("config/database.json"));
 	if (databaseConfig != null) {
 		return databaseConfig;
 	}
@@ -1034,7 +1034,7 @@ function loadDatabaseConfig() {
 
 function loadKeyBindConfig() {
 	logToConsole(LOG_DEBUG, "[AGRP.Config] Loading keybind configuration");
-	let keyBindConfig = JSON.parse(loadTextFile("config/keybind.json"));
+	let keyBindConfig = JSON.parse(getContentsOfTextFile("config/keybind.json"));
 	if (keyBindConfig != null) {
 		return keyBindConfig;
 	}
@@ -1045,7 +1045,7 @@ function loadKeyBindConfig() {
 
 function loadEmailConfig() {
 	logToConsole(LOG_DEBUG, "[AGRP.Config] Loading email configuration");
-	let emailConfig = JSON.parse(loadTextFile("config/email.json"));
+	let emailConfig = JSON.parse(getContentsOfTextFile("config/email.json"));
 	if (emailConfig != null) {
 		return emailConfig;
 	}

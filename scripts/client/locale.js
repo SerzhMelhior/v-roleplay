@@ -35,7 +35,7 @@ function getAvailableLocaleOptions() {
 // ===========================================================================
 
 function loadLocaleConfig() {
-	let configFile = loadTextFile("config/client/locale.json");
+	let configFile = getContentsOfTextFile("config/client/locale.json");
 	getServerData().localeOptions = JSON.parse(configFile);
 
 	//resetLocaleChooserOptions();
@@ -48,7 +48,7 @@ function loadAllLocaleStrings() {
 	let localeOptions = getServerData().localeOptions;
 	for (let i in localeOptions) {
 		logToConsole(LOG_INFO, `[AGRP.Locale] Loading locale strings for ${localeOptions[i].englishName} (${i})`);
-		let localeStringFile = loadTextFile(`locale/${localeOptions[i].stringsFile}`);
+		let localeStringFile = getContentsOfTextFile(`locale/${localeOptions[i].stringsFile}`);
 		let localeStringData = JSON.parse(localeStringFile);
 
 		let localeId = localeOptions[i].id;

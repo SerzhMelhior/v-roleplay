@@ -164,7 +164,7 @@ function loadAllLocaleStrings() {
 	let locales = getGlobalConfig().locale.locales;
 	for (let i in locales) {
 		let localeData = locales[i];
-		let localeFile = JSON.parse(loadTextFile(`locale/${localeData.stringsFile}`));
+		let localeFile = JSON.parse(getContentsOfTextFile(`locale/${localeData.stringsFile}`));
 		tempLocaleStrings[i] = localeFile;
 	}
 

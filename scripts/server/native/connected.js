@@ -1482,3 +1482,9 @@ function shutdownServer() {
 }
 
 // ===========================================================================
+
+function getContentsOfTextFile(filePath) {
+	return loadTextFile(filePath);
+}
+
+// ===========================================================================
