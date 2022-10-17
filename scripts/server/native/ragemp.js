@@ -3,10 +3,12 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: connected.js
-// DESC: Provides wrapped natives for GTA Connected and Mafia Connected mods
+// FILE: ragemp.js
+// DESC: Provides wrapped natives for RAGEMP
 // TYPE: Server (JavaScript)
 // ===========================================================================
+
+var fs = require('fs');
 
 let builtInCommands = [
 ];
@@ -1236,7 +1238,6 @@ function deletePlayerPed(client) {
 	} else {
 		sendNetworkEventToPlayer("agrp.deleteLocalPlayerPed", client);
 	}
-
 }
 
 // ===========================================================================
@@ -1248,19 +1249,25 @@ function isPlayerOnBoat(client) {
 // ===========================================================================
 
 function setServerName(name) {
-	server.name = name;
+	//server.name = name;
 }
 
 // ===========================================================================
 
 function setServerPassword(password) {
-	server.setPassword(password);
+	//server.setPassword(password);
 }
 
 // ===========================================================================
 
-function getContentsOfTextFile(filePath) {
-	return "";
+async function getContentsOfTextFile(filePath) {
+	let fileContents = fs.readFile(filePath, 'utf8', function (err, data) {
+		if (err) {
+			console.error("Could not open file: %s", err);
+		} else {
+			return data;
+		}
+	});
 }
 
 // ===========================================================================
