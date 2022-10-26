@@ -31,7 +31,7 @@ const AGRP_BLIP_EXIT = 6;
 // ===========================================================================
 
 // Ped States
-const AGRP_PEDSTATE_NONE = 2;                     // None
+const AGRP_PEDSTATE_NONE = 0;                     // None
 const AGRP_PEDSTATE_READY = 1;                    // Ready
 const AGRP_PEDSTATE_DRIVER = 2;                   // Driving a vehicle
 const AGRP_PEDSTATE_PASSENGER = 3;                // In a vehicle as passenger
@@ -47,11 +47,16 @@ const AGRP_PEDSTATE_INITEM = 12;                  // In item (crate, box, etc)
 const AGRP_PEDSTATE_HANDSUP = 13;                 // Has hands up (surrendering)
 const AGRP_PEDSTATE_SPAWNING = 14;                // Spawning
 
+// Property Types
+const AGRP_PROPERTY_TYPE_NONE = 0;				  // None
+const AGRP_PROPERTY_TYPE_BUSINESS = 1;			  // Business
+const AGRP_PROPERTY_TYPE_HOUSE = 2;				  // House
+
 // ===========================================================================
 
 function initMiscScript() {
-	logToConsole(LOG_DEBUG, "[VRR.Misc]: Initializing misc script ...");
-	logToConsole(LOG_INFO, "[VRR.Misc]: Misc script initialized successfully!");
+	logToConsole(LOG_DEBUG, "[AGRP.Misc]: Initializing misc script ...");
+	logToConsole(LOG_INFO, "[AGRP.Misc]: Misc script initialized successfully!");
 	return true;
 }
 
@@ -144,7 +149,7 @@ function setNewCharacterMoneyCommand(command, params, client) {
 	getServerConfig().newCharacter.cash = amount;
 	getServerConfig().needsSaved = true;
 
-	messagePlayerNormal(client, `The new character money has been set to $${amount}`);
+	messagePlayerNormal(client, `The new character money has been set to ${getCurrencyString(amount)}`);
 	return true;
 }
 
@@ -206,11 +211,9 @@ function enterExitPropertyCommand(command, params, client) {
 		return false;
 	}
 
-	if (areServerElementsSupported()) {
-		if (!getPlayerData(client).currentPickup) {
-			return false;
-		}
-
+	// The player's currentPickup wasn't always being set. This prevented entering/exiting a property.
+	// Needs further testing and tweaks.
+	if (!getPlayerData(client).currentPickup) {
 		let ownerType = getEntityData(getPlayerData(client).currentPickup, "agrp.owner.type");
 		let ownerId = getEntityData(getPlayerData(client).currentPickup, "agrp.owner.id");
 
@@ -242,37 +245,48 @@ function enterExitPropertyCommand(command, params, client) {
 			default:
 				return false;
 		}
-	} else {
-		for (let i in getServerData().businesses) {
-			if (getPlayerDimension(client) == getGameConfig().mainWorldDimension[getGame()] && getPlayerInterior(client) == getGameConfig().mainWorldInterior[getGame()]) {
-				let businessId = getClosestBusinessEntrance(getPlayerPosition(client), getPlayerDimension(client));
-				isBusiness = true;
-				isEntrance = true;
-				closestProperty = getServerData().businesses[businessId];
-			} else {
-				let businessId = getClosestBusinessExit(getPlayerPosition(client), getPlayerDimension(client));
-				isBusiness = true;
-				isEntrance = false;
-				closestProperty = getServerData().businesses[businessId];
-			}
-		}
+	}
 
-		for (let j in getServerData().houses) {
-			if (getPlayerDimension(client) == getGameConfig().mainWorldDimension[getGame()] && getPlayerInterior(client) == getGameConfig().mainWorldInterior[getGame()]) {
-				let houseId = getClosestHouseEntrance(getPlayerPosition(client), getPlayerDimension(client));
-				isBusiness = false;
-				isEntrance = true;
-				closestProperty = getServerData().businesses[houseId];
-			} else {
-				let houseId = getClosestHouseExit(getPlayerPosition(client), getPlayerDimension(client));
-				isBusiness = false;
-				isEntrance = false;
-				closestProperty = getServerData().businesses[houseId];
-			}
+	// Check businesses first
+	if (closestProperty == null) {
+		let businessIndex = getClosestBusinessEntrance(getPlayerPosition(client), getPlayerDimension(client));
+		if (getDistance(getBusinessData(businessIndex).entrancePosition, getPlayerPosition(client)) <= 1.5) {
+			isBusiness = true;
+			isEntrance = true;
+			closestProperty = getServerData().businesses[businessIndex];
 		}
 	}
 
 	if (closestProperty == null) {
+		let businessIndex = getClosestBusinessExit(getPlayerPosition(client), getPlayerDimension(client));
+		if (getDistance(getBusinessData(businessIndex).exitPosition, getPlayerPosition(client)) <= 1.5) {
+			isBusiness = true;
+			isEntrance = false;
+			closestProperty = getServerData().businesses[businessIndex];
+		}
+	}
+
+	// Check houses second
+	if (closestProperty == null) {
+		let houseIndex = getClosestHouseEntrance(getPlayerPosition(client), getPlayerDimension(client));
+		if (getDistance(getHouseData(houseIndex).entrancePosition, getPlayerPosition(client)) <= 1.5) {
+			isBusiness = false;
+			isEntrance = true;
+			closestProperty = getServerData().houses[houseIndex];
+		}
+	}
+
+	if (closestProperty == null) {
+		let houseIndex = getClosestHouseExit(getPlayerPosition(client), getPlayerDimension(client));
+		if (getDistance(getHouseData(houseIndex).exitPosition, getPlayerPosition(client)) <= 1.5) {
+			isBusiness = false;
+			isEntrance = false;
+			closestProperty = getServerData().houses[houseIndex];
+		}
+	}
+
+	if (closestProperty == null) {
+		logToConsole(LOG_DEBUG, `${getPlayerDisplayForConsole(client)}'s closest door is null`);
 		return false;
 	}
 
@@ -296,43 +310,27 @@ function enterExitPropertyCommand(command, params, client) {
 
 			clearPlayerStateToEnterExitProperty(client);
 			getPlayerData(client).pedState = AGRP_PEDSTATE_ENTERINGPROPERTY;
+			getPlayerData(client).enteringExitingProperty = [(isBusiness) ? AGRP_PROPERTY_TYPE_BUSINESS : AGRP_PROPERTY_TYPE_HOUSE, closestProperty.index];
 
 			meActionToNearbyPlayers(client, getLanguageLocaleString(englishId, "EntersProperty", typeString, nameString));
+
+			if (closestProperty.exitScene != "" && isGameFeatureSupported("interiorScene")) {
+				getPlayerCurrentSubAccount(client).spawnPosition = closestProperty.exitPosition;
+				if (isMainWorldScene(closestProperty.exitScene) || closestProperty.exitScene == "AGRP.MAINWORLD") {
+					setPlayerScene(client, getGameConfig().mainWorldScene[getGame()]);
+				} else {
+					setPlayerScene(client, closestProperty.exitScene);
+				}
+				return false;
+			}
 
 			if (isFadeCameraSupported()) {
 				fadeCamera(client, false, 1.0);
 			}
 
 			setTimeout(function () {
-				setPlayerInCutsceneInterior(client, closestProperty.exitCutscene);
-				setPlayerDimension(client, closestProperty.exitDimension);
-				setPlayerInterior(client, closestProperty.exitInterior);
-				setPlayerPosition(client, closestProperty.exitPosition);
-				setPlayerHeading(client, closestProperty.exitRotation);
-				setTimeout(function () {
-					if (isFadeCameraSupported()) {
-						fadeCamera(client, true, 1.0);
-					}
-					updateInteriorLightsForPlayer(client, closestProperty.interiorLights);
-				}, 1000);
-				//setPlayerInCutsceneInterior(client, closestProperty.exitCutscene);
-				//updateAllInteriorVehiclesForPlayer(client, closestProperty.exitInterior, closestProperty.exitDimension);
+				processPlayerEnteringExitingProperty(client);
 			}, 1100);
-
-			if (isBusiness) {
-				if (closestProperty.type == AGRP_BIZ_TYPE_PAINTBALL) {
-					messagePlayerAlert(client, getLocaleString(client, "JoinedPaintBall"));
-					startPaintBall(client);
-				}
-			}
-
-			let radioStationIndex = closestProperty.streamingRadioStationIndex;
-			if (radioStationIndex != -1) {
-				if (getRadioStationData(radioStationIndex)) {
-					playRadioStreamForPlayer(client, getRadioStationData(radioStationIndex).url);
-					getPlayerData(client).streamingRadioStation = radioStationIndex;
-				}
-			}
 			return true;
 		}
 	} else {
@@ -341,69 +339,34 @@ function enterExitPropertyCommand(command, params, client) {
 				meActionToNearbyPlayers(client, getLocaleString(client, "EnterExitPropertyDoorLocked", (isBusiness) ? getLocaleString(client, "Business") : getLocaleString(client, "House")));
 				return false;
 			}
-			getPlayerData(client).pedState = AGRP_PEDSTATE_EXITINGPROPERTY;
+
 			clearPlayerStateToEnterExitProperty(client);
+			getPlayerData(client).pedState = AGRP_PEDSTATE_EXITINGPROPERTY;
+			getPlayerData(client).enteringExitingProperty = [(isBusiness) ? AGRP_PROPERTY_TYPE_BUSINESS : AGRP_PROPERTY_TYPE_HOUSE, closestProperty.index];
 
 			meActionToNearbyPlayers(client, getLanguageLocaleString(englishId, "ExitsProperty", typeString, nameString));
+
+			if (closestProperty.entranceScene != "" && isGameFeatureSupported("interiorScene")) {
+				getPlayerCurrentSubAccount(client).spawnPosition = closestProperty.entrancePosition;
+				if (isMainWorldScene(closestProperty.entranceScene) || closestProperty.entranceScene == "AGRP.MAINWORLD") {
+					setPlayerScene(client, getGameConfig().mainWorldScene[getGame()]);
+				} else {
+					setPlayerScene(client, closestProperty.entranceScene);
+				}
+
+				return false;
+			}
 
 			if (isFadeCameraSupported()) {
 				fadeCamera(client, false, 1.0);
 			}
 
-			disableCityAmbienceForPlayer(client, true);
 			setTimeout(function () {
-				setPlayerInCutsceneInterior(client, closestProperty.entranceCutscene);
-				setPlayerPosition(client, closestProperty.entrancePosition);
-				setPlayerHeading(client, closestProperty.entranceRotation);
-				setPlayerDimension(client, closestProperty.entranceDimension);
-				setPlayerInterior(client, closestProperty.entranceInterior);
-				setTimeout(function () {
-					if (isFadeCameraSupported()) {
-						fadeCamera(client, true, 1.0);
-					}
-
-					updateInteriorLightsForPlayer(client, true);
-				}, 1000);
+				processPlayerEnteringExitingProperty(client);
 			}, 1100);
-
-			if (isBusiness) {
-				if (closestProperty.type == AGRP_BIZ_TYPE_PAINTBALL) {
-					messagePlayerAlert(client, getLocaleString(client, "LeftPaintBall"));
-					stopPaintBall(client);
-				}
-			}
-
-			clearLocalPickupsForPlayer(client);
-
-			//setPlayerInCutsceneInterior(client, closestProperty.entranceCutscene);
-			stopRadioStreamForPlayer(client);
-			getPlayerData(client).streamingRadioStation = -1;
-
-			// Check if exiting property was into another house/business and set radio station accordingly
-			let inHouse = getPlayerHouse(client);
-			let inBusiness = getPlayerBusiness(client);
-
-			if (inBusiness != -1) {
-				if (getBusinessData(inBusiness).streamingRadioStationIndex != -1) {
-					if (getRadioStationData(getBusinessData(inBusiness).streamingRadioStationIndex)) {
-						playRadioStreamForPlayer(client, getRadioStationData(getBusinessData(inBusiness).streamingRadioStationIndex).url);
-						getPlayerData(client).streamingRadioStation = getBusinessData(inBusiness).streamingRadioStationIndex;
-					}
-				}
-			} else if (inHouse != -1) {
-				if (getHouseData(inHouse).streamingRadioStationIndex != -1) {
-					if (getRadioStationData(getHouseData(inHouse).streamingRadioStationIndex)) {
-						playRadioStreamForPlayer(client, getRadioStationData(getHouseData(inHouse).streamingRadioStationIndex).url);
-						getPlayerData(client).streamingRadioStation = getHouseData(inHouse).streamingRadioStationIndex;
-					}
-				}
-			}
-
-			//logToConsole(LOG_DEBUG, `[VRR.Misc] ${getPlayerDisplayForConsole(client)} exited business ${inBusiness.name}[${inBusiness.index}/${inBusiness.databaseId}]`);
-			return true;
 		}
 	}
-
+	//logToConsole(LOG_DEBUG, `[AGRP.Misc] ${getPlayerDisplayForConsole(client)} exited business ${inBusiness.name}[${inBusiness.index}/${inBusiness.databaseId}]`);
 	return true;
 }
 
@@ -452,16 +415,16 @@ function getPlayerInfoCommand(command, params, client) {
 		["Account", `${getPlayerData(targetClient).accountData.name}{mediumGrey}[${getPlayerData(targetClient).accountData.databaseId}]{ALTCOLOUR}`],
 		["Character", `${getCharacterFullName(targetClient)}{mediumGrey}[${getPlayerCurrentSubAccount(targetClient).databaseId}]{ALTCOLOUR}`],
 		["Connected", `${getTimeDifferenceDisplay(getCurrentUnixTimestamp(), getPlayerData(targetClient).connectTime)} ago`],
-		["Registered", `${registerDate.toLocaleDateString()} - ${registerDate.toLocaleTimeString()}`],
+		["Registered", `${registerDate.toLocaleDateString()}`],
 		["Game Version", `${targetClient.gameVersion}`],
 		["Script Version", `${scriptVersion}`],
 		["Client Version", `${getPlayerData(targetClient).clientVersion}`],
 		["Client Version", `${getPlayerData(targetClient).clientVersion}`],
-		["Cash", `$${getPlayerCurrentSubAccount(client).cash}`],
-		["Skin", `${skinName}{mediumGrey}[${skinModel}]{ALTCOLOUR}`],
+		["Cash", `${getCurrencyString(getPlayerCurrentSubAccount(client).cash)}`],
+		["Skin", `${skinName}{mediumGrey}[Model: ${skinModel}/Index: ${skinIndex}]{ALTCOLOUR}`],
 		["Clan", `${clan}`],
 		["Job", `${job}`],
-		["Current Date", `${currentDate.toLocaleDateString()} - ${currentDate.toLocaleTimeString()}`],
+		["Current Date", `${currentDate.toLocaleDateString()}`],
 	]
 
 	let stats = tempStats.map(stat => `{MAINCOLOUR}${stat[0]}: {ALTCOLOUR}${stat[1]} {MAINCOLOUR}`);
@@ -506,11 +469,11 @@ function checkPlayerSpawning() {
 // ===========================================================================
 
 function showPlayerPrompt(client, promptMessage, promptTitle, yesButtonText, noButtonText) {
-	if (canPlayerUseGUI(client)) {
+	if (doesPlayerUseGUI(client)) {
 		showPlayerPromptGUI(client, promptMessage, promptTitle, yesButtonText, noButtonText);
 	} else {
-		messagePlayerNormal(client, `❓ ${promptMessage} `);
-		messagePlayerInfo(client, getLocaleString(client, "PromptResponseTip", `{ ALTCOLOUR } /yes{MAINCOLOUR}`, `{ALTCOLOUR}/no{ MAINCOLOUR } `));
+		messagePlayerNormal(client, `🛎️ ${promptMessage} `);
+		messagePlayerInfo(client, getLocaleString(client, "PromptResponseTip", `{ALTCOLOUR}/yes{MAINCOLOUR}`, `{ALTCOLOUR}/no{MAINCOLOUR}`));
 	}
 }
 
@@ -553,7 +516,7 @@ function listOnlineAdminsCommand(command, params, client) {
 		if (getPlayerData(clients[i])) {
 			if (typeof getPlayerData(clients[i]).accountData.flags.admin != "undefined") {
 				if (getPlayerData(clients[i]).accountData.flags.admin > 0 || getPlayerData(clients[i]).accountData.flags.admin == -1) {
-					admins.push(`{ ALTCOLOUR } [${getPlayerData(clients[i]).accountData.staffTitle}] { MAINCOLOUR }${getCharacterFullName(clients[i])} `);
+					admins.push(`{ALTCOLOUR}[${getPlayerData(clients[i]).accountData.staffTitle}]{MAINCOLOUR} ${getCharacterFullName(clients[i])}`);
 				}
 			}
 		}
@@ -910,9 +873,7 @@ function processPlayerDeath(client) {
 	updatePlayerSpawnedState(client, false);
 	setPlayerControlState(client, false);
 	setTimeout(function () {
-		if (isFadeCameraSupported()) {
-			fadeCamera(client, false, 1.0);
-		}
+		fadePlayerCamera(client, false, 1000);
 		setTimeout(function () {
 			if (isPlayerInPaintBall(client)) {
 				respawnPlayerForPaintBall(client);
@@ -927,15 +888,9 @@ function processPlayerDeath(client) {
 						stopWorking(client);
 					}
 
-					if (getGame() == AGRP_GAME_MAFIA_ONE) {
-						spawnPlayer(client, getGameConfig().skins[getGame()][getPlayerCurrentSubAccount(client).skin][0], closestJail.position, closestJail.heading);
-					} else {
-						spawnPlayer(client, closestJail.position, closestJail.heading, getGameConfig().skins[getGame()][getPlayerCurrentSubAccount(client).skin][0]);
-					}
+					spawnPlayer(client, closestJail.position, closestJail.heading, getGameConfig().skins[getGame()][getPlayerCurrentSubAccount(client).skin][0]);
 
-					if (isFadeCameraSupported()) {
-						fadeCamera(client, true, 1.0);
-					}
+					fadePlayerCamera(client, true, 1000);
 					updatePlayerSpawnedState(client, true);
 					makePlayerStopAnimation(client);
 					setPlayerControlState(client, true);
@@ -950,16 +905,8 @@ function processPlayerDeath(client) {
 						stopWorking(client);
 					}
 
-					if (getGame() == AGRP_GAME_MAFIA_ONE) {
-						spawnPlayer(client, getGameConfig().skins[getGame()][getPlayerCurrentSubAccount(client).skin][0], closestHospital.position, closestHospital.heading);
-					} else {
-						spawnPlayer(client, closestHospital.position, closestHospital.heading, getGameConfig().skins[getGame()][getPlayerCurrentSubAccount(client).skin][0]);
-					}
-
-					if (isFadeCameraSupported()) {
-						fadeCamera(client, true, 1.0);
-					}
-
+					spawnPlayer(client, closestHospital.position, closestHospital.heading, getGameConfig().skins[getGame()][getPlayerCurrentSubAccount(client).skin][0]);
+					fadePlayerCamera(client, true, 1000);
 					updatePlayerSpawnedState(client, true);
 					makePlayerStopAnimation(client);
 					setPlayerControlState(client, true);
@@ -991,6 +938,24 @@ function isPlayerSurrendered(client) {
 
 function isPlayerRestrained(client) {
 	return (getPlayerData(client).pedState == AGRP_PEDSTATE_BINDED);
+}
+
+// ===========================================================================
+
+function getPlayerInPropertyData(client) {
+	let businessId = getPlayerBusiness(client);
+	if (businessId != -1) {
+		getPlayerData(client).inProperty = [AGRP_PROPERTY_TYPE_BUSINESS, businessId];
+		return false;
+	}
+
+	let houseId = getPlayerHouse(client);
+	if (houseId != -1) {
+		getPlayerData(client).inProperty = [AGRP_PROPERTY_TYPE_HOUSE, houseId];
+		return false;
+	}
+
+	getPlayerData(client).inProperty = null;
 }
 
 // ===========================================================================

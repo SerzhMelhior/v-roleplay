@@ -13,47 +13,6 @@ let emojiNumbers = ["➊", "➋", "➌", "➍", "➎", "➏", "➐", "➑", "➒
 //let emojiNumbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
 
 let bindableKeys = {
-	8: "backspace",
-	9: "tab",
-	13: "return",
-	27: "escape",
-	32: "space",
-	33: "exclamation",
-	34: "doublequote",
-	35: "hashtag",
-	36: "dollar",
-	37: "percent",
-	38: "ampersand",
-	39: "quote",
-	40: "leftparenthesis",
-	41: "rightparenthesis",
-	42: "asterisk",
-	43: "plus",
-	44: "comma",
-	45: "minus",
-	46: "period",
-	47: "slash",
-	48: "0",
-	49: "1",
-	50: "2",
-	51: "3",
-	52: "4",
-	53: "5",
-	54: "6",
-	55: "7",
-	56: "8",
-	57: "9",
-	58: "colon",
-	59: "semicolon",
-	60: "less",
-	61: "equals",
-	62: "greater",
-	63: "questionmark",
-	64: "at",
-	91: "leftbracket",
-	92: "backslash",
-	93: "rightbracket",
-	95: "underscore",
 	97: "a",
 	98: "b",
 	99: "c",
@@ -80,8 +39,16 @@ let bindableKeys = {
 	120: "x",
 	121: "y",
 	122: "z",
-	127: "delete",
-	1073741881: "capslock",
+	48: "0",
+	49: "1",
+	50: "2",
+	51: "3",
+	52: "4",
+	53: "5",
+	54: "6",
+	55: "7",
+	56: "8",
+	57: "9",
 	1073741882: "f12",
 	1073741883: "f2",
 	1073741884: "f3",
@@ -94,23 +61,6 @@ let bindableKeys = {
 	1073741891: "f10",
 	1073741892: "f11",
 	1073741893: "f12",
-	1073741894: "printscreen",
-	1073741895: "scrolllock",
-	1073741896: "pause",
-	1073741897: "insert",
-	1073741898: "home",
-	1073741899: "pageup",
-	1073741901: "end",
-	1073741902: "pagedown",
-	1073741903: "right",
-	1073741904: "left",
-	1073741905: "down",
-	1073741906: "up",
-	1073741908: "numdivide",
-	1073741909: "nummultiply",
-	1073741910: "numminus",
-	1073741911: "numplus",
-	1073741912: "numenter",
 	1073741913: "num1",
 	1073741914: "num2",
 	1073741915: "num3",
@@ -121,6 +71,57 @@ let bindableKeys = {
 	1073741920: "num8",
 	1073741921: "num9",
 	1073741922: "num0",
+	1073741903: "right",
+	1073741904: "left",
+	1073741905: "down",
+	1073741906: "up",
+	8: "backspace",
+	9: "tab",
+	13: "return",
+	13: "enter",
+	27: "escape",
+	32: "space",
+	33: "exclamation",
+	34: "doublequote",
+	35: "hashtag",
+	36: "dollar",
+	37: "percent",
+	38: "ampersand",
+	39: "quote",
+	40: "leftparenthesis",
+	41: "rightparenthesis",
+	42: "asterisk",
+	43: "plus",
+	44: "comma",
+	45: "minus",
+	46: "period",
+	47: "slash",
+	58: "colon",
+	59: "semicolon",
+	60: "less",
+	61: "equals",
+	62: "greater",
+	63: "questionmark",
+	64: "at",
+	91: "leftbracket",
+	92: "backslash",
+	93: "rightbracket",
+	95: "underscore",
+	127: "delete",
+	1073741881: "capslock",
+	1073741894: "printscreen",
+	1073741895: "scrolllock",
+	1073741896: "pause",
+	1073741897: "insert",
+	1073741898: "home",
+	1073741899: "pageup",
+	1073741901: "end",
+	1073741902: "pagedown",
+	1073741908: "numdivide",
+	1073741909: "nummultiply",
+	1073741910: "numminus",
+	1073741911: "numplus",
+	1073741912: "numenter",
 	1073741923: "numperiod",
 	1073742048: "leftctrl",
 	1073742049: "leftshift",
@@ -1384,9 +1385,6 @@ let placesOfOrigin = [
 
 // ===========================================================================
 
-/**
- * @return {GameConfig} The game data
- */
 function getGameConfig() {
 	return gameData;
 }
@@ -1817,10 +1815,23 @@ function getSkinIndexFromName(name, gameId = getGame()) {
 
 // ===========================================================================
 
-function getObjectModelIndexFromModel(model, gameId = getGame()) {
+function getObjectModelIndexFromName(model, gameId = getGame()) {
 	let objects = getGameConfig().objects[gameId];
 	for (let i in objects) {
 		if (toLowerCase(objects[i][0]).indexOf(toLowerCase(model)) != -1) {
+			return i;
+		}
+	}
+
+	return false;
+}
+
+// ===========================================================================
+
+function getObjectModelIndexFromModel(model, gameId = getGame()) {
+	let objects = getGameConfig().objects[gameId];
+	for (let i in objects) {
+		if (toLowerCase(objects[i][1]).indexOf(toLowerCase(model)) != -1) {
 			return i;
 		}
 	}
@@ -2075,12 +2086,18 @@ function getPosBehindPos(pos, angle, distance) {
 // ===========================================================================
 
 function getPosAbovePos(pos, distance) {
+	if (getGame() == AGRP_GAME_MAFIA_ONE) {
+		return toVector3(pos.x, pos.y + distance, pos.z);
+	}
 	return toVector3(pos.x, pos.y, pos.z + distance);
 }
 
 // ===========================================================================
 
 function getPosBelowPos(pos, distance) {
+	if (getGame() == AGRP_GAME_MAFIA_ONE) {
+		return toVector3(pos.x, pos.y - distance, pos.z);
+	}
 	return toVector3(pos.x, pos.y, pos.z - distance);
 }
 
@@ -3179,6 +3196,38 @@ function fillLeadingZeros(number, length) {
 		str = "0" + str;
 	}
 	return str;
+}
+
+// ===========================================================================
+
+function isMainWorldScene(sceneName) {
+	return (sceneName == "agrp.mainWorldScene");
+}
+
+// ===========================================================================
+
+function isNightTime(hour) {
+	if (hour >= 7 && hour <= 19) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+// ===========================================================================
+
+function isServerGoingToChangeMapsSoon(hour, minute) {
+	if (server.mapName == "FREERIDENOC") {
+		if (hour == 6 && minute >= 30) {
+			return true
+		}
+	} else if (server.mapName == "FREERIDE") {
+		if (hour == 18 && minute >= 30) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // ===========================================================================

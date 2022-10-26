@@ -13,7 +13,7 @@ function initClientScripts() {
 	initNameTagScript();
 	initScoreBoardScript();
 	initMessagingScript();
-	initServerScript();
+	initNetworkEventsScript();
 	initLogoScript();
 	initLabelScript();
 	initChatBoxScript();
@@ -21,6 +21,9 @@ function initClientScripts() {
 	initKeyBindScript();
 	initEventScript();
 	initSkinSelectScript();
+	initCursorScript();
+
+	addAllNetworkHandlers();
 }
 
 // ===========================================================================

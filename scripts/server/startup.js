@@ -48,10 +48,10 @@ function initServerScripts() {
 	// Load all the server data
 	loadServerDataFromDatabase();
 	setAllServerDataIndexes();
+
+	checkServerGameTime();
 	createAllServerElements();
-
 	addAllNetworkEventHandlers();
-
 	initAllClients();
 	initTimers();
 
@@ -62,6 +62,15 @@ function initServerScripts() {
 
 function checkForHashingModule() {
 	if (typeof module.hashing == "undefined") {
+		return false;
+	}
+	return true;
+}
+
+// ===========================================================================
+
+function checkForGeoIPModule() {
+	if (typeof module.geoip == "undefined") {
 		return false;
 	}
 	return true;
@@ -80,9 +89,9 @@ function checkForMySQLModule() {
 // ===========================================================================
 
 function checkForSMTPModule() {
-	if (typeof module.smtp == "undefined") {
-		return false;
-	}
+	//if (typeof module.smtp == "undefined") {
+	//	return false;
+	//}
 
 	return true;
 }
@@ -90,33 +99,33 @@ function checkForSMTPModule() {
 // ===========================================================================
 
 function checkForAllRequiredModules() {
-	logToConsole(LOG_DEBUG, "[VRR.Startup]: Checking for required modules ...");
+	logToConsole(LOG_DEBUG, "[AGRP.Startup]: Checking for required modules ...");
 
 	if (!checkForHashingModule()) {
-		logToConsole(LOG_WARN, "[VRR.Startup]: Hashing module is not loaded!");
-		logToConsole(LOG_WARN, "[VRR.Startup]: This resource will now shutdown.");
-		thisResource.stop();
+		logToConsole(LOG_WARN, "[AGRP.Startup]: Hashing module is not loaded!");
+		logToConsole(LOG_ERROR, "[AGRP.Startup]: This server will now shutdown.");
+		shutdownServer();
 	}
 
 	if (!checkForMySQLModule()) {
-		logToConsole(LOG_WARN, "[VRR.Startup]: MySQL module is not loaded!");
-		logToConsole(LOG_WARN, "[VRR.Startup]: This resource will now shutdown.");
-		thisResource.stop();
+		logToConsole(LOG_WARN, "[AGRP.Startup]: MySQL module is not loaded!");
+		logToConsole(LOG_ERROR, "[AGRP.Startup]: This server will now shutdown.");
+		shutdownServer();
 	}
 
-	if (!checkForSMTPModule()) {
-		logToConsole(LOG_WARN, "[VRR.Startup]: SMTP Email module is not loaded!");
-		logToConsole(LOG_WARN, "[VRR.Startup]: Email features will NOT be available!");
-	}
+	//if (!checkForSMTPModule()) {
+	//	logToConsole(LOG_WARN, "[AGRP.Startup]: SMTP Email module is not loaded!");
+	//	logToConsole(LOG_WARN, "[AGRP.Startup]: Email features will NOT be available!");
+	//}
 
-	logToConsole(LOG_DEBUG, "[VRR.Startup]: All required modules loaded!");
+	logToConsole(LOG_DEBUG, "[AGRP.Startup]: All required modules loaded!");
 	return true;
 }
 
 // ===========================================================================
 
 function loadServerDataFromDatabase() {
-	logToConsole(LOG_INFO, "[VRR.Config]: Loading server data ...");
+	logToConsole(LOG_INFO, "[AGRP.Config]: Loading server data ...");
 
 	// Always load these regardless of "test server" status
 	getServerData().localeStrings = loadAllLocaleStrings();

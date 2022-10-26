@@ -23,23 +23,6 @@ let builtInCommands = [
 
 // ===========================================================================
 
-let disconnectReasons = [
-	"Lost Connection",
-	"Disconnected",
-	"Unsupported Client",
-	"Wrong Game",
-	"Incorrect Password",
-	"Unsupported Executable",
-	"Disconnected",
-	"Banned",
-	"Failed",
-	"Invalid Name",
-	"Crashed",
-	"Modified Game"
-];
-
-// ===========================================================================
-
 function getPlayerPosition(client) {
 	if (!areServerElementsSupported()) {
 		return getPlayerData(client).syncPosition;
@@ -760,24 +743,24 @@ function getPlayerWeapon(client) {
 function connectToDatabase() {
 	if (getDatabaseConfig().usePersistentConnection) {
 		if (persistentDatabaseConnection == null) {
-			logToConsole(LOG_DEBUG, `[VRR.Database] Initializing database connection ...`);
+			logToConsole(LOG_DEBUG, `[AGRP.Database] Initializing database connection ...`);
 			persistentDatabaseConnection = module.mysql.connect(getDatabaseConfig().host, getDatabaseConfig().user, getDatabaseConfig().pass, getDatabaseConfig().name, getDatabaseConfig().port);
 			if (persistentDatabaseConnection.error) {
-				logToConsole(LOG_ERROR, `[VRR.Database] Database connection error: ${persistentDatabaseConnection.error}`);
+				logToConsole(LOG_ERROR, `[AGRP.Database] Database connection error: ${persistentDatabaseConnection.error}`);
 				persistentDatabaseConnection = null;
 				return false;
 			}
 
-			logToConsole(LOG_DEBUG, `[VRR.Database] Database connection successful!`);
+			logToConsole(LOG_DEBUG, `[AGRP.Database] Database connection successful!`);
 			return persistentDatabaseConnection;
 		} else {
-			logToConsole(LOG_DEBUG, `[VRR.Database] Using existing database connection.`);
+			logToConsole(LOG_DEBUG, `[AGRP.Database] Using existing database connection.`);
 			return persistentDatabaseConnection;
 		}
 	} else {
 		let databaseConnection = module.mysql.connect(getDatabaseConfig().host, getDatabaseConfig().user, getDatabaseConfig().pass, getDatabaseConfig().name, getDatabaseConfig().port);
 		if (databaseConnection.error) {
-			logToConsole(LOG_ERROR, `[VRR.Database] Database connection error: ${persistentDatabaseConnection.error}`);
+			logToConsole(LOG_ERROR, `[AGRP.Database] Database connection error: ${persistentDatabaseConnection.error}`);
 			return false;
 		} else {
 			return databaseConnection;
@@ -791,9 +774,9 @@ function disconnectFromDatabase(dbConnection) {
 	if (!getDatabaseConfig().usePersistentConnection) {
 		try {
 			dbConnection.close();
-			logToConsole(LOG_DEBUG, `[VRR.Database] Database connection closed successfully`);
+			logToConsole(LOG_DEBUG, `[AGRP.Database] Database connection closed successfully`);
 		} catch (error) {
-			logToConsole(LOG_ERROR, `[VRR.Database] Database connection could not be closed! (Error: ${error})`);
+			logToConsole(LOG_ERROR, `[AGRP.Database] Database connection could not be closed! (Error: ${error})`);
 		}
 	}
 	return true;
@@ -802,7 +785,7 @@ function disconnectFromDatabase(dbConnection) {
 // ===========================================================================
 
 function queryDatabase(dbConnection, queryString, useThread = false) {
-	logToConsole(LOG_DEBUG, `[VRR.Database] Query string: ${queryString}`);
+	logToConsole(LOG_DEBUG, `[AGRP.Database] Query string: ${queryString}`);
 	if (useThread == true) {
 		Promise.resolve().then(() => {
 			let queryResult = dbConnection.query(queryString);
@@ -865,19 +848,19 @@ function quickDatabaseQuery(queryString) {
 	let dbConnection = connectToDatabase();
 	let insertId = 0;
 	if (dbConnection) {
-		//logToConsole(LOG_DEBUG, `[VRR.Database] Query string: ${queryString}`);
+		//logToConsole(LOG_DEBUG, `[AGRP.Database] Query string: ${queryString}`);
 		let dbQuery = queryDatabase(dbConnection, queryString);
 		if (getDatabaseInsertId(dbConnection)) {
 			insertId = getDatabaseInsertId(dbConnection);
-			logToConsole(LOG_DEBUG, `[VRR.Database] Query returned insert id ${insertId}`);
+			logToConsole(LOG_DEBUG, `[AGRP.Database] Query returned insert id ${insertId}`);
 		}
 
 		if (dbQuery) {
 			try {
 				freeDatabaseQuery(dbQuery);
-				logToConsole(LOG_DEBUG, `[VRR.Database] Query result free'd successfully`);
+				logToConsole(LOG_DEBUG, `[AGRP.Database] Query result free'd successfully`);
 			} catch (error) {
-				logToConsole(LOG_ERROR, `[VRR.Database] Query result could not be free'd! (Error: ${error})`);
+				logToConsole(LOG_ERROR, `[AGRP.Database] Query result could not be free'd! (Error: ${error})`);
 			}
 		}
 
@@ -1014,7 +997,7 @@ function setVehicleHealth(vehicle, health) {
 // ===========================================================================
 
 function givePlayerWeapon(client, weaponId, ammo, active = true) {
-	//logToConsole(LOG_DEBUG, `[VRR.Client] Sending signal to ${getPlayerDisplayForConsole(client)} to give weapon (Weapon: ${weaponId}, Ammo: ${ammo})`);
+	//logToConsole(LOG_DEBUG, `[AGRP.Client] Sending signal to ${getPlayerDisplayForConsole(client)} to give weapon (Weapon: ${weaponId}, Ammo: ${ammo})`);
 	//sendNetworkEventToPlayer("agrp.giveWeapon", client, weaponId, ammo, active);
 	client.giveWeapon(weaponId, ammo);
 }
@@ -1227,44 +1210,43 @@ function bindServerEventHandler(eventName, bindTo, handlerFunction) {
 // ===========================================================================
 
 function setElementName(element, name) {
-	element.name = name;
+	//element.name = name;
 }
 
 // ===========================================================================
 
 function hideElementForPlayer(element, client) {
-	element.setExistsFor(client, false);
+	//element.setExistsFor(client, false);
 }
 
 // ===========================================================================
 
 function showElementForPlayer(element, client) {
-	element.setExistsFor(client, true);
+	//element.setExistsFor(client, true);
 }
 
 // ===========================================================================
 
 function setElementShownByDefault(element, state) {
-	element.netFlags.defaultExistance = state;
+	//element.netFlags.defaultExistance = state;
 }
 
 // ===========================================================================
 
 function createAttachedGameBlip(element, type, size, colour = toColour(255, 255, 255, 255)) {
 	if (isGameFeatureSupported("attachedBlip")) {
-		return game.createBlipAttachedTo(element, type, size, colour, true, false);
+		//	return game.createBlipAttachedTo(element, type, size, colour, true, false);
 	}
 }
 
 // ===========================================================================
 
 function deletePlayerPed(client) {
-	if (areServerElementsSupported()) {
-		destroyElement(client.player);
-	} else {
-		sendNetworkEventToPlayer("agrp.deleteLocalPlayerPed", client);
-	}
-
+	//if (areServerElementsSupported()) {
+	//	destroyElement(client.player);
+	//} else {
+	//	sendNetworkEventToPlayer("agrp.deleteLocalPlayerPed", client);
+	//}
 }
 
 // ===========================================================================
@@ -1276,13 +1258,19 @@ function isPlayerOnBoat(client) {
 // ===========================================================================
 
 function setServerName(name) {
-	server.name = name;
+	//server.name = name;
 }
 
 // ===========================================================================
 
 function setServerPassword(password) {
-	server.setPassword(password);
+	//server.setPassword(password);
+}
+
+// ===========================================================================
+
+function setServerRule(ruleName, ruleValue) {
+	//server.setRule(ruleName, ruleValue);
 }
 
 // ===========================================================================

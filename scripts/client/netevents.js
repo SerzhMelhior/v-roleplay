@@ -8,16 +8,15 @@
 // TYPE: Client (JavaScript)
 // ===========================================================================
 
-function initServerScript() {
-	logToConsole(LOG_DEBUG, "[VRR.Server]: Initializing server script ...");
-	addAllNetworkHandlers();
-	logToConsole(LOG_DEBUG, "[VRR.Server]: Server script initialized!");
+function initNetworkEventsScript() {
+	logToConsole(LOG_DEBUG, "[AGRP.NetEvents]: Initializing server script ...");
+	logToConsole(LOG_DEBUG, "[AGRP.NetEvents]: Server script initialized!");
 }
 
 // ===========================================================================
 
 function addAllNetworkHandlers() {
-	logToConsole(LOG_DEBUG, "[VRR.Server]: Adding network handlers ...");
+	logToConsole(LOG_DEBUG, "[AGRP.Server]: Adding network handlers ...");
 
 	// Chat Box
 	addNetworkEventHandler("m", receiveChatBoxMessageFromServer); // Not prefixed with VRR to make it as small as possible
@@ -49,7 +48,7 @@ function addAllNetworkHandlers() {
 	addNetworkEventHandler("agrp.heading", setLocalPlayerHeading);
 	addNetworkEventHandler("agrp.interior", setLocalPlayerInterior);
 	addNetworkEventHandler("agrp.spawned", onServerSpawnedLocalPlayer);
-	addNetworkEventHandler("agrp.money", setLocalPlayerCash);
+	addNetworkEventHandler("agrp.money", setLocalPlayerMoney);
 	addNetworkEventHandler("agrp.armour", setLocalPlayerArmour);
 	addNetworkEventHandler("agrp.localPlayerSkin", setLocalPlayerSkin);
 	addNetworkEventHandler("agrp.pedSpeak", makeLocalPlayerPedSpeak);
@@ -69,7 +68,8 @@ function addAllNetworkHandlers() {
 	addNetworkEventHandler("agrp.veh.lights", setVehicleLights);
 	addNetworkEventHandler("agrp.veh.engine", setVehicleEngine);
 	addNetworkEventHandler("agrp.veh.repair", repairVehicle);
-	addNetworkEventHandler("agrp.cruiseControl", toggleVehicleCruiseControl);
+	addNetworkEventHandler("agrp.cruiseControl", toggleLocalVehicleCruiseControl);
+	addNetworkEventHandler("agrp.passenger", enterVehicleAsPassenger);
 
 	// Radio
 	addNetworkEventHandler("agrp.radioStream", playStreamingRadio);
@@ -108,6 +108,12 @@ function addAllNetworkHandlers() {
 	addNetworkEventHandler("agrp.changePassword", showChangePasswordGUI);
 	addNetworkEventHandler("agrp.showLocaleChooser", showLocaleChooserGUI);
 	addNetworkEventHandler("agrp.guiColour", setGUIColours);
+	addNetworkEventHandler("agrp.mapChangeWarning", setMapChangeWarningState);
+
+	// 2D Rendering
+	addNetworkEventHandler("agrp.set2DRendering", set2DRendering);
+	addNetworkEventHandler("agrp.logo", setServerLogoRenderState);
+	addNetworkEventHandler("agrp.showItemActionDelay", showItemActionDelay);
 
 	// Business
 	addNetworkEventHandler("agrp.business", receiveBusinessFromServer);
@@ -122,13 +128,20 @@ function addAllNetworkHandlers() {
 	addNetworkEventHandler("agrp.locale", setLocale);
 	addNetworkEventHandler("agrp.localeChooser", toggleLocaleChooserGUI);
 
+	// Animation
+	addNetworkEventHandler("agrp.anim", makePedPlayAnimation);
+	addNetworkEventHandler("agrp.stopAnim", makePedStopAnimation);
+	addNetworkEventHandler("agrp.forceAnim", forcePedAnimation);
+
+	// Nametags
+	addNetworkEventHandler("agrp.nametag", updatePlayerNameTag);
+	addNetworkEventHandler("agrp.nametagDistance", setNameTagDistance);
+
 	// Misc
 	addNetworkEventHandler("agrp.mouseCursor", toggleMouseCursor);
 	addNetworkEventHandler("agrp.mouseCamera", toggleMouseCamera);
 	addNetworkEventHandler("agrp.clearPeds", clearLocalPlayerOwnedPeds);
 	addNetworkEventHandler("agrp.clearPickups", clearLocalPlayerOwnedPickups);
-	addNetworkEventHandler("agrp.passenger", enterVehicleAsPassenger);
-	addNetworkEventHandler("agrp.logo", setServerLogoRenderState);
 	addNetworkEventHandler("agrp.ambience", setCityAmbienceState);
 	addNetworkEventHandler("agrp.runCode", runClientCode);
 	addNetworkEventHandler("agrp.minuteDuration", setMinuteDuration);
@@ -136,26 +149,20 @@ function addAllNetworkHandlers() {
 	addNetworkEventHandler("agrp.enterPropertyKey", setEnterPropertyKey);
 	addNetworkEventHandler("agrp.skinSelect", toggleSkinSelect);
 	addNetworkEventHandler("agrp.hotbar", updatePlayerHotBar);
-	addNetworkEventHandler("agrp.showItemActionDelay", showItemActionDelay);
-	addNetworkEventHandler("agrp.set2DRendering", set2DRendering);
 	addNetworkEventHandler("agrp.mouseCameraForce", setMouseCameraState);
 	addNetworkEventHandler("agrp.logLevel", setLogLevel);
 	addNetworkEventHandler("agrp.hideAllGUI", hideAllGUI);
-	addNetworkEventHandler("agrp.nametag", updatePlayerNameTag);
-	addNetworkEventHandler("agrp.nametagDistance", setNameTagDistance);
 	addNetworkEventHandler("agrp.ping", updatePlayerPing);
-	addNetworkEventHandler("agrp.anim", makePedPlayAnimation);
-	addNetworkEventHandler("agrp.stopAnim", makePedStopAnimation);
-	addNetworkEventHandler("agrp.forceAnim", forcePedAnimation);
 	addNetworkEventHandler("agrp.clientInfo", serverRequestedClientInfo);
 	addNetworkEventHandler("agrp.interiorLights", updateInteriorLightsState);
-	addNetworkEventHandler("agrp.cutsceneInterior", setCutsceneInterior);
+	addNetworkEventHandler("agrp.scene", changeScene);
 	addNetworkEventHandler("agrp.syncElement", forceSyncElementProperties);
 	addNetworkEventHandler("agrp.elementPosition", setElementPosition);
 	addNetworkEventHandler("agrp.elementCollisions", setElementCollisionsEnabled);
 	addNetworkEventHandler("agrp.vehBuyState", setVehiclePurchaseState);
 	addNetworkEventHandler("agrp.holdObject", makePedHoldObject);
 	addNetworkEventHandler("agrp.profanityFilter", setProfanityFilterState);
+	addNetworkEventHandler("agrp.currencyString", receiveCurrencyStringFromServer);
 }
 
 // ===========================================================================
@@ -181,7 +188,7 @@ function sendResourceStoppedSignalToServer() {
 // ===========================================================================
 
 function set2DRendering(hudState, labelState, smallGameMessageState, scoreboardState, hotBarState, itemActionDelayState) {
-	logToConsole(LOG_DEBUG, `[VRR.Main] Updating render states (HUD: ${hudState}, Labels: ${labelState}, Bottom Text: ${smallGameMessageState}, Scoreboard: ${scoreboardState}, HotBar: ${hotBarState}, Item Action Delay: ${itemActionDelayState})`);
+	logToConsole(LOG_DEBUG, `[AGRP.Main] Updating render states (HUD: ${hudState}, Labels: ${labelState}, Bottom Text: ${smallGameMessageState}, Scoreboard: ${scoreboardState}, HotBar: ${hotBarState}, Item Action Delay: ${itemActionDelayState})`);
 	renderHUD = hudState;
 
 	if (getGame() == AGRP_GAME_GTA_IV) {
@@ -206,7 +213,7 @@ function set2DRendering(hudState, labelState, smallGameMessageState, scoreboardS
 // ===========================================================================
 
 function onServerSpawnedLocalPlayer(state) {
-	logToConsole(LOG_DEBUG, `[VRR.Main] Setting spawned state to ${state}`);
+	logToConsole(LOG_DEBUG, `[AGRP.Main] Setting spawned state to ${state}`);
 	isSpawned = state;
 	setUpInitialGame();
 	if (state) {
@@ -339,7 +346,7 @@ function setLocalPlayerInfiniteRun(state) {
 // ===========================================================================
 
 function setLocalPlayerSkin(skinId) {
-	logToConsole(LOG_INFO, `[VRR.Server] Setting locale player skin to ${skinId}`);
+	logToConsole(LOG_INFO, `[AGRP.Server] Setting locale player skin to ${skinId}`);
 	if (getGame() == AGRP_GAME_GTA_IV) {
 		if (natives.isModelInCdimage(skinId)) {
 			natives.requestModel(skinId);
@@ -364,12 +371,14 @@ function makePedHoldObject(pedId, modelIndex) {
 // ===========================================================================
 
 function sendLocalPlayerNetworkIdToServer() {
-	sendNetworkEventToServer("agrp.playerPedId", natives.getNetworkIdFromPed(localPlayer));
+	if (getGame() == AGRP_GAME_GTA_IV || getGame() == AGRP_GAME_GTA_IV_EFLC) {
+		sendNetworkEventToServer("agrp.playerPedId", natives.getNetworkIdFromPed(localPlayer));
+	}
 }
 
 // ===========================================================================
 
-function setCutsceneInterior(cutsceneName) {
+function changeScene(sceneName) {
 	if (getGame() == AGRP_GAME_GTA_IV) {
 		if (cutsceneName == "") {
 			natives.clearCutscene();
@@ -379,6 +388,8 @@ function setCutsceneInterior(cutsceneName) {
 			}
 			natives.initCutscene(cutsceneName);
 		}
+	} else if (getGame() == AGRP_GAME_MAFIA_ONE) {
+		game.changeMap(sceneName);
 	}
 }
 
@@ -433,6 +444,24 @@ function clearLocalPlayerOwnedPickups() {
 	for (let i in pickups) {
 		deleteLocalGameElement(pickups[i]);
 	}
+}
+
+// ===========================================================================
+
+function receiveCurrencyStringFromServer(newCurrencyString) {
+	currencyString = newCurrencyString;
+}
+
+// ===========================================================================
+
+function setMapChangeWarningState(state) {
+	mapChangeWarning = state;
+}
+
+// ===========================================================================
+
+function updatePlayerPing(playerName, ping) {
+	playerPing[playerName] = ping;
 }
 
 // ===========================================================================

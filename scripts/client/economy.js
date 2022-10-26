@@ -3,7 +3,11 @@
 // https://github.com/VortrexFTW/agrp_main
 // (c) 2022 Asshat Gaming
 // ===========================================================================
-// FILE: 5cardpoker.js
-// DESC: Provides 5-card poker games GUI
+// FILE: economy.js
+// DESC: Provides economy functions
 // TYPE: Client (JavaScript)
+// ===========================================================================
+
+
+
 // ===========================================================================

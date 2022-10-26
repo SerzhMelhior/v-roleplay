@@ -9,7 +9,7 @@
 // ===========================================================================
 
 function initDeveloperScript() {
-	logToConsole(LOG_INFO, "[VRR.Developer]: Initializing developer script ...");
+	logToConsole(LOG_INFO, "[AGRP.Developer]: Initializing developer script ...");
 
 	// Use GTAC command handlers for these since they need to be available on console
 	//addCommandHandler("sc", executeServerCodeCommand);
@@ -18,7 +18,7 @@ function initDeveloperScript() {
 	//addCommandHandler("allcmd", simulateCommandForAllPlayersCommand);
 	//addCommandHandler("addloglvl", setServerLogLevelCommand);
 
-	logToConsole(LOG_INFO, "[VRR.Developer]: Developer script initialized successfully!");
+	logToConsole(LOG_INFO, "[AGRP.Developer]: Developer script initialized successfully!");
 	return true;
 }
 
@@ -152,7 +152,7 @@ function addLogLevelCommand(command, params, client) {
 	}
 
 	sendPlayerLogLevel(null, logLevel);
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} {MAINCOLOUR}enabled log level {ALTCOLOUR}${toLowerCase(params)}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)}{MAINCOLOUR} enabled log level {ALTCOLOUR}${toLowerCase(params)}`);
 	return true;
 }
 
@@ -219,7 +219,7 @@ function removeLogLevelCommand(command, params, client) {
 	}
 
 	sendPlayerLogLevel(null, logLevel);
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} {MAINCOLOUR}disabled log level {ALTCOLOUR}${toLowerCase(params)}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)}{MAINCOLOUR} disabled log level {ALTCOLOUR}${toLowerCase(params)}`);
 	return true;
 }
 
@@ -254,7 +254,7 @@ function simulateCommandForPlayerCommand(command, params, client) {
 	}
 
 	if (!getCommand(tempCommand)) {
-		messagePlayerError(client, `The command {ALTCOLOUR}/${command} {MAINCOLOUR}does not exist! Use /help for commands and information.`);
+		messagePlayerError(client, `The command {ALTCOLOUR}/${command}{MAINCOLOUR} does not exist! Use /help for commands and information.`);
 		return false;
 	}
 
@@ -288,7 +288,7 @@ function simulateCommandForAllPlayersCommand(command, params, client) {
 	let tempParams = splitParams.slice(1).join(" ");
 
 	if (!getCommand(tempCommand)) {
-		messagePlayerError(client, `The command {ALTCOLOUR}/${command} {MAINCOLOUR}does not exist! Use /help for commands and information.`);
+		messagePlayerError(client, `The command {ALTCOLOUR}/${command}{MAINCOLOUR} does not exist! Use /help for commands and information.`);
 		return false;
 	}
 
@@ -441,22 +441,16 @@ function testErrorGUICommand(command, params, client) {
 // ===========================================================================
 
 function saveServerDataCommand(command, params, client) {
-	messageAdmins(`{adminOrange}Vortrex{MAINCOLOUR} has forced a manual save of all data. Initiating ...`);
+	messageAdmins(`{adminOrange}Vortrex{MAINCOLOUR} has forced a manual save of all data. Initiating ...`, true);
 	saveServerDataToDatabase();
-	messageAdmins(`{MAINCOLOUR}All server data saved to database successfully!`);
+	messageAdmins(`{MAINCOLOUR}All server data saved to database successfully!`, true);
 	return true;
 }
 
 // ===========================================================================
 
-function testEmailCommand(command, params, client) {
-	try {
-		messagePlayerAlert(client, `Sending test email to ${params}`);
-		sendEmail(params, "Player", "Test email", "Just testing the SMTP module for the server!");
-	} catch (error) {
-		messagePlayerError(client, "The email could not be sent! Error: ${error}");
-		return false;
-	}
+async function testEmailCommand(command, params, client) {
+	sendEmail(params, "Player", "Test email", "Just testing the email system for the server!");
 
 	return true;
 }

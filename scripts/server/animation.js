@@ -9,8 +9,8 @@
 // ===========================================================================
 
 function initAnimationScript() {
-	logToConsole(LOG_DEBUG, "[VRR.Animation]: Initializing animation script ...");
-	logToConsole(LOG_DEBUG, "[VRR.Animation]: Animation script initialized!");
+	logToConsole(LOG_DEBUG, "[AGRP.Animation]: Initializing animation script ...");
+	logToConsole(LOG_DEBUG, "[AGRP.Animation]: Animation script initialized!");
 }
 
 // ===========================================================================
@@ -44,7 +44,9 @@ function playPlayerAnimationCommand(command, params, client) {
 		return false;
 	}
 
-	messagePlayerTip(client, getLocaleString(client, "AnimationStopCommandTip", "{ALTCOLOUR}/stopanim{MAINCOLOUR}"));
+	if (hasPlayerSeenActionTip(client, "AnimationStop")) {
+		messagePlayerTip(client, getGroupedLocaleString(client, "ActionTips", "AnimationStop", "{ALTCOLOUR}/stopanim{MAINCOLOUR}"));
+	}
 	makePlayerPlayAnimation(client, animationSlot, animationPositionOffset);
 }
 
@@ -66,6 +68,8 @@ function stopPlayerAnimationCommand(command, params, client) {
 	getPlayerData(client).animationForced = false;
 
 	//setPlayerMouseCameraState(client, false);
+
+	markPlayerActionTipSeen(client, "AnimationStop");
 }
 
 // ===========================================================================
@@ -98,7 +102,7 @@ function makePlayerPlayAnimation(client, animationSlot, offsetPosition = 1) {
 	getPlayerData(client).animationForced = false;
 
 	makePedPlayAnimation(getPlayerPed(client), animationSlot, offsetPosition);
-	setEntityData(getPlayerPed(client), "agrp.anim", animationSlot, true);
+	//setEntityData(getPlayerPed(client), "agrp.anim", animationSlot, true);
 	//if(getAnimationData(animationSlot)[9] != AGRP_ANIMMOVE_NONE) {
 	//	if(getGame() < AGRP_GAME_GTA_SA) {
 	//		setPlayerMouseCameraState(client, true);

@@ -17,7 +17,7 @@ function saveServerDataToDatabase() {
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, "[VRR.Utilities]: Saving all server data to database ...");
+	logToConsole(LOG_DEBUG, "[AGRP.Utilities]: Saving all server data to database ...");
 
 	try {
 		saveAllPlayersToDatabase();
@@ -85,7 +85,7 @@ function saveServerDataToDatabase() {
 		logToConsole(LOG_ERROR, `Could not save server config to database: ${error}`);
 	}
 
-	logToConsole(LOG_DEBUG, "[VRR.Utilities]: Saved all server data to database!");
+	logToConsole(LOG_DEBUG, "[AGRP.Utilities]: Saved all server data to database!");
 }
 
 // ===========================================================================
@@ -104,18 +104,18 @@ function initTimers() {
 // ===========================================================================
 
 function oneMinuteTimerFunction() {
-	logToConsole(LOG_DEBUG, `[VRR.Event] Checking server game time`);
+	logToConsole(LOG_DEBUG, `[AGRP.Event] Checking server game time`);
 	checkServerGameTime();
 
 	if (getClients().length > 0) {
-		logToConsole(LOG_DEBUG, `[VRR.Event] Checking rentable vehicles`);
+		logToConsole(LOG_DEBUG, `[AGRP.Event] Checking rentable vehicles`);
 		checkVehicleRenting();
 
-		logToConsole(LOG_DEBUG, `[VRR.Event] Updating all player name tags`);
+		logToConsole(LOG_DEBUG, `[AGRP.Event] Updating all player name tags`);
 		updateAllPlayerNameTags();
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Event] Collecting all garbage`);
+	logToConsole(LOG_DEBUG, `[AGRP.Event] Collecting all garbage`);
 	collectAllGarbage();
 }
 
@@ -133,8 +133,13 @@ function thirtyMinuteTimerFunction() {
 	if (getClients().length > 0) {
 		checkPayDays();
 	}
-	saveServerDataToDatabase();
+
+	if (isGameFeatureSupported("snow")) {
+		checkSnowChance();
+	}
+
 	checkInactiveVehicleRespawns();
+	saveServerDataToDatabase();
 }
 
 // ===========================================================================
@@ -202,28 +207,67 @@ function updatePings() {
 // ===========================================================================
 
 function checkServerGameTime() {
-	if (isGameFeatureSupported("time")) {
-		return false;
+	//logToConsole(LOG_DEBUG | LOG_WARN, "[AGRP.Timers] Checking server game time");
+
+	//if (isGameFeatureSupported("time")) {
+	//	return false;
+	//}
+
+	if (!getServerConfig().useRealTime) {
+		if (getServerConfig().minute >= 59) {
+			getServerConfig().minute = 0;
+			if (getServerConfig().hour >= 23) {
+				getServerConfig().hour = 0;
+			} else {
+				getServerConfig().hour = getServerConfig().hour + 1;
+			}
+		} else {
+			getServerConfig().minute = getServerConfig().minute + 1;
+		}
+	} else {
+		let dateTime = getCurrentTimeStampWithTimeZone(getServerConfig().realTimeZone);
+		getServerConfig().hour = dateTime.getHours();
+		getServerConfig().minute = dateTime.getMinutes();
 	}
 
-	//if(!getServerConfig().useRealTime) {
-	//if (getServerConfig().minute >= 59) {
-	//	getServerConfig().minute = 0;
-	//	if (getServerConfig().hour >= 23) {
-	//		getServerConfig().hour = 0;
-	//	} else {
-	//		getServerConfig().hour = getServerConfig().hour + 1;
-	//	}
-	//} else {
-	//	getServerConfig().minute = getServerConfig().minute + 1;
-	//}
-	//} else {
-	//	let dateTime = getCurrentTimeStampWithTimeZone(getServerConfig().realTimeZone);
-	//	getServerConfig().hour = dateTime.getHours();
-	//	getServerConfig().minute = dateTime.getMinutes();
-	//}
+	if (getGame() == AGRP_GAME_MAFIA_ONE) {
+		if (getGameConfig().mainWorldScene[getGame()] == "FREERIDE") {
+			if (isServerGoingToChangeMapsSoon(getServerConfig().hour, getServerConfig().minute)) {
+				sendMapChangeWarningToPlayer(null, true);
+			}
 
-	updateTimeRule();
+			if (isNightTime(getServerConfig().hour)) {
+				getGameConfig().mainWorldScene[getGame()] = "FREERIDENOC";
+				removeAllPlayersFromProperties();
+				removeAllPlayersFromVehicles();
+				saveServerDataToDatabase();
+				logToConsole(LOG_INFO | LOG_WARN, `[AGRP.Timers] Changing server map to night`);
+				messageDiscordEventChannel("🌙 Changing server map to night");
+				game.changeMap(getGameConfig().mainWorldScene[getGame()]);
+			}
+		} else if (getGameConfig().mainWorldScene[getGame()] == "FREERIDENOC") {
+			if (isServerGoingToChangeMapsSoon(getServerConfig().hour, getServerConfig().minute)) {
+				sendMapChangeWarningToPlayer(null, true);
+			}
+
+			if (!isNightTime(getServerConfig().hour)) {
+				getGameConfig().mainWorldScene[getGame()] = "FREERIDE";
+				removeAllPlayersFromProperties();
+				removeAllPlayersFromVehicles();
+				saveServerDataToDatabase();
+				logToConsole(LOG_INFO | LOG_WARN, `[AGRP.Timers] Changing server map to day`);
+				messageDiscordEventChannel("🌞 Changing server map to day");
+				game.changeMap(getGameConfig().mainWorldScene[getGame()]);
+			}
+		}
+	}
+
+	if (isGameFeatureSupported("time")) {
+		game.time.hour = getServerConfig().hour;
+		game.time.minute = getServerConfig().minute;
+	}
+
+	updateServerRules();
 }
 
 // ===========================================================================
@@ -294,6 +338,17 @@ function checkInactiveVehicleRespawns() {
 			}
 		}
 	}
+}
+
+// ===========================================================================
+
+function checkSnowChance() {
+	let date = new Date();
+
+	let shouldBeSnowing = getRandomBoolWithProbability(getGlobalConfig().monthlyChanceOfSnow[date.getMonths()]);
+	getServerConfig().groundSnow = shouldBeSnowing;
+	getServerConfig().fallingSnow = shouldBeSnowing;
+	updatePlayerSnowState(null);
 }
 
 // ===========================================================================

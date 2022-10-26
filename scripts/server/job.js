@@ -472,15 +472,15 @@ let jobRouteLocationTypeNames = {
 // ===========================================================================
 
 function initJobScript() {
-	logToConsole(LOG_DEBUG, "[VRR.Job]: Initializing job script ...");
-	logToConsole(LOG_INFO, "[VRR.Job]: Job script initialized successfully!");
+	logToConsole(LOG_DEBUG, "[AGRP.Job]: Initializing job script ...");
+	logToConsole(LOG_INFO, "[AGRP.Job]: Job script initialized successfully!");
 	return true;
 }
 
 // ===========================================================================
 
 function loadJobsFromDatabase() {
-	logToConsole(LOG_DEBUG, "[VRR.Job]: Loading jobs from database ...");
+	logToConsole(LOG_DEBUG, "[AGRP.Job]: Loading jobs from database ...");
 
 	let tempJobs = [];
 	let dbConnection = connectToDatabase();
@@ -499,7 +499,7 @@ function loadJobsFromDatabase() {
 					tempJobData.routes = loadJobRoutesFromDatabase(tempJobData.databaseId);
 					tempJobData.ranks = loadJobRanksFromDatabase(tempJobData.databaseId);
 					tempJobs.push(tempJobData);
-					logToConsole(LOG_VERBOSE, `[VRR.Job]: Job '${tempJobData.name}' loaded from database successfully!`);
+					logToConsole(LOG_VERBOSE, `[AGRP.Job]: Job '${tempJobData.name}' loaded from database successfully!`);
 				}
 			}
 			freeDatabaseQuery(dbQuery);
@@ -507,7 +507,7 @@ function loadJobsFromDatabase() {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: ${tempJobs.length} jobs loaded from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: ${tempJobs.length} jobs loaded from database successfully!`);
 	return tempJobs;
 }
 
@@ -546,7 +546,7 @@ function loadAllJobLocationsFromDatabase() {
 // ===========================================================================
 
 function loadJobRanksFromDatabase(jobDatabaseId) {
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Loading ranks for job ${jobDatabaseId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Loading ranks for job ${jobDatabaseId} from database ...`);
 
 	let tempJobRanks = [];
 	let dbConnection = connectToDatabase();
@@ -560,7 +560,7 @@ function loadJobRanksFromDatabase(jobDatabaseId) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
 					let tempJobRankData = new JobRankData(dbAssoc);
 					tempJobRanks.push(tempJobRankData);
-					logToConsole(LOG_VERBOSE, `[VRR.Job]: Job rank '${tempJobRankData.name}' loaded from database successfully!`);
+					logToConsole(LOG_VERBOSE, `[AGRP.Job]: Job rank '${tempJobRankData.name}' loaded from database successfully!`);
 				}
 			}
 			freeDatabaseQuery(dbQuery);
@@ -568,14 +568,14 @@ function loadJobRanksFromDatabase(jobDatabaseId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: ${tempJobRanks.length} ranks for job ${jobDatabaseId} loaded from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: ${tempJobRanks.length} ranks for job ${jobDatabaseId} loaded from database successfully!`);
 	return tempJobRanks;
 }
 
 // ===========================================================================
 
 function loadJobRoutesFromDatabase(jobDatabaseId) {
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Loading job routes for job ${jobDatabaseId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Loading job routes for job ${jobDatabaseId} from database ...`);
 
 	let tempJobRoutes = [];
 	let dbConnection = connectToDatabase();
@@ -590,7 +590,7 @@ function loadJobRoutesFromDatabase(jobDatabaseId) {
 					let tempJobRouteData = new JobRouteData(dbAssoc);
 					tempJobRouteData.locations = loadJobRouteLocationsFromDatabase(tempJobRouteData.databaseId);
 					tempJobRoutes.push(tempJobRouteData);
-					logToConsole(LOG_VERBOSE, `[VRR.Job]: Job route '${tempJobRouteData.name}' loaded from database successfully!`);
+					logToConsole(LOG_VERBOSE, `[AGRP.Job]: Job route '${tempJobRouteData.name}' loaded from database successfully!`);
 				}
 			}
 			freeDatabaseQuery(dbQuery);
@@ -598,14 +598,14 @@ function loadJobRoutesFromDatabase(jobDatabaseId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: ${tempJobRoutes.length} job routes for job ${jobDatabaseId} loaded from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: ${tempJobRoutes.length} job routes for job ${jobDatabaseId} loaded from database successfully!`);
 	return tempJobRoutes;
 }
 
 // ===========================================================================
 
 function loadJobRouteLocationsFromDatabase(jobRouteId) {
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Loading locations for job route ${jobRouteId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Loading locations for job route ${jobRouteId} from database ...`);
 
 	let tempJobRouteLocations = [];
 	let dbConnection = connectToDatabase();
@@ -619,7 +619,7 @@ function loadJobRouteLocationsFromDatabase(jobRouteId) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
 					let tempJobRouteLocationData = new JobRouteLocationData(dbAssoc);
 					tempJobRouteLocations.push(tempJobRouteLocationData);
-					logToConsole(LOG_VERBOSE, `[VRR.Job]: Job route location '${tempJobRouteLocationData.databaseId}' loaded from database successfully!`);
+					logToConsole(LOG_VERBOSE, `[AGRP.Job]: Job route location '${tempJobRouteLocationData.databaseId}' loaded from database successfully!`);
 				}
 			}
 			freeDatabaseQuery(dbQuery);
@@ -627,14 +627,14 @@ function loadJobRouteLocationsFromDatabase(jobRouteId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: ${tempJobRouteLocations.length} locations for job route ${jobRouteId} loaded from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: ${tempJobRouteLocations.length} locations for job route ${jobRouteId} loaded from database successfully!`);
 	return tempJobRouteLocations;
 }
 
 // ===========================================================================
 
 function loadJobEquipmentsFromDatabase(jobDatabaseId) {
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Loading job equipments for job ${jobDatabaseId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Loading job equipments for job ${jobDatabaseId} from database ...`);
 
 	let tempJobEquipments = [];
 	let dbConnection = connectToDatabase();
@@ -649,7 +649,7 @@ function loadJobEquipmentsFromDatabase(jobDatabaseId) {
 					let tempJobEquipmentData = new JobEquipmentData(dbAssoc);
 					tempJobEquipmentData.items = loadJobEquipmentItemsFromDatabase(tempJobEquipmentData.databaseId);
 					tempJobEquipments.push(tempJobEquipmentData);
-					logToConsole(LOG_VERBOSE, `[VRR.Job]: Job equipment '${tempJobEquipmentData.name}' loaded from database successfully!`);
+					logToConsole(LOG_VERBOSE, `[AGRP.Job]: Job equipment '${tempJobEquipmentData.name}' loaded from database successfully!`);
 				}
 			}
 			freeDatabaseQuery(dbQuery);
@@ -657,14 +657,14 @@ function loadJobEquipmentsFromDatabase(jobDatabaseId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: ${tempJobEquipments.length} job equipments for job ${jobDatabaseId} loaded from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: ${tempJobEquipments.length} job equipments for job ${jobDatabaseId} loaded from database successfully!`);
 	return tempJobEquipments;
 }
 
 // ===========================================================================
 
 function loadJobLocationsFromDatabase(jobDatabaseId) {
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Loading job locations for job ${jobDatabaseId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Loading job locations for job ${jobDatabaseId} from database ...`);
 
 	let tempJobLocations = [];
 	let dbConnection = connectToDatabase();
@@ -678,7 +678,7 @@ function loadJobLocationsFromDatabase(jobDatabaseId) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
 					let tempJobLocationData = new JobLocationData(dbAssoc);
 					tempJobLocations.push(tempJobLocationData);
-					logToConsole(LOG_VERBOSE, `[VRR.Job]: Job location '${tempJobLocationData.databaseId}' loaded from database successfully!`);
+					logToConsole(LOG_VERBOSE, `[AGRP.Job]: Job location '${tempJobLocationData.databaseId}' loaded from database successfully!`);
 				}
 			}
 			freeDatabaseQuery(dbQuery);
@@ -686,14 +686,14 @@ function loadJobLocationsFromDatabase(jobDatabaseId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: ${tempJobLocations.length} job locations for job ${jobDatabaseId} loaded from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: ${tempJobLocations.length} job locations for job ${jobDatabaseId} loaded from database successfully!`);
 	return tempJobLocations;
 }
 
 // ===========================================================================
 
 function loadJobUniformsFromDatabase(jobDatabaseId) {
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Loading job uniforms for job ${jobDatabaseId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Loading job uniforms for job ${jobDatabaseId} from database ...`);
 
 	let tempJobUniforms = [];
 	let dbConnection = connectToDatabase();
@@ -707,7 +707,7 @@ function loadJobUniformsFromDatabase(jobDatabaseId) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
 					let tempJobUniformData = new JobUniformData(dbAssoc);
 					tempJobUniforms.push(tempJobUniformData);
-					logToConsole(LOG_VERBOSE, `[VRR.Job]: Job uniform '${tempJobUniformData.databaseId}' loaded from database successfully!`);
+					logToConsole(LOG_VERBOSE, `[AGRP.Job]: Job uniform '${tempJobUniformData.databaseId}' loaded from database successfully!`);
 				}
 			}
 			freeDatabaseQuery(dbQuery);
@@ -715,14 +715,14 @@ function loadJobUniformsFromDatabase(jobDatabaseId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: ${tempJobUniforms.length} job uniforms for job ${jobDatabaseId} loaded from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: ${tempJobUniforms.length} job uniforms for job ${jobDatabaseId} loaded from database successfully!`);
 	return tempJobUniforms;
 }
 
 // ===========================================================================
 
 function loadJobEquipmentItemsFromDatabase(jobEquipmentDatabaseId) {
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Loading job equipment items for job equipment ${jobEquipmentDatabaseId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Loading job equipment items for job equipment ${jobEquipmentDatabaseId} from database ...`);
 
 	let tempJobEquipmentItems = [];
 	let dbConnection = connectToDatabase();
@@ -736,7 +736,7 @@ function loadJobEquipmentItemsFromDatabase(jobEquipmentDatabaseId) {
 				while (dbAssoc = fetchQueryAssoc(dbQuery)) {
 					let tempJobEquipmentItemData = new JobEquipmentItemData(dbAssoc);
 					tempJobEquipmentItems.push(tempJobEquipmentItemData);
-					logToConsole(LOG_VERBOSE, `[VRR.Job]: Job equipment item '${tempJobEquipmentItemData.databaseId}' loaded from database successfully!`);
+					logToConsole(LOG_VERBOSE, `[AGRP.Job]: Job equipment item '${tempJobEquipmentItemData.databaseId}' loaded from database successfully!`);
 				}
 			}
 			freeDatabaseQuery(dbQuery);
@@ -744,7 +744,7 @@ function loadJobEquipmentItemsFromDatabase(jobEquipmentDatabaseId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: ${tempJobEquipmentItems.length} job equipment items for equipment ${jobEquipmentDatabaseId} loaded from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: ${tempJobEquipmentItems.length} job equipment items for equipment ${jobEquipmentDatabaseId} loaded from database successfully!`);
 	return tempJobEquipmentItems;
 }
 
@@ -755,13 +755,13 @@ function createAllJobBlips() {
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job] Spawning all job location blips ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job] Spawning all job location blips ...`);
 	for (let i in getServerData().jobs) {
 		for (let j in getServerData().jobs[i].locations) {
 			createJobLocationBlip(i, j);
 		}
 	}
-	logToConsole(LOG_DEBUG, `[VRR.Job] All job location blips spawned!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job] All job location blips spawned!`);
 }
 
 // ===========================================================================
@@ -771,7 +771,7 @@ function createAllJobPickups() {
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job] Spawning all job location pickups ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job] Spawning all job location pickups ...`);
 	let pickupCount = 0;
 	for (let i in getServerData().jobs) {
 		if (getServerData().jobs[i].pickupModel != 0) {
@@ -787,11 +787,11 @@ function createAllJobPickups() {
 				setElementDimension(getServerData().jobs[i].locations[j].pickup, getServerData().jobs[i].locations[j].dimension);
 				addToWorld(getServerData().jobs[i].locations[j].pickup);
 
-				logToConsole(LOG_VERBOSE, `[VRR.Job] Job '${getServerData().jobs[i].name}' location pickup ${j} spawned!`);
+				logToConsole(LOG_VERBOSE, `[AGRP.Job] Job '${getServerData().jobs[i].name}' location pickup ${j} spawned!`);
 			}
 		}
 	}
-	logToConsole(LOG_DEBUG, `[VRR.Job] All job location pickups (${pickupCount}) spawned!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job] All job location pickups (${pickupCount}) spawned!`);
 }
 
 // ===========================================================================
@@ -904,7 +904,7 @@ function jobListCommand(command, params, client) {
 
 function takeJobCommand(command, params, client) {
 	if (!canPlayerUseJobs(client)) {
-		messagePlayerError(client, "You are not allowed to use any jobs!");
+		messagePlayerError(client, getLocaleString(client, "NotAllowedToUseJobs"));
 		return false;
 	}
 
@@ -912,7 +912,7 @@ function takeJobCommand(command, params, client) {
 	let jobData = getJobData(closestJobLocation.jobIndex);
 
 	if (closestJobLocation.position.distance(getPlayerPosition(client)) > getGlobalConfig().takeJobDistance) {
-		messagePlayerError(client, "There are no job points close enough!");
+		messagePlayerError(client, getLocaleString(client, "NoJobLocationCloseEnough"));
 		return false;
 	}
 
@@ -922,12 +922,12 @@ function takeJobCommand(command, params, client) {
 	}
 
 	if (!canPlayerUseJob(client, closestJobLocation.jobIndex)) {
-		messagePlayerError(client, "You can't use this job!");
+		messagePlayerError(client, getLocaleString(client, "CantUseThisJob"));
 		return false;
 	}
 
 	takeJob(client, closestJobLocation.jobIndex);
-	messagePlayerSuccess(client, `{MAINCOLOUR}You now have the {jobYellow}${jobData.name} {MAINCOLOUR}job`);
+	messagePlayerSuccess(client, getLocaleString(client, "JobChanged", `{jobYellow}${jobData.name}{MAINCOLOUR}`));
 	return true;
 }
 
@@ -944,7 +944,7 @@ function startWorkingCommand(command, params, client) {
 	if (closestJobLocation.position.distance(getPlayerPosition(client)) > getGlobalConfig().startWorkingDistance) {
 		let closestVehicle = getClosestVehicle(getPlayerPosition(client));
 		if (getDistance(getVehiclePosition(closestVehicle), getPlayerPosition(client)) > getGlobalConfig().startWorkingDistance) {
-			messagePlayerError(client, "You need to be near your job site or vehicle that belongs to your job!");
+			messagePlayerError(client, getLocaleString(client, "NeedToBeNearJob"));
 			return false;
 		}
 
@@ -961,13 +961,13 @@ function startWorkingCommand(command, params, client) {
 		jobData = getJobData(getJobIdFromDatabaseId(getVehicleData(closestVehicle).ownerId));
 	} else {
 		if (getPlayerCurrentSubAccount(client).job == AGRP_JOB_NONE) {
-			messagePlayerError(client, "You don't have a job!");
+			messagePlayerError(client, getLocaleString(client, "DontHaveAJob"));
 			messagePlayerInfo(client, "You can get a job by going the yellow points on the map.");
 			return false;
 		}
 
 		if (getPlayerCurrentSubAccount(client).job != closestJobLocation.jobId) {
-			messagePlayerError(client, "This is not your job!");
+			messagePlayerError(client, getLocaleString(client, "NotYourJob"));
 			messagePlayerInfo(client, getLocaleString(client, "QuitJobToTakeAnother", "{ALTCOLOUR}/quitjob{MAINCOLOUR}"));
 			return false;
 		}
@@ -980,11 +980,16 @@ function startWorkingCommand(command, params, client) {
 		return false;
 	}
 
-	messagePlayerSuccess(client, `💼 You are now working for the {jobYellow}${jobData.name}{MAINCOLOUR} job`);
+	messagePlayerSuccess(client, getLocaleString(client, "StartedWorking", jobData.name));
 	messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} started working for the {jobYellow}${jobData.name}{MAINCOLOUR} job`);
 
 	startWorking(client);
-	//messagePlayerNewbieTip(client, `Enter a job vehicle to get started!`);
+
+	if (doesJobLocationHaveAnyRoutes(closestJobLocation)) {
+		if (hasPlayerSeenActionTip(client, "EnterJobVehicleForRoute")) {
+			messagePlayerTip(client, getGroupedLocaleString(client, "ActionTips", "EnterJobVehicleForRoute"));
+		}
+	}
 	return true;
 }
 
@@ -996,13 +1001,13 @@ function stopWorkingCommand(command, params, client) {
 	}
 
 	if (!isPlayerWorking(client)) {
-		messagePlayerError(client, "You are not working!");
+		messagePlayerError(client, getLocaleString(client, "NeedToBeWorking", "{ALTCOLOUR}/startwork{MAINCOLOUR}"));
 		return false;
 	}
 
 	deleteJobItems(client);
 	stopWorking(client);
-	messagePlayerSuccess(client, "You have stopped working!");
+	messagePlayerSuccess(client, getLocaleString(client, "StoppedWorking"));
 	return true;
 }
 
@@ -1017,7 +1022,7 @@ function startWorking(client) {
 	getPlayerCurrentSubAccount(client).skin = getPlayerSkin(client);
 	storePlayerItemsInTempLocker(client);
 	getPlayerData(client).tempLockerType = AGRP_TEMP_LOCKER_TYPE_JOB;
-	messagePlayerInfo(client, "Your personal items have been stored in your locker while you work");
+	messagePlayerInfo(client, getLocaleString(client, "ItemsStoredForJob"));
 
 	getPlayerCurrentSubAccount(client).isWorking = true;
 
@@ -1067,7 +1072,7 @@ function startWorking(client) {
 function getJobInfoCommand(command, params, client) {
 	let closestJobLocation = getClosestJobLocation(getPlayerPosition(client), getPlayerDimension(client));
 
-	messagePlayerInfo(client, `{jobYellow}[Job Info] {MAINCOLOUR}Name: {ALTCOLOUR}${getJobData(closestJobLocation.jobIndex).name}, {MAINCOLOUR}Enabled: {ALTCOLOUR}${getYesNoFromBool(intToBool(getJobData(closestJobLocation.jobIndex).enabled))}, {MAINCOLOUR}Whitelisted: {ALTCOLOUR}${getYesNoFromBool(intToBool(getJobData(closestJobLocation.jobIndex).whiteListEnabled))}, {MAINCOLOUR}Blacklisted: {ALTCOLOUR}${getYesNoFromBool(intToBool(getJobData(closestJobLocation.jobIndex).blackListEnabled))}, {MAINCOLOUR}ID: {ALTCOLOUR}${getJobData(closestJobLocation.jobIndex).databaseId}/${closestJobLocation.jobIndex}`);
+	messagePlayerInfo(client, `{jobYellow}[Job Info] {MAINCOLOUR}Name:{ALTCOLOUR} ${getJobData(closestJobLocation.jobIndex).name}, {MAINCOLOUR}Enabled:{ALTCOLOUR} ${getYesNoFromBool(intToBool(getJobData(closestJobLocation.jobIndex).enabled))}, {MAINCOLOUR}Whitelisted:{ALTCOLOUR} ${getYesNoFromBool(intToBool(getJobData(closestJobLocation.jobIndex).whiteListEnabled))}, {MAINCOLOUR}Blacklisted:{ALTCOLOUR} ${getYesNoFromBool(intToBool(getJobData(closestJobLocation.jobIndex).blackListEnabled))}, {MAINCOLOUR}ID:{ALTCOLOUR} ${getJobData(closestJobLocation.jobIndex).databaseId}/${closestJobLocation.jobIndex}`);
 }
 
 // ===========================================================================
@@ -1075,7 +1080,7 @@ function getJobInfoCommand(command, params, client) {
 function getJobLocationInfoCommand(command, params, client) {
 	let closestJobLocation = getClosestJobLocation(getPlayerPosition(client), getPlayerDimension(client));
 
-	messagePlayerInfo(client, `{jobYellow}[Job Location Info] {MAINCOLOUR}Job: {ALTCOLOUR}${getJobData(closestJobLocation.jobIndex).name} (${getJobData(closestJobLocation.jobIndex).databaseId}/${closestJobLocation.jobIndex}), {MAINCOLOUR}Enabled: {ALTCOLOUR}${getYesNoFromBool(closestJobLocation.enabled)}, {MAINCOLOUR}Database ID: {ALTCOLOUR}${closestJobLocation.databaseId}`);
+	messagePlayerInfo(client, `{jobYellow}[Job Location Info] {MAINCOLOUR}Job:{ALTCOLOUR} ${getJobData(closestJobLocation.jobIndex).name} (${getJobData(closestJobLocation.jobIndex).databaseId}/${closestJobLocation.jobIndex}), {MAINCOLOUR}Enabled:{ALTCOLOUR} ${getYesNoFromBool(closestJobLocation.enabled)}, {MAINCOLOUR}Database ID:{ALTCOLOUR} ${closestJobLocation.databaseId}`);
 }
 
 // ===========================================================================
@@ -1148,6 +1153,7 @@ function stopWorking(client) {
 	let jobId = getPlayerJob(client);
 	messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} has stopped working as a ${getJobData(jobId).name}`);
 
+	/*
 	switch (getJobType(jobId)) {
 		case AGRP_JOB_POLICE:
 			messagePlayerInfo(client, "Your uniform, equipment, and vehicle have been returned to the police station");
@@ -1186,6 +1192,7 @@ function stopWorking(client) {
 		default:
 			break;
 	}
+	*/
 
 	updatePlayerNameTag(client);
 	sendPlayerWorkingState(client, false);
@@ -1200,12 +1207,12 @@ function jobUniformCommand(command, params, client) {
 	}
 
 	if (!doesPlayerHaveAnyJob(client)) {
-		messagePlayerError(client, "You don't have a job!");
+		messagePlayerError(client, getLocaleString(client, "DontHaveAJob"));
 		return false;
 	}
 
 	if (!isPlayerWorking(client)) {
-		messagePlayerError(client, "You are not working! Use /startwork at your job location or a job vehicle.");
+		messagePlayerError(client, getLocaleString(client, "NeedToBeWorking", `{ALTCOLOUR}/startwork{MAINCOLOUR}`));
 		return false;
 	}
 
@@ -1215,7 +1222,7 @@ function jobUniformCommand(command, params, client) {
 	if (closestJobLocation.position.distance(getPlayerPosition(client)) > getGlobalConfig().startWorkingDistance) {
 		let closestVehicle = getClosestVehicle(getPlayerPosition(client));
 		if (getDistance(getVehiclePosition(closestVehicle), getPlayerPosition(client)) > getGlobalConfig().startWorkingDistance) {
-			messagePlayerError(client, "You need to be near your job site or vehicle that belongs to your job!");
+			messagePlayerError(client, getLocaleString(client, "NeedToBeNearJob"));
 			return false;
 		}
 
@@ -1303,12 +1310,12 @@ function jobEquipmentCommand(command, params, client) {
 	}
 
 	if (!doesPlayerHaveAnyJob(client)) {
-		messagePlayerError(client, "You don't have a job!");
+		messagePlayerError(client, getLocaleString(client, "DontHaveAJob"));
 		return false;
 	}
 
 	if (!isPlayerWorking(client)) {
-		messagePlayerError(client, "You are not working! Use /startwork at your job location.");
+		messagePlayerError(client, getLocaleString(client, "NeedToBeWorking", `{ALTCOLOUR}/startwork{MAINCOLOUR}`));
 		return false;
 	}
 
@@ -1318,7 +1325,7 @@ function jobEquipmentCommand(command, params, client) {
 	if (closestJobLocation.position.distance(getPlayerPosition(client)) > getGlobalConfig().startWorkingDistance) {
 		let closestVehicle = getClosestVehicle(getPlayerPosition(client));
 		if (getDistance(getVehiclePosition(closestVehicle), getPlayerPosition(client)) > getGlobalConfig().startWorkingDistance) {
-			messagePlayerError(client, "You need to be near your job site or vehicle that belongs to your job!");
+			messagePlayerError(client, getLocaleString(client, "NeedToBeNearJob"));
 			return false;
 		}
 
@@ -1336,12 +1343,15 @@ function jobEquipmentCommand(command, params, client) {
 	} else {
 		if (getPlayerCurrentSubAccount(client).job == AGRP_JOB_NONE) {
 			messagePlayerError(client, getLocaleString(client, "NotYourJob"));
-			messagePlayerInfo(client, getLocaleString(client, "JobPoints"));
+
+			if (hasPlayerSeenActionTip(client, "JobLocations")) {
+				messagePlayerInfo(client, getGroupedLocaleString(client, "ActionTips", "JobPoints", "{ALTCOLOUR}/gps{MAINCOLOUR}"));
+			}
 			return false;
 		}
 
 		if (getPlayerCurrentSubAccount(client).job != closestJobLocation.jobId) {
-			messagePlayerError(client, "This is not your job!");
+			messagePlayerError(client, getLocaleString(client, "NotYourJob"));
 			messagePlayerInfo(client, getLocaleString(client, "QuitJobToTakeAnother", "{ALTCOLOUR}/quitjob{MAINCOLOUR}"));
 			return false;
 		}
@@ -1377,7 +1387,7 @@ function jobEquipmentCommand(command, params, client) {
 	}
 
 	if (equipmentId < 1 || equipmentId > equipments.length) {
-		messagePlayerError(client, "That equipment ID is invalid!");
+		messagePlayerError(client, getLocaleString(client, "InvalidJobEquipment"));
 		return false;
 	}
 
@@ -1394,11 +1404,15 @@ function jobEquipmentCommand(command, params, client) {
 	givePlayerJobEquipment(client, equipmentId - 1);
 	//messagePlayerSuccess(client, `You have been given the ${equipments[equipmentId-1].name} equipment`);
 	meActionToNearbyPlayers(client, `grabs the ${jobEquipmentData.name} equipment from the locker`);
-	if (doesPlayerHaveKeyBindForCommand(client, "inv")) {
-		messagePlayerTip(client, getLocaleString(client, "JobEquipmentInventoryKeyBindTip", toUpperCase(getKeyNameFromId(getPlayerKeyBindForCommand(client, "inv").key))));
-	} else {
-		messagePlayerTip(client, getLocaleString(client, "JobEquipmentInventoryCommandTip", "/inv"));
+	if (!hasPlayerSeenActionTip(client, "JobEquipmentInventory")) {
+		if (doesPlayerHaveKeyBindForCommand(client, "inv")) {
+			messagePlayerTip(client, getGroupedLocaleString(client, "ActionTips", "JobEquipmentInventory", toUpperCase(getKeyNameFromId(getPlayerKeyBindForCommand(client, "inv").key))));
+		} else {
+			messagePlayerTip(client, getGroupedLocaleString(client, "ActionTips", "JobEquipmentInventory", "/inv"));
+		}
+		markPlayerActionTipSeen(client, "JobEquipmentInventory");
 	}
+
 }
 
 // ===========================================================================
@@ -1548,11 +1562,11 @@ function createJobLocationCommand(command, params, client) {
 	let jobId = getJobFromParams(params);
 
 	if (!getJobData(jobId)) {
-		messagePlayerError(client, "That job was not found!");
+		messagePlayerError(client, getLocaleString(client, "InvalidJob"));
 		return false;
 	}
 
-	createJobLocation(jobId, getPlayerPosition(client), getPlayerInterior(client), getPlayerDimension(client));
+	createJobLocation(jobId, getPlayerPosition(client), getPlayerInterior(client), getPlayerDimension(client), getPlayerData(client).accountData.databaseId);
 	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created a location for the {jobYellow}${getJobData(jobId).name}{MAINCOLOUR} job`);
 	return true;
 }
@@ -1562,10 +1576,8 @@ function createJobLocationCommand(command, params, client) {
 function deleteJobLocationCommand(command, params, client) {
 	let closestJobLocation = getClosestJobLocation(getPlayerPosition(client), getPlayerDimension(client));
 
+	deleteJobLocation(closestJobLocation.jobIndex, closestJobLocation.index);
 	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} deleted location {ALTCOLOUR}${closestJobLocation.index} (DB ID ${closestJobLocation.databaseId}){MAINCOLOUR} for the {jobYellow}${getJobData(closestJobLocation.jobIndex).name}{MAINCOLOUR} job`);
-
-
-	deleteJobLocation(closestJobLocation);
 }
 
 // ===========================================================================
@@ -1743,7 +1755,7 @@ function toggleJobRouteEnabledCommand(command, params, client) {
 			if (isPlayerOnJobRoute(clients[i])) {
 				if (getPlayerJob(clients[i]) == jobId && getPlayerJobRoute(clients[i]) == jobRoute) {
 					stopJobRoute(clients[i], true, false);
-					messagePlayerAlert(clients[i], "The job route you were on has been disabled by an admin");
+					messagePlayerAlert(clients[i], getLocaleString(clients[i], "CurrentJobRouteDeleted"));
 				}
 			}
 		}
@@ -2139,7 +2151,7 @@ function setJobRoutePayCommand(command, params, client) {
 
 	getJobData(jobId).routes[jobRoute].pay = toInteger(amount);
 	getJobData(jobId).routes[jobRoute].needsSaved = true;
-	messageAdmins(`{adminOrange}${getPlayerName(client)} {MAINCOLOUR} set the pay for route {ALTCOLOUR}${getJobRouteData(jobId, jobRoute).name}{MAINCOLOUR} of the {jobYellow}${getJobData(jobId).name}{MAINCOLOUR} job to {ALTCOLOUR}$${makeLargeNumberReadable(amount)} {MAINCOLOUR} `);
+	messageAdmins(`{adminOrange}${getPlayerName(client)} {MAINCOLOUR} set the pay for route {ALTCOLOUR}${getJobRouteData(jobId, jobRoute).name}{MAINCOLOUR} of the {jobYellow}${getJobData(jobId).name}{MAINCOLOUR} job to {ALTCOLOUR}${getCurrencyString(amount)} {MAINCOLOUR} `);
 }
 
 // ===========================================================================
@@ -2304,27 +2316,32 @@ function forceAllPlayersToStopWorking() {
 
 function jobStartRouteCommand(command, params, client) {
 	if (!canPlayerUseJobs(client)) {
-		messagePlayerError(client, "You are not allowed to use jobs.");
+		messagePlayerError(client, getLocaleString(client, "NotAllowedToUseJobs"));
 		return false;
 	}
 
 	if (!isPlayerWorking(client)) {
-		messagePlayerError(client, "You aren't working yet! Use /startwork first.");
+		messagePlayerError(client, getLocaleString(client, "NeedToBeWorking", "{ALTCOLOUR}/startwork{MAINCOLOUR}"));
 		return false;
 	}
 
 	if (getJobData(getPlayerJob(client)).routes.length == 0) {
-		messagePlayerError(client, "Your job doesn't have any routes for this location!");
+		messagePlayerError(client, getLocaleString(client, "NoJobRoutesForLocation"));
+		return false;
+	}
+
+	if (!isPlayerInAnyVehicle(client)) {
+		messagePlayerError(client, getLocaleString(client, "MustBeInAVehicle"));
 		return false;
 	}
 
 	if (!isPlayerInJobVehicle(client)) {
-		messagePlayerError(client, "You need to be in a vehicle that belongs to your job!");
+		messagePlayerError(client, getLocaleString(client, "NeedToBeInJobVehicle"));
 		return false;
 	}
 
 	if (isPlayerOnJobRoute(client)) {
-		messagePlayerError(client, "You're already on a job route! Finish the route or use /stoproute");
+		messagePlayerError(client, getLocaleString(client, "AlreadyOnJobRoute", "{ALTCOLOUR}/stoproute{MAINCOLOUR}"));
 		return false;
 	}
 
@@ -2338,6 +2355,8 @@ function jobStartRouteCommand(command, params, client) {
 		}
 	}
 
+	markPlayerActionTipSeen(client, "JobRouteStart");
+
 	startJobRoute(client, forceRoute);
 	return true;
 }
@@ -2346,7 +2365,7 @@ function jobStartRouteCommand(command, params, client) {
 
 function jobStopRouteCommand(command, params, client) {
 	if (!canPlayerUseJobs(client)) {
-		messagePlayerError(client, "You are not allowed to use jobs.");
+		messagePlayerError(client, getLocaleString(client, "NotAllowedToUseJobs"));
 		return false;
 	}
 
@@ -2409,7 +2428,7 @@ function startJobRoute(client, forceRoute = -1) {
 	}
 
 	if (jobRoute == -1) {
-		messagePlayerError(client, `There are no routes for this location.`);
+		messagePlayerError(client, getLocaleString(client, "NoRoutesForLocation"));
 		return false;
 	}
 
@@ -2441,6 +2460,10 @@ function startJobRoute(client, forceRoute = -1) {
 // ===========================================================================
 
 function stopJobRoute(client, successful = false, alertPlayer = true) {
+	if (!isPlayerOnJobRoute(client)) {
+		return false;
+	}
+
 	let jobId = getPlayerJob(client);
 	let routeId = getPlayerJobRoute(client);
 
@@ -2453,11 +2476,13 @@ function stopJobRoute(client, successful = false, alertPlayer = true) {
 		return false;
 	}
 
+	if (alertPlayer) {
+		messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} failed to finish the ${getJobRouteData(jobId, getPlayerJobRoute(client)).name} route for the ${getJobData(jobId).name} job and didn't earn anything.`);
+	}
+
 	//if (alertPlayer) {
 	//	messagePlayerAlert(client, replaceJobRouteStringsInMessage(getJobRouteData(jobId, routeId).failedMessage, jobId, routeId));
 	//}
-
-	messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} failed to finish the ${getJobRouteData(jobId, getPlayerJobRoute(client)).name} route for the ${getJobData(jobId).name} job and didn't earn anything.`);
 
 	stopReturnToJobVehicleCountdown(client);
 	sendPlayerStopJobRoute(client);
@@ -2546,14 +2571,14 @@ function canPlayerUseJob(client, jobId) {
 
 // ===========================================================================
 
-function deleteJobLocation(jobLocationData) {
+function deleteJobLocation(jobIndex, jobLocationIndex) {
 	if (jobLocationData.databaseId > 0) {
-		quickDatabaseQuery(`DELETE FROM job_loc WHERE job_loc_id = ${jobLocationData.databaseId}`);
+		quickDatabaseQuery(`DELETE FROM job_loc WHERE job_loc_id = ${getJobLocationData(jobIndex, jobLocationIndex).databaseId}`);
 	}
 
-	deleteJobLocationBlip(tempJob, tempLocation);
-	deleteJobLocationPickup(tempJob, tempLocation);
-	getJobData(getJobIdFromDatabaseId(tempJob)).locations.splice(tempLocation, 1);
+	deleteJobLocationBlip(jobIndex, jobLocationIndex);
+	deleteJobLocationPickup(jobIndex, jobLocationIndex);
+	getJobData(getJobIdFromDatabaseId(jobIndex)).locations.splice(jobLocationIndex, 1);
 	setAllJobDataIndexes();
 }
 
@@ -2634,7 +2659,7 @@ function setAllJobDataIndexes() {
 
 // ===========================================================================
 
-function createJobLocation(jobId, position, interior, dimension) {
+function createJobLocation(jobId, position, interior, dimension, whoCreated) {
 	let jobLocationData = new JobLocationData(false);
 	jobLocationData.position = position;
 	jobLocationData.jobId = getJobData(jobId).databaseId;
@@ -2643,11 +2668,14 @@ function createJobLocation(jobId, position, interior, dimension) {
 	jobLocationData.enabled = true;
 	jobLocationData.jobIndex = jobId;
 	jobLocationData.needsSaved = true;
+	jobLocationData.whoCreated = whoCreated;
+	jobLocationData.whenCreated = getCurrentUnixTimestamp();
 
 	getServerData().jobs[jobId].locations.push(jobLocationData);
 	let newSlot = getServerData().jobs[jobId].locations.length - 1;
 	getServerData().jobs[jobId].locations[newSlot].index = newSlot;
 	createJobLocationPickup(jobId, newSlot);
+	createJobLocationBlip(jobId, newSlot);
 	saveJobLocationToDatabase(jobLocationData);
 }
 
@@ -2660,11 +2688,11 @@ function saveJobToDatabase(jobData) {
 	}
 
 	if (jobData.needsSaved == false) {
-		logToConsole(LOG_DEBUG, `[VRR.Job]: Job ${jobData.name} doesn't need saved. Skipping ...`);
+		logToConsole(LOG_DEBUG, `[AGRP.Job]: Job ${jobData.name} doesn't need saved. Skipping ...`);
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saving job ${jobData.name} to database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saving job ${jobData.name} to database ...`);
 	let dbConnection = connectToDatabase();
 	if (dbConnection) {
 		let safeName = escapeDatabaseString(dbConnection, jobData.name);
@@ -2701,7 +2729,7 @@ function saveJobToDatabase(jobData) {
 		disconnectFromDatabase(dbConnection);
 		return true;
 	}
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saved job ${jobData.name} to database!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saved job ${jobData.name} to database!`);
 
 	return false;
 }
@@ -2715,11 +2743,11 @@ function saveJobRankToDatabase(jobRankData) {
 	}
 
 	if (jobRankData.needsSaved == false) {
-		logToConsole(LOG_DEBUG, `[VRR.Job]: Job route ${jobRankData.name} (DB ID ${jobRankData.databaseId}) doesn't need saved. Skipping ...`);
+		logToConsole(LOG_DEBUG, `[AGRP.Job]: Job route ${jobRankData.name} (DB ID ${jobRankData.databaseId}) doesn't need saved. Skipping ...`);
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saving job route ${jobRankData.name} to database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saving job route ${jobRankData.name} to database ...`);
 	let dbConnection = connectToDatabase();
 	if (dbConnection) {
 		let safeName = escapeDatabaseString(dbConnection, jobRankData.name);
@@ -2750,7 +2778,7 @@ function saveJobRankToDatabase(jobRankData) {
 		disconnectFromDatabase(dbConnection);
 		return true;
 	}
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saved job rank ${jobRankData.name} to database!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saved job rank ${jobRankData.name} to database!`);
 
 	return false;
 }
@@ -2764,11 +2792,11 @@ function saveJobRouteToDatabase(jobRouteData) {
 	}
 
 	if (jobRouteData.needsSaved == false) {
-		logToConsole(LOG_DEBUG, `[VRR.Job]: Job route ${jobRouteData.name} (DB ID ${jobRouteData.databaseId}) doesn't need saved. Skipping ...`);
+		logToConsole(LOG_DEBUG, `[AGRP.Job]: Job route ${jobRouteData.name} (DB ID ${jobRouteData.databaseId}) doesn't need saved. Skipping ...`);
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saving job route ${jobRouteData.name} to database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saving job route ${jobRouteData.name} to database ...`);
 	let dbConnection = connectToDatabase();
 	if (dbConnection) {
 		let safeName = escapeDatabaseString(dbConnection, jobRouteData.name);
@@ -2809,7 +2837,7 @@ function saveJobRouteToDatabase(jobRouteData) {
 		disconnectFromDatabase(dbConnection);
 		return true;
 	}
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saved job route ${jobRouteData.name} to database!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saved job route ${jobRouteData.name} to database!`);
 
 	return false;
 }
@@ -2823,11 +2851,11 @@ function saveJobRouteLocationToDatabase(jobRouteLocationData) {
 	}
 
 	if (jobRouteLocationData.needsSaved == false) {
-		logToConsole(LOG_DEBUG, `[VRR.Job]: Job route location ${jobRouteLocationData.name} (DB ID ${jobRouteLocationData.databaseId}) doesn't need saved. Skipping ...`);
+		logToConsole(LOG_DEBUG, `[AGRP.Job]: Job route location ${jobRouteLocationData.name} (DB ID ${jobRouteLocationData.databaseId}) doesn't need saved. Skipping ...`);
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saving job route location ${jobRouteLocationData.name} to database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saving job route location ${jobRouteLocationData.name} to database ...`);
 	let dbConnection = connectToDatabase();
 	if (dbConnection) {
 		let safeName = escapeDatabaseString(dbConnection, jobRouteLocationData.name);
@@ -2859,7 +2887,7 @@ function saveJobRouteLocationToDatabase(jobRouteLocationData) {
 		disconnectFromDatabase(dbConnection);
 		return true;
 	}
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saved job route location ${jobRoutePositionData.name} (${jobRouteLocationData.databaseId}) to database!`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saved job route location ${jobRoutePositionData.name} (${jobRouteLocationData.databaseId}) to database!`);
 
 	return false;
 }
@@ -2873,11 +2901,11 @@ function saveJobLocationToDatabase(jobLocationData) {
 	}
 
 	if (!jobLocationData.needsSaved) {
-		logToConsole(LOG_DEBUG, `[VRR.Job]: Job location ${jobLocationData.name} (${jobLocationData.databaseId}) doesn't need saved. Skipping ...`);
+		logToConsole(LOG_DEBUG, `[AGRP.Job]: Job location ${jobLocationData.name} (${jobLocationData.databaseId}) doesn't need saved. Skipping ...`);
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saving job location ${jobLocationData.databaseId} to database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saving job location ${jobLocationData.databaseId} to database ...`);
 	let dbConnection = connectToDatabase();
 	if (dbConnection) {
 		let data = [
@@ -2908,7 +2936,7 @@ function saveJobLocationToDatabase(jobLocationData) {
 		return true;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saved job location ${jobLocationData.databaseId} to database`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saved job location ${jobLocationData.databaseId} to database`);
 
 	return false;
 }
@@ -2922,11 +2950,11 @@ function saveJobEquipmentToDatabase(jobEquipmentData) {
 	}
 
 	if (!jobEquipmentData.needsSaved) {
-		logToConsole(LOG_DEBUG, `[VRR.Job]: Job equipment ${jobEquipmentData.name} (${jobEquipmentData.databaseId}) doesn't need saved. Skipping ...`);
+		logToConsole(LOG_DEBUG, `[AGRP.Job]: Job equipment ${jobEquipmentData.name} (${jobEquipmentData.databaseId}) doesn't need saved. Skipping ...`);
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saving job equipment ${jobEquipmentData.databaseId} to database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saving job equipment ${jobEquipmentData.databaseId} to database ...`);
 	let dbConnection = connectToDatabase();
 	if (dbConnection) {
 		let safeName = escapeDatabaseString(dbConnection, jobEquipmentData.name);
@@ -2954,7 +2982,7 @@ function saveJobEquipmentToDatabase(jobEquipmentData) {
 		disconnectFromDatabase(dbConnection);
 		return true;
 	}
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saved job equipment ${jobEquipmentData.databaseId} to database`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saved job equipment ${jobEquipmentData.databaseId} to database`);
 
 	return false;
 }
@@ -2968,11 +2996,11 @@ function saveJobEquipmentItemToDatabase(jobEquipmentItemData) {
 	}
 
 	if (!jobEquipmentItemData.needsSaved) {
-		logToConsole(LOG_DEBUG, `[VRR.Job]: Job equipment item ${jobEquipmentItemData.databaseId} doesn't need saved. Skipping ...`);
+		logToConsole(LOG_DEBUG, `[AGRP.Job]: Job equipment item ${jobEquipmentItemData.databaseId} doesn't need saved. Skipping ...`);
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saving job equipment weapon ${jobEquipmentItemData.databaseId} to database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saving job equipment weapon ${jobEquipmentItemData.databaseId} to database ...`);
 	let dbConnection = connectToDatabase();
 	if (dbConnection) {
 		let data = [
@@ -2999,7 +3027,7 @@ function saveJobEquipmentItemToDatabase(jobEquipmentItemData) {
 		disconnectFromDatabase(dbConnection);
 		return true;
 	}
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saved job equipment weapon ${jobEquipmentItemData.databaseId} to database`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saved job equipment weapon ${jobEquipmentItemData.databaseId} to database`);
 
 	return false;
 }
@@ -3013,11 +3041,11 @@ function saveJobUniformToDatabase(jobUniformData) {
 	}
 
 	if (!jobUniformData.needSaved) {
-		logToConsole(LOG_DEBUG, `[VRR.Job]: Job uniform ${jobUniformData.databaseId} doesn't need saved. Skipping ...`);
+		logToConsole(LOG_DEBUG, `[AGRP.Job]: Job uniform ${jobUniformData.databaseId} doesn't need saved. Skipping ...`);
 		return false;
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saving job uniform ${jobUniformData.databaseId} to database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saving job uniform ${jobUniformData.databaseId} to database ...`);
 	let dbConnection = connectToDatabase();
 	if (dbConnection) {
 		let safeName = escapeDatabaseString(dbConnection, jobUniformData.name);
@@ -3046,7 +3074,7 @@ function saveJobUniformToDatabase(jobUniformData) {
 		disconnectFromDatabase(dbConnection);
 		return true;
 	}
-	logToConsole(LOG_DEBUG, `[VRR.Job]: Saved job uniform ${jobUniformData.databaseId} to database`);
+	logToConsole(LOG_DEBUG, `[AGRP.Job]: Saved job uniform ${jobUniformData.databaseId} to database`);
 
 	return false;
 }
@@ -3112,20 +3140,19 @@ function createJobLocationPickup(jobId, locationId) {
 		return false;
 	}
 
-	if (!isGameFeatureSupported("pickup")) {
-		return false;
-	}
-
 	let tempJobData = getJobData(jobId);
 
+	logToConsole(LOG_VERBOSE, `[AGRP.Job]: Creating pickup for location ${locationId} of the ${tempJobData.name} job`);
+
 	if (tempJobData.pickupModel != -1) {
-		let pickupModelId = getGameConfig().pickupModels[getGame()].Job;
+		let pickupModelId = -1;
+		if (isGameFeatureSupported("pickup")) {
+			pickupModelId = getGameConfig().pickupModels[getGame()].Job;
 
-		if (tempJobData.pickupModel != 0) {
-			pickupModelId = tempJobData.pickupModel;
+			if (tempJobData.pickupModel != 0) {
+				pickupModelId = tempJobData.pickupModel;
+			}
 		}
-
-		logToConsole(LOG_VERBOSE, `[VRR.Job]: Creating pickup for location ${locationId} of the ${tempJobData.name} job`);
 
 		if (areServerElementsSupported()) {
 			let pickup = createGamePickup(pickupModelId, tempJobData.locations[locationId].position, getGameConfig().pickupTypes[getGame()].job);
@@ -3141,7 +3168,16 @@ function createJobLocationPickup(jobId, locationId) {
 				addToWorld(pickup);
 			}
 		} else {
-			// sendJobToPlayer(null, jobId, tempJobData.name, tempJobData.locations[locationId].position, pickupModel);
+			let blipModelId = -1;
+			if (isGameFeatureSupported("blip")) {
+				blipModelId = getGameConfig().blipSprites[getGame()].Job;
+
+				if (getJobData(jobId).blipModel != 0) {
+					blipModelId = getJobData(jobId).blipModel;
+				}
+			}
+
+			sendJobToPlayer(null, jobId, tempJobData.name, tempJobData.locations[locationId].position, blipModelId, pickupModelId);
 		}
 	}
 }
@@ -3189,8 +3225,6 @@ function createJobLocationBlip(jobId, locationId) {
 				updateJobBlipsForPlayer(clients[i]);
 			}
 		}
-	} else {
-		sendJobToPlayer(null, jobId, tempJobData.name, tempJobData.locations[locationId].position, blipModelId);
 	}
 }
 
@@ -3416,7 +3450,7 @@ function createJobRouteCommand(command, params, client) {
 	}
 
 	if (isPlayerOnJobRoute(client)) {
-		messagePlayerError(client, getLocaleString(client, "AlreadyOnJobRoute", "{ALTCOLOUR}/startroute{MAINCOLOUR}"));
+		messagePlayerError(client, getLocaleString(client, "AlreadyOnJobRoute", "{ALTCOLOUR}/stoproute{MAINCOLOUR}"));
 		return false;
 	}
 
@@ -3483,7 +3517,7 @@ function createJobUniformCommand(command, params, client) {
 		return false;
 	}
 
-	let splitParams = params.spli(" ");
+	let splitParams = params.split(" ");
 	let jobId = getJobFromParams(getParam(params, " ", 1));
 	let skinIndex = getSkinModelIndexFromParams(splitParams.slice(1).join(" "), getGame());
 
@@ -3498,7 +3532,7 @@ function createJobUniformCommand(command, params, client) {
 	}
 
 	createJobUniform(jobId, skinIndex);
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created uniform with skin {ALTCOLOUR}${getGameConfig().skins[skinIndex][1]} (}${getGameConfig().skins[skinIndex][0]}){MAINCOLOUR} for job {jobYellow}${getJobData(jobId).name}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created uniform with skin {ALTCOLOUR}${getGameConfig().skins[skinIndex][1]} (${getGameConfig().skins[skinIndex][0]}){MAINCOLOUR} for job {jobYellow}${getJobData(jobId).name}`);
 	return true;
 }
 
@@ -3756,6 +3790,14 @@ function getRandomJobRouteForLocation(closestJobLocation) {
  * @return {JobUniformData} The jobroutes's data (class instance)
  */
 function getJobUniformData(jobIndex, uniformIndex) {
+	if (typeof getServerData().jobs[jobIndex] == "undefined") {
+		return false;
+	}
+
+	if (typeof getServerData().jobs[jobIndex].uniforms[uniformIndex] == "undefined") {
+		return false;
+	}
+
 	return getServerData().jobs[jobIndex].uniforms[uniformIndex];
 }
 
@@ -3767,6 +3809,14 @@ function getJobUniformData(jobIndex, uniformIndex) {
  * @return {JobEquipmentData} The job equipment loadout's data (class instance)
  */
 function getJobEquipmentData(jobIndex, equipmentIndex) {
+	if (typeof getServerData().jobs[jobIndex] == "undefined") {
+		return false;
+	}
+
+	if (typeof getServerData().jobs[jobIndex].equipment[equipmentIndex] == "undefined") {
+		return false;
+	}
+
 	return getServerData().jobs[jobIndex].equipment[equipmentIndex];
 }
 
@@ -3779,7 +3829,15 @@ function getJobEquipmentData(jobIndex, equipmentIndex) {
  * @return {JobEquipmentItemData} The job equipment loadout's data (class instance)
  */
 function getJobEquipmentItemData(jobIndex, equipmentIndex, equipmentItemIndex) {
-	return getJobEquipmentData(jobIndex, equipmentIndex).items[equipmentItemIndex];
+	if (typeof getServerData().jobs[jobIndex] == "undefined") {
+		return false;
+	}
+
+	if (typeof getServerData().jobs[jobIndex].equipment[equipmentIndex] == "undefined") {
+		return false;
+	}
+
+	return getServerData().jobs[jobIndex].equipment[equipmentIndex].items[equipmentItemIndex];
 }
 
 // ===========================================================================
@@ -3790,6 +3848,10 @@ function getJobEquipmentItemData(jobIndex, equipmentIndex, equipmentItemIndex) {
  * @return {JobRouteData} The job rank's data (class instance)
  */
 function getJobRankData(jobIndex, rankIndex) {
+	if (typeof getServerData().jobs[jobIndex] == "undefined") {
+		return false;
+	}
+
 	return getServerData().jobs[jobIndex].ranks[rankIndex];
 }
 
@@ -3801,6 +3863,14 @@ function getJobRankData(jobIndex, rankIndex) {
  * @return {JobRouteData} The job routes's data (class instance)
  */
 function getJobRouteData(jobIndex, routeIndex) {
+	if (typeof getServerData().jobs[jobIndex] == "undefined") {
+		return false;
+	}
+
+	if (typeof getServerData().jobs[jobIndex].routes[routeIndex] == "undefined") {
+		return false;
+	}
+
 	return getServerData().jobs[jobIndex].routes[routeIndex];
 }
 
@@ -3813,7 +3883,38 @@ function getJobRouteData(jobIndex, routeIndex) {
  * @return {JobRouteLocationData} The job route locations's data (class instance)
  */
 function getJobRouteLocationData(jobIndex, routeIndex, routeLocationIndex) {
-	return getJobRouteData(jobIndex, routeIndex).locations[routeLocationIndex];
+	if (typeof getServerData().jobs[jobIndex] == "undefined") {
+		return false;
+	}
+
+	if (typeof getServerData().jobs[jobIndex].routes[routeIndex] == "undefined") {
+		return false;
+	}
+
+	if (typeof getServerData().jobs[jobIndex].routes[routeIndex].locations[routeLocationIndex] == "undefined") {
+		return false;
+	}
+
+	return getServerData().jobs[jobIndex].routes[routeIndex].locations[routeLocationIndex];
+}
+
+// ===========================================================================
+
+/**
+ * @param {number} jobIndex - The data index of the job
+ * @param {number} locationIndex - The data index of the job location
+ * @return {JobLocationData} The job route locations's data (class instance)
+ */
+function getJobLocationData(jobIndex, locationIndex) {
+	if (typeof getServerData().jobs[jobIndex] == "undefined") {
+		return false;
+	}
+
+	if (typeof getServerData().jobs[jobIndex].locations[locationIndex] == "undefined") {
+		return false;
+	}
+
+	return getServerData().jobs[jobIndex].locations[locationIndex];
 }
 
 // ===========================================================================
@@ -3856,7 +3957,7 @@ function finishSuccessfulJobRoute(client) {
 	let payout = toInteger(applyServerInflationMultiplier(jobRouteData.pay));
 	getPlayerData(client).payDayAmount = getPlayerData(client).payDayAmount + payout;
 
-	messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} finished the ${jobRouteData.name} route for the ${getJobData(jobId).name} job and earned $${jobRouteData.pay}!`);
+	messageDiscordEventChannel(`💼 ${getCharacterFullName(client)} finished the ${jobRouteData.name} route for the ${getJobData(jobId).name} job and earned ${getCurrencyString(jobRouteData.pay)}!`);
 	messagePlayerSuccess(client, replaceJobRouteStringsInMessage(jobRouteData.finishMessage, jobId, jobRouteData.index));
 
 	stopReturnToJobVehicleCountdown(client);
@@ -3916,7 +4017,7 @@ function replaceJobRouteStringsInMessage(messageText, jobId, jobRouteId) {
 
 	tempFind = `{JOBROUTEPAY}`;
 	tempRegex = new RegExp(tempFind, 'g');
-	messageText = messageText.replace(tempRegex, `$${tempJobRouteData.pay}`);
+	messageText = messageText.replace(tempRegex, `${getCurrencyString(tempJobRouteData.pay)}`);
 
 	tempFind = `{JOBNAME}`;
 	tempRegex = new RegExp(tempFind, 'g');
@@ -4022,6 +4123,12 @@ function createAllJobRouteLocationMarkers() {
 			}
 		}
 	}
+}
+
+// ===========================================================================
+
+function doesJobLocationHaveAnyRoutes(jobLocationData) {
+	return (getRandomJobRouteForLocation(jobLocationData) != -1);
 }
 
 // ===========================================================================

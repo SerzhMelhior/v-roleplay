@@ -40,7 +40,6 @@ function processSync(event, deltaTime) {
 	}
 
 	if (streamingRadioElement) {
-		streamingRadio.position = getElementPosition(streamingRadioElement.id);
 		//streamingRadio.volume = getStreamingRadioVolumeForPosition(streamingRadio.position);
 	}
 }
@@ -48,24 +47,14 @@ function processSync(event, deltaTime) {
 // ===========================================================================
 
 function setVehicleLights(vehicleId, state) {
-	if (getGame() != AGRP_GAME_MAFIA_ONE) {
-		if (!state) {
-			getElementFromId(vehicleId).lightStatus = 2;
-		} else {
-			getElementFromId(vehicleId).lightStatus = 1;
-		}
-	} else if (getGame() == AGRP_GAME_GTA_IV) {
+	if (getGame() == AGRP_GAME_GTA_IV) {
 		if (!state) {
 			natives.forceCarLights(natives.getVehicleFromNetworkId(vehicleId, 0));
 		} else {
 			natives.forceCarLights(natives.getVehicleFromNetworkId(vehicleId, 1));
 		}
 	} else {
-		if (!state) {
-			getElementFromId(vehicleId).lights = false;
-		} else {
-			getElementFromId(vehicleId).lights = true;
-		}
+		getElementFromId(vehicleId).lights = state;
 	}
 }
 
@@ -122,7 +111,7 @@ function syncVehicleProperties(vehicle) {
 		vehicle.setSuspensionHeight(suspensionHeight);
 	}
 
-	if (getGame() == AGRP_GAME_GTA_SA) {
+	if (isGameFeatureSupported("vehicleUpgrades")) {
 		//let allUpgrades = getGameConfig().vehicleUpgrades[getGame()];
 		//for(let i in allUpgrades) {
 		//	vehicle.removeUpgrade(i);
@@ -157,7 +146,7 @@ function syncCivilianProperties(civilian) {
 		return false;
 	}
 
-	if (getGame() == AGRP_GAME_GTA_III) {
+	if (isGameFeatureSupported("pedScale")) {
 		if (doesEntityDataExist(civilian, "agrp.scale")) {
 			let scaleFactor = getEntityData(civilian, "agrp.scale");
 			let tempMatrix = civilian.matrix;
@@ -176,7 +165,7 @@ function syncCivilianProperties(civilian) {
 		}
 	}
 
-	if (getGame() == AGRP_GAME_GTA_III) {
+	if (getGame() == AGRP_GAME_GTA_SA) {
 		if (doesEntityDataExist(civilian, "agrp.walkStyle")) {
 			let walkStyle = getEntityData(civilian, "agrp.walkStyle");
 			civilian.walkStyle = walkStyle;
@@ -249,12 +238,32 @@ function syncCivilianProperties(civilian) {
 
 // ===========================================================================
 
+function syncObjectProperties(object) {
+	if (!areServerElementsSupported()) {
+		return false;
+	}
+
+	if (isGameFeatureSupported("objectScale")) {
+		if (doesEntityDataExist(object, "agrp.scale")) {
+			let scaleFactor = getEntityData(object, "agrp.scale");
+			let tempMatrix = object.matrix;
+			tempMatrix.setScale(toVector3(scaleFactor.x, scaleFactor.y, scaleFactor.z));
+			let tempPosition = object.position;
+			object.matrix = tempMatrix;
+			tempPosition.z += scaleFactor.z;
+			object.position = tempPosition;
+		}
+	}
+}
+
+// ===========================================================================
+
 function syncPlayerProperties(player) {
 	if (!areServerElementsSupported()) {
 		return false;
 	}
 
-	if (getGame() == AGRP_GAME_GTA_III) {
+	if (isGameFeatureSupported("pedScale")) {
 		if (doesEntityDataExist(player, "agrp.scale")) {
 			let scaleFactor = getEntityData(player, "agrp.scale");
 			let tempMatrix = player.matrix;
@@ -367,9 +376,17 @@ function syncElementProperties(element) {
 		return false;
 	}
 
-	if (doesEntityDataExist(element, "agrp.interior")) {
-		if (typeof element.interior != "undefined") {
-			element.interior = getEntityData(element, "agrp.interior");
+	if (isGameFeatureSupported("interior")) {
+		if (doesEntityDataExist(element, "agrp.interior")) {
+			if (typeof element.interior != "undefined") {
+				element.interior = getEntityData(element, "agrp.interior");
+			}
+		}
+	}
+
+	if (isGameFeatureSupported("toggleCollision")) {
+		if (doesEntityDataExist(element, "agrp.collisions")) {
+			element.collisionsEnabled = getEntityData(element, "agrp.collisions");
 		}
 	}
 
@@ -402,6 +419,10 @@ function syncElementProperties(element) {
 
 			case ELEMENT_PLAYER:
 				syncPlayerProperties(element);
+				break;
+
+			case ELEMENT_OBJECT:
+				syncObjectProperties(element);
 				break;
 
 			default:

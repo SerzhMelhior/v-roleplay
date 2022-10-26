@@ -31,7 +31,7 @@ class VehicleData {
 // ===========================================================================
 
 function receiveVehicleFromServer(vehicleId, position, model, colour1, colour2, colour3 = 0, colour4 = 0, locked = false, lights = false, engine = false, licensePlate = "") {
-	logToConsole(LOG_DEBUG, `[VRR.Vehicle] Received vehicle ${vehicleId} (${getVehicleNameFromModel(model, getGame())}) from server`);
+	logToConsole(LOG_DEBUG, `[AGRP.Vehicle] Received vehicle ${vehicleId} (${getVehicleNameFromModel(model, getGame())}) from server`);
 
 	if (getGame() != AGRP_GAME_GTA_IV) {
 		return false;
@@ -53,7 +53,7 @@ function receiveVehicleFromServer(vehicleId, position, model, colour1, colour2, 
 
 		let vehicle = natives.getVehicleFromNetworkId(vehicleId.ivNetworkId);
 	} else {
-		//logToConsole(LOG_DEBUG, `[VRR.Vehicle] Vehicle ${vehicleId} doesn't exist. Adding ...`);
+		//logToConsole(LOG_DEBUG, `[AGRP.Vehicle] Vehicle ${vehicleId} doesn't exist. Adding ...`);
 		//let tempVehicleData = new VehicleData(vehicleId, name, position, blipModel, pickupModel);
 
 		//vehicles.push(tempVehicleData);
@@ -131,14 +131,13 @@ function setAllVehicleDataIndexes() {
 
 // ===========================================================================
 
-function toggleVehicleCruiseControl(vehicle) {
-	if (!vehicle.isSyncer) {
+function toggleLocalVehicleCruiseControl() {
+	if (!localPlayer.vehicle.isSyncer) {
 		return false;
 	}
 
-
-
-	cruiseControl = !cruiseControl;
+	cruiseControlEnabled = !cruiseControlEnabled;
+	cruiseControlSpeed = getVehicleSpeed(vehicle);
 }
 
 // ===========================================================================

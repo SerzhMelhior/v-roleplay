@@ -19,8 +19,8 @@ let isSpawned = false;
 
 let garbageCollectorInterval = null;
 
-let parkedVehiclePosition = false;
-let parkedVehicleHeading = false;
+//let parkedVehiclePosition = false;
+//let parkedVehicleHeading = false;
 
 let renderHUD = true;
 let renderLabels = true;
@@ -31,7 +31,7 @@ let renderHotBar = true;
 let renderItemActionDelay = true;
 let renderInteriorLights = true;
 
-let logLevel = LOG_DEBUG;
+let logLevel = LOG_INFO | LOG_DEBUG;
 
 let weaponDamageEnabled = {};
 let weaponDamageEvent = {};
@@ -61,6 +61,7 @@ let interiorLightsEnabled = true;
 let interiorLightsColour = toColour(0, 0, 0, 150);
 
 let mouseCameraEnabled = false;
+let mouseCursorEnabled = false;
 
 let currentPickup = false;
 
@@ -91,5 +92,15 @@ let serverData = {
 	vehicles: [],
 	jobs: [],
 };
+
+let localPlayerMoney = 0;
+let localPlayerMoneyInterval = null;
+
+let currencyString = "${AMOUNT}";
+
+let mapChangeWarning = false;
+
+let cruiseControlEnabled = false;
+let cruiseControlSpeed = 0.0;
 
 // ===========================================================================

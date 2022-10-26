@@ -45,6 +45,7 @@ class NPCData {
 		this.scale = toVector3(1.0, 1.0, 1.0);
 		this.heading = 0.0;
 		this.clan = 0;
+		this.rank = 0;
 		this.isWorking = false;
 		this.jobUniform = this.skin;
 		this.lastJobVehicle = null;
@@ -65,6 +66,7 @@ class NPCData {
 		this.animationName = "";
 		this.ownerType = AGRP_NPC_OWNER_NONE;
 		this.ownerId = 0;
+		this.enabled = false;
 
 		this.bodyParts = {
 			hair: [0, 0],
@@ -98,21 +100,22 @@ class NPCData {
 			this.rotation = toVector3(toFloat(dbAssoc["npc_rot_x"]), toFloat(dbAssoc["npc_rot_y"]), toFloat(dbAssoc["npc_rot_z"]));
 			this.scale = toVector3(toFloat(dbAssoc["npc_scale_x"]), toFloat(dbAssoc["npc_scale_y"]), toFloat(dbAssoc["npc_scale_z"]));
 			this.heading = toFloat(dbAssoc["npc_rot_z"]);
-			this.lastLogin = toInteger(dbAssoc["npc_when_lastlogin"]);
 			this.rank = toInteger(dbAssoc["npc_rank"]);
 			this.title = toInteger(dbAssoc["npc_title"]);
 			this.job = toInteger(dbAssoc["npc_job"]);
 			this.interior = toInteger(dbAssoc["npc_int"]);
 			this.dimension = toInteger(dbAssoc["npc_vw"]);
-			this.walkStyle = toInteger(dbAssoc["npc_walkstyle"]);
-			this.fightStyle = toInteger(dbAssoc["npc_fightstyle"]);
+			this.walkStyle = toInteger(dbAssoc["npc_walk_style"]);
+			this.fightStyle = toInteger(dbAssoc["npc_fight_style"]);
 			this.health = toInteger(dbAssoc["npc_health"]);
 			this.armour = toInteger(dbAssoc["npc_armour"]);
 			this.typeFlags = toInteger(dbAssoc["npc_type_flags"]);
 			this.heedThreats = intToBool(dbAssoc["npc_headthreats"]);
 			this.threats = toInteger(dbAssoc["npc_threats"]);
 			this.invincible = intToBool(dbAssoc["npc_invincible"]);
-			this.animationName = intToBool(dbAssoc["npc_animation"]);
+			this.animationName = toString(dbAssoc["npc_animation"]);
+			this.enabled = intToBool(dbAssoc["npc_enabled"]);
+			this.lookAtPlayer = intToBool(dbAssoc["npc_lookatplr"]);
 
 			this.bodyParts = {
 				hair: [toInteger(dbAssoc["npc_hd_part_hair_model"]) || 0, toInteger(dbAssoc["npc_hd_part_hair_texture"]) || 0],
@@ -203,8 +206,8 @@ class NPCTriggerResponseData {
 // ===========================================================================
 
 function initNPCScript() {
-	logToConsole(LOG_DEBUG, "[VRR.NPC]: Initializing NPC script ...");
-	logToConsole(LOG_INFO, "[VRR.NPC]: NPC script initialized successfully!");
+	logToConsole(LOG_DEBUG, "[AGRP.NPC]: Initializing NPC script ...");
+	logToConsole(LOG_INFO, "[AGRP.NPC]: NPC script initialized successfully!");
 }
 
 // ===========================================================================
@@ -244,7 +247,7 @@ function createNPCCommand(command, params, client) {
 // ===========================================================================
 
 function loadNPCsFromDatabase() {
-	logToConsole(LOG_DEBUG, `[VRR.NPC]: Loading NPCs from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.NPC]: Loading NPCs from database ...`);
 	let dbConnection = connectToDatabase();
 	let tempNPCs = [];
 	let dbAssoc;
@@ -262,14 +265,14 @@ function loadNPCsFromDatabase() {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.NPC]: ${tempNPCs.length} NPCs loaded from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.NPC]: ${tempNPCs.length} NPCs loaded from database successfully!`);
 	return tempNPCs;
 }
 
 // ===========================================================================
 
 function loadNPCTriggersFromDatabase(npcDatabaseId) {
-	logToConsole(LOG_DEBUG, `[VRR.NPC]: Loading NPC triggers for NPC ${npcDatabaseId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.NPC]: Loading NPC triggers for NPC ${npcDatabaseId} from database ...`);
 	let dbConnection = connectToDatabase();
 	let tempNPCTriggers = [];
 	let dbAssoc;
@@ -288,14 +291,14 @@ function loadNPCTriggersFromDatabase(npcDatabaseId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.NPC]: ${tempNPCTriggers.length} NPC triggers loaded for NPC ${npcDatabaseId} from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.NPC]: ${tempNPCTriggers.length} NPC triggers loaded for NPC ${npcDatabaseId} from database successfully!`);
 	return tempNPCTriggers;
 }
 
 // ===========================================================================
 
 function loadNPCTriggerConditionsFromDatabase(npcTriggerDatabaseId) {
-	logToConsole(LOG_DEBUG, `[VRR.NPC]: Loading NPC trigger conditions for trigger ${npcTriggerDatabaseId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.NPC]: Loading NPC trigger conditions for trigger ${npcTriggerDatabaseId} from database ...`);
 	let dbConnection = connectToDatabase();
 	let tempNPCTriggerConditions = [];
 	let dbAssoc;
@@ -312,14 +315,14 @@ function loadNPCTriggerConditionsFromDatabase(npcTriggerDatabaseId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.NPC]: ${tempNPCTriggerConditions.length} conditions loaded for trigger ${npcTriggerDatabaseId} from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.NPC]: ${tempNPCTriggerConditions.length} conditions loaded for trigger ${npcTriggerDatabaseId} from database successfully!`);
 	return tempNPCTriggerConditions;
 }
 
 // ===========================================================================
 
 function loadNPCTriggerResponsesFromDatabase(npcTriggerDatabaseId) {
-	logToConsole(LOG_DEBUG, `[VRR.NPC]: Loading NPC trigger responses for trigger ${npcTriggerDatabaseId} from database ...`);
+	logToConsole(LOG_DEBUG, `[AGRP.NPC]: Loading NPC trigger responses for trigger ${npcTriggerDatabaseId} from database ...`);
 	let dbConnection = connectToDatabase();
 	let tempNPCTriggerResponses = [];
 	let dbAssoc;
@@ -336,7 +339,7 @@ function loadNPCTriggerResponsesFromDatabase(npcTriggerDatabaseId) {
 		disconnectFromDatabase(dbConnection);
 	}
 
-	logToConsole(LOG_DEBUG, `[VRR.NPC]: ${tempNPCTriggerResponses.length} responses loaded for trigger ${npcTriggerDatabaseId} from database successfully!`);
+	logToConsole(LOG_DEBUG, `[AGRP.NPC]: ${tempNPCTriggerResponses.length} responses loaded for trigger ${npcTriggerDatabaseId} from database successfully!`);
 	return tempNPCTriggerResponses;
 }
 
@@ -356,28 +359,28 @@ function saveAllNPCsToDatabase() {
 
 function saveNPCToDatabase(npcDataId) {
 	if (getServerConfig().devServer) {
-		logToConsole(LOG_VERBOSE, `[VRR.NPC]: NPC ${npcDataId} can't be saved because server is running as developer only. Aborting save ...`);
+		logToConsole(LOG_VERBOSE, `[AGRP.NPC]: NPC ${npcDataId} can't be saved because server is running as developer only. Aborting save ...`);
 		return false;
 	}
 
 	if (getNPCData(npcDataId) == false) {
-		logToConsole(LOG_VERBOSE, `[VRR.NPC]: NPC ${npcDataId} data is invalid. Aborting save ...`);
+		logToConsole(LOG_VERBOSE, `[AGRP.NPC]: NPC ${npcDataId} data is invalid. Aborting save ...`);
 		return false;
 	}
 
 	let tempNPCData = getNPCData(npcDataId);
 
 	if (tempNPCData.databaseId == -1) {
-		logToConsole(LOG_VERBOSE, `[VRR.NPC]: NPC ${npcDataId} is a temp NPC. Aborting save ...`);
+		logToConsole(LOG_VERBOSE, `[AGRP.NPC]: NPC ${npcDataId} is a temp NPC. Aborting save ...`);
 		return false;
 	}
 
 	if (!tempNPCData.needsSaved) {
-		logToConsole(LOG_VERBOSE, `[VRR.NPC]: NPC ${npcDataId} hasn't changed data. Aborting save ...`);
+		logToConsole(LOG_VERBOSE, `[AGRP.NPC]: NPC ${npcDataId} hasn't changed data. Aborting save ...`);
 		return false;
 	}
 
-	logToConsole(LOG_VERBOSE, `[VRR.NPC]: Saving NPC ${tempNPCData.databaseId} to database ...`);
+	logToConsole(LOG_VERBOSE, `[AGRP.NPC]: Saving NPC ${tempNPCData.databaseId} to database ...`);
 	let dbConnection = connectToDatabase();
 	if (dbConnection) {
 		if (tempNPCData.ped != false) {
@@ -394,6 +397,7 @@ function saveNPCToDatabase(npcDataId) {
 
 		let safeAnimationName = escapeDatabaseString(dbConnection, tempNPCData.animationName);
 		let safeName = escapeDatabaseString(dbConnection, tempNPCData.name);
+		let safeTitle = escapeDatabaseString(dbConnection, tempNPCData.title);
 
 		let data = [
 			["npc_server", getServerId()],
@@ -416,6 +420,15 @@ function saveNPCToDatabase(npcDataId) {
 			["npc_threats", toInteger(tempNPCData.threats)],
 			["npc_stay", boolToInt(tempNPCData.stay)],
 			["npc_type_flags", toInteger(tempNPCData.typeFlags)],
+			["npc_int", toInteger(tempNPCData.interior)],
+			["npc_vw", toInteger(tempNPCData.dimension)],
+			["npc_fight_style", toInteger(tempNPCData.fightStyle)],
+			["npc_walk_style", toInteger(tempNPCData.walkStyle)],
+			["npc_rank", toInteger(tempNPCData.rank)],
+			["npc_title", toString(safeTitle)],
+			["npc_enabled", boolToInt(tempNPCData.enabled)],
+			["npc_lookatplr", boolToInt(tempNPCData.lookAtPlayer)],
+			//["npc_recreate", toInteger(tempNPCData.recreateOnDeath)],
 		];
 
 		let dbQuery = null;
@@ -434,7 +447,7 @@ function saveNPCToDatabase(npcDataId) {
 		disconnectFromDatabase(dbConnection);
 		return true;
 	}
-	logToConsole(LOG_VERBOSE, `[VRR.NPC]: Saved NPC ${npcDataId} to database!`);
+	logToConsole(LOG_VERBOSE, `[AGRP.NPC]: Saved NPC ${npcDataId} to database!`);
 
 	return false;
 }
@@ -502,7 +515,7 @@ function deleteNPCCommand(command, params, client) {
 	let npcName = getNPCData(closestNPC).name;
 
 	deleteNPC(closestNPC);
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} deleted NPC {npcPink}${npcName}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} deleted NPC {npcPink}${npcName}`, true);
 }
 
 // ===========================================================================
@@ -512,7 +525,7 @@ function deleteNPC(npcId) {
 
 	if (getNPCData(npcId)) {
 		if (getNPCData(npcId).ped != false) {
-			deleteEntity(getNPCData(npcId).ped);
+			deleteGameElement(getNPCData(npcId).ped);
 		}
 		getServerData().npcs.splice(npcId, 1);
 	}
@@ -606,7 +619,7 @@ function setNPCClanCommand(command, params, client) {
 	getNPCData(closestNPC).ownerId = getClanData(clanId).databaseId;
 	getNPCData(closestNPC).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set {npcPink}${getNPCData(closestNPC).name}${MAINCOLOUR}'s clan to {clanOrange}${getClanData(clanId).name}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set {npcPink}${getNPCData(closestNPC).name}${MAINCOLOUR}'s clan to {clanOrange}${getClanData(clanId).name}`, true);
 }
 
 // ===========================================================================
@@ -618,25 +631,11 @@ function addNPCTriggerCommand(command, params, client) {
 	}
 
 	let closestNPC = getClosestNPC(getPlayerPosition(client), getPlayerDimension(client), getPlayerInterior(client));
-	let clanId = getClanFromParams(params);
 
 	if (!getNPCData(closestNPC)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidNPC"));
 		return false;
 	}
-
-	if (!getClanData(clanId)) {
-		messagePlayerError(client, getLocaleString(client, "InvalidClan"));
-		return false;
-	}
-
-	//let triggerData = new TriggerData();
-
-	getNPCData(closestNPC).ownerType = AGRP_NPC_OWNER_CLAN;
-	getNPCData(closestNPC).ownerId = getClanData(clanId).databaseId;
-	getNPCData(closestNPC).needsSaved = true;
-
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set {npcPink}${getNPCData(closestNPC).name}${MAINCOLOUR}'s clan to {clanOrange}${getClanData(clanId).name}`);
 }
 
 // ===========================================================================
@@ -664,7 +663,7 @@ function getNPCInfoCommand(command, params, client) {
 		return false;
 	}
 
-	let closestNPC = getClosestNPC(getPlayerPosition(client));
+	let closestNPC = getClosestNPC(getPlayerPosition(client), getPlayerDimension(client), getPlayerInterior(client));
 
 	if (!getNPCData(closestNPC)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidNPC"));
@@ -724,13 +723,15 @@ function getNPCInfoCommand(command, params, client) {
 
 // ===========================================================================
 
-function getClosestNPC(position, interior, dimension) {
+function getClosestNPC(position, dimension, interior) {
 	let npcs = getServerData().npcs;
 
 	let closest = 0;
 	for (let i in npcs) {
-		if (getDistance(npcs[i].ped.position, position) < getDistance(npcs[closest].ped.position, position) && npcs[closest].interior == interior && npcs[closest].dimension == dimension) {
-			closest = i;
+		if (npcs[i].interior == interior && npcs[i].dimension == dimension) {
+			if (getDistance(npcs[i].ped.position, position) < getDistance(npcs[closest].ped.position, position)) {
+				closest = i;
+			}
 		}
 	}
 

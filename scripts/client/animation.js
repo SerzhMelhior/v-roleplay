@@ -8,6 +8,13 @@
 // TYPE: Client (JavaScript)
 // ===========================================================================
 
+function initAnimationScript() {
+	logToConsole(LOG_DEBUG, "[AGRP.Animation]: Initializing animation script ...");
+	logToConsole(LOG_DEBUG, "[AGRP.Animation]: Animation script initialized!");
+}
+
+// ===========================================================================
+
 function makePedPlayAnimation(pedId, animationSlot, positionOffset) {
 	let ped = getElementFromId(pedId);
 
@@ -16,7 +23,7 @@ function makePedPlayAnimation(pedId, animationSlot, positionOffset) {
 	}
 
 	let animationData = getAnimationData(animationSlot);
-	logToConsole(LOG_DEBUG, `[VRR.Animation] Playing animation ${animationData[0]} for ped ${pedId}`);
+	logToConsole(LOG_DEBUG, `[AGRP.Animation] Playing animation ${animationData[0]} for ped ${pedId}`);
 
 	let freezePlayer = false;
 	switch (animationData.moveType) {
