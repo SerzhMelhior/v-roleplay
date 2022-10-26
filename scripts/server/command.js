@@ -353,6 +353,7 @@ function loadCommands() {
 			new CommandData("itemtypeorderprice", setItemTypeOrderPriceCommand, "<item type> <order price>", getStaffFlagValue("ManageItems"), true, false, "Sets an item type's order price (base price when ordering for a business"),
 			new CommandData("itemtyperiskmult", setItemTypeRiskMultiplierCommand, "<item type> <risk multiplier>", getStaffFlagValue("ManageItems"), true, false, "Sets an item type's risk multiplayer (higher value for more dangerous or rare illegal items)"),
 			new CommandData("itemtypeenabled", toggleItemTypeEnabledCommand, "<item type>", getStaffFlagValue("ManageItems"), true, false, "Toggles an item type on or off (if off, any items with that type can't be interacted with)"),
+			new CommandData("itemtypedropmodel", setItemTypeDropModelCommand, "<item type> <object name/id>", getStaffFlagValue("ManageItems"), true, false, "Sets the drop model for the object of an item type when dropped"),
 			new CommandData("itemtypedroppos", setItemTypeDropPositionCommand, "<item type> [x] [y] [z]", getStaffFlagValue("ManageItems"), true, false, "Sets the offset position for the object of an item type when dropped"),
 			new CommandData("itemtypedroprot", setItemTypeDropRotationCommand, "<item type> [x] [y] [z]", getStaffFlagValue("ManageItems"), true, false, "Sets the rotation for the object of an item type when dropped"),
 			new CommandData("itemtypedropscale", setItemTypeDropScaleCommand, "<item type> [x] [y] [z]", getStaffFlagValue("ManageItems"), true, false, "Sets the scale for the object of an item type when dropped"),
@@ -360,7 +361,7 @@ function loadCommands() {
 			new CommandData("itemtypemaxval", setItemTypeMaxValueCommand, "<item type> <max value>", getStaffFlagValue("ManageItems"), true, false, "Sets the maximum value an item type can have"),
 			new CommandData("itemtypeorderval", setItemTypeOrderValueCommand, "<item type> <order value>", getStaffFlagValue("ManageItems"), true, false, "Sets the initial value of an item type when ordered by a business"),
 			new CommandData("itemtypesize", setItemTypeSizeCommand, "<item type> <order value>", getStaffFlagValue("ManageItems"), true, false, "Sets the item type's size"),
-			new CommandData("itemtypecapacity", setItemTypeSizeCommand, "<item type> <order value>", getStaffFlagValue("ManageItems"), true, false, "Sets an item type's capacity (how much it can hold)"),
+			new CommandData("itemtypecapacity", setItemTypeCapacityCommand, "<item type> <order value>", getStaffFlagValue("ManageItems"), true, false, "Sets an item type's capacity (how much it can hold)"),
 
 			new CommandData("delplritem", deleteItemInPlayerInventoryCommand, "<player name/id> <item slot>", getStaffFlagValue("ManageItems"), true, false, "Removes an item by slot from a player's personal inventory"),
 			new CommandData("delplritems", deleteAllItemsInPlayerInventoryCommand, "<player name/id>", getStaffFlagValue("ManageItems"), true, false, "Removes all items from a player's personal inventory"),
@@ -634,7 +635,7 @@ function loadCommands() {
 			new CommandData("vehowner", setVehicleOwnerCommand, "<player id/name>", getStaffFlagValue("ManageVehicles"), true, true),
 			new CommandData("vehpublic", setVehiclePublicCommand, "", getStaffFlagValue("ManageVehicles"), true, true),
 			new CommandData("vehclan", setVehicleClanCommand, "<clan id/name>", getStaffFlagValue(""), true, true),
-			new CommandData("vehbiz", setVehicleToBusinessCommand, "", getStaffFlagValue(""), true, true),
+			new CommandData("vehbiz", setVehicleBusinessCommand, "", getStaffFlagValue(""), true, true),
 			new CommandData("vehjob", setVehicleJobCommand, "[job id/name]", getStaffFlagValue("ManageVehicles"), true, true),
 			new CommandData("vehdelowner", removeVehicleOwnerCommand, "", getStaffFlagValue("ManageVehicles"), true, true),
 			new CommandData("vehrank", setVehicleRankCommand, "<rank id/name>", getStaffFlagValue("None"), true, true),
@@ -785,12 +786,12 @@ function disableCommand(command, params, client) {
 	params = toLowerCase(params);
 
 	if (!getCommand(params)) {
-		messagePlayerError(client, `The command {ALTCOLOUR}/${params} {MAINCOLOUR} does not exist!`);
+		messagePlayerError(client, `The command {ALTCOLOUR}/${params}{MAINCOLOUR} does not exist!`);
 		return false;
 	}
 
 	getCommand(params).enabled = false;
-	messagePlayerSuccess(client, `Command {ALTCOLOUR}/${params} {MAINCOLOUR}has been disabled!`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} disabled the {ALTCOLOUR}${params}{MAINCOLOUR} command!`, true);
 	return true;
 }
 
@@ -805,12 +806,12 @@ function enableCommand(command, params, client) {
 	params = toLowerCase(params);
 
 	if (!getCommand(params)) {
-		messagePlayerError(client, `The command {ALTCOLOUR}/${params} {MAINCOLOUR} does not exist!`);
+		messagePlayerError(client, `The command {ALTCOLOUR}/${params}{MAINCOLOUR} does not exist!`);
 		return false;
 	}
 
 	getCommand(params).enabled = true;
-	messagePlayerSuccess(client, `Command {ALTCOLOUR}/${params} {MAINCOLOUR}has been enabled!`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} enabled the {ALTCOLOUR}${params}{MAINCOLOUR} command!`, true);
 	return true;
 }
 
@@ -825,7 +826,7 @@ function disableAllCommandsByType(command, params, client) {
 	params = toLowerCase(params);
 
 	if (isNull(getServerData().commands[params])) {
-		messagePlayerError(client, `Command type {ALTCOLOUR}${params} {MAINCOLOUR}does not exist!`);
+		messagePlayerError(client, `Command type {ALTCOLOUR}${params}{MAINCOLOUR} does not exist!`);
 		return false;
 	}
 
@@ -833,7 +834,7 @@ function disableAllCommandsByType(command, params, client) {
 		getServerData().commands[params][i].enabled = false;
 	}
 
-	messagePlayerSuccess(client, `{clanOrange}All {ALTCOLOUR}${params} {MAINCOLOUR}commands have been disabled!`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} disabled all {ALTCOLOUR}${params}{MAINCOLOUR} commands!`, true);
 	return true;
 }
 
@@ -848,7 +849,7 @@ function enableAllCommandsByType(command, params, client) {
 	params = toLowerCase(params);
 
 	if (isNull(getServerData().commands[params])) {
-		messagePlayerError(client, `Command type {ALTCOLOUR}${params} {MAINCOLOUR}does not exist!`);
+		messagePlayerError(client, `Command type {ALTCOLOUR}${params}{MAINCOLOUR} does not exist!`);
 		return false;
 	}
 
@@ -856,7 +857,7 @@ function enableAllCommandsByType(command, params, client) {
 		getServerData().commands[params][i].enabled = true;
 	}
 
-	messagePlayerSuccess(client, `{clanOrange}All {ALTCOLOUR}${params} {MAINCOLOUR}commands have been enabled!`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} enabled all {ALTCOLOUR}${params}{MAINCOLOUR} commands!`, true);
 	return true;
 }
 

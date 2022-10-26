@@ -373,7 +373,10 @@ function createGroundItemObject(itemId) {
 		setElementRotation(getItemData(itemId).object, getItemTypeData(getItemData(itemId).itemTypeIndex).dropRotation);
 		setElementOnAllDimensions(getItemData(itemId).object, false);
 		setElementDimension(getItemData(itemId).object, getItemData(itemId).dimension);
-		//setEntityData(getItemData(itemId).object, "agrp.scale", getItemTypeData(getItemData(itemId).itemTypeIndex).dropScale, true);
+		setElementInterior(getItemData(itemId).object, getItemData(itemId).interior);
+		setEntityData(getItemData(itemId).object, "agrp.scale", getItemTypeData(getItemData(itemId).itemTypeIndex).dropScale, true);
+		setEntityData(getItemData(itemId).object, "agrp.collisions", false, true);
+		forcePlayerToSyncElementProperties(null, getItemData(itemId).object);
 		addToWorld(getItemData(itemId).object);
 	}
 }
@@ -484,13 +487,13 @@ function useItemCommand(command, params, client) {
 	let itemId = getPlayerData(client).hotBarItems[hotBarSlot];
 
 	if (!getItemData(itemId)) {
-		messagePlayerError(client, getLocaleString(client, "UseItemBug"));
+		messagePlayerError(client, getLocaleString(client, "UseItemBugged"));
 		submitBugReport(client, `(AUTOMATED REPORT) Use Item: Getting item data for item ${itemId} in player hotbar slot ${hotBarSlot} (cache ${getPlayerData(client).hotBarItems[hotBarSlot]}) returned false.`);
 		return false;
 	}
 
 	if (!getItemTypeData(getItemData(itemId).itemTypeIndex)) {
-		messagePlayerError(client, getLocaleString(client, "UseItemBug"));
+		messagePlayerError(client, getLocaleString(client, "UseItemBugged"));
 		submitBugReport(client, `(AUTOMATED REPORT) Use Item: Getting item type ${getItemData(itemId).itemType} data for item ${itemId}/${getItemData(itemId).databaseId} in player hotbar slot ${hotBarSlot} (cache ${getPlayerData(client).hotBarItems[hotBarSlot]}) returned false.`);
 		return false;
 	}
@@ -691,7 +694,7 @@ function dropItemCommand(command, params, client) {
  *
  */
 function putItemCommand(command, params, client) {
-	clearPlayerItemActionState(client);
+	//clearPlayerItemActionState(client);
 
 	let hotBarSlot = toInteger(params);
 
@@ -733,6 +736,8 @@ function putItemCommand(command, params, client) {
 		messagePlayerError(client, getLocaleString(client, "CantPutJobEquipmentItem"));
 		return false;
 	}
+
+	clearPlayerItemActionState(client);
 
 	if (getItemTypeData(getItemData(itemId).itemTypeIndex).putAnimationIndex != -1 && !isPlayerInAnyVehicle(client)) {
 		forcePlayerPlayAnimation(client, getItemTypeData(getItemData(itemId).itemTypeIndex).putAnimationIndex, 0.0);
@@ -819,7 +824,7 @@ function createItemTypeCommand(command, params, client) {
 	}
 
 	let itemTypeIndex = createItemType(params);
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} created new item {ALTCOLOUR}${params}. {MAINCOLOUR}ID: ${itemTypeIndex}/${getItemTypeData(itemTypeIndex).databaseId}!`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} created new item type: {ALTCOLOUR}${params}. {MAINCOLOUR}ID: ${itemTypeIndex}/${getItemTypeData(itemTypeIndex).databaseId}!`, true);
 }
 
 // ===========================================================================
@@ -839,6 +844,7 @@ function setItemTypeDropModelCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
 	let modelIndex = getObjectModelIndexFromParams(splitParams.slice(-1).join(" "));
 
@@ -849,7 +855,7 @@ function setItemTypeDropModelCommand(command, params, client) {
 
 	getItemTypeData(itemTypeIndex).dropModel = modelIndex;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}'s{MAINCOLOUR} dropped object model index to ${modelIndex}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}'s{MAINCOLOUR} dropped object model index to ${modelIndex}`, true);
 }
 
 // ===========================================================================
@@ -869,6 +875,7 @@ function setItemTypeOrderPriceCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
 	let orderPrice = splitParams[splitParams.length - 1];
 
@@ -879,7 +886,7 @@ function setItemTypeOrderPriceCommand(command, params, client) {
 
 	getItemTypeData(itemTypeIndex).orderPrice = orderPrice;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} base price to {ALTCOLOUR}${getCurrencyString(orderPrice)}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} base price to {ALTCOLOUR}${getCurrencyString(orderPrice)}`, true);
 }
 
 // ===========================================================================
@@ -899,6 +906,7 @@ function setItemTypeOrderValueCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
 	let orderValue = splitParams[splitParams.length - 1];
 
@@ -909,7 +917,7 @@ function setItemTypeOrderValueCommand(command, params, client) {
 
 	getItemTypeData(itemTypeIndex).orderValue = orderValue;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} order value to {ALTCOLOUR}${orderValue}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} order value to {ALTCOLOUR}${orderValue}`, true);
 }
 
 // ===========================================================================
@@ -929,6 +937,7 @@ function setItemTypeRiskMultiplierCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
 	let riskMultiplier = splitParams[splitParams.length - 1];
 
@@ -937,9 +946,9 @@ function setItemTypeRiskMultiplierCommand(command, params, client) {
 		return false;
 	}
 
-	getItemTypeData(itemTypeIndex).riskMultiplier = riskMultiplier;
+	getItemTypeData(itemTypeIndex).riskMultiplier = riskMultiplier / 100;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} risk multiplier to {ALTCOLOUR}${riskMultiplier}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} risk multiplier to {ALTCOLOUR}${riskMultiplier}%`, true);
 }
 
 // ===========================================================================
@@ -968,7 +977,7 @@ function toggleItemTypeEnabledCommand(command, params, client) {
 
 	getItemTypeData(itemTypeIndex).enabled = !getItemTypeData(itemTypeIndex).enabled;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} ${getEnabledDisabledFromBool(getItemTypeData(itemTypeIndex).enabled)} item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} ${getEnabledDisabledFromBool(getItemTypeData(itemTypeIndex).enabled)} item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}`, true);
 }
 
 // ===========================================================================
@@ -988,6 +997,7 @@ function setItemTypeUseTypeCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
 	let useType = splitParams[splitParams.length - 1];
 
@@ -998,7 +1008,7 @@ function setItemTypeUseTypeCommand(command, params, client) {
 
 	getItemTypeData(itemTypeIndex).useType = useType;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} use type to {ALTCOLOUR}${useType}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} use type to {ALTCOLOUR}${useType}`, true);
 }
 
 // ===========================================================================
@@ -1018,6 +1028,7 @@ function setItemTypeUseValueCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
 	let useValue = splitParams[splitParams.length - 1];
 
@@ -1028,7 +1039,7 @@ function setItemTypeUseValueCommand(command, params, client) {
 
 	getItemTypeData(itemTypeIndex).useValue = useValue;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} use value to {ALTCOLOUR}${useValue}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} use value to {ALTCOLOUR}${useValue}`, true);
 }
 
 // ===========================================================================
@@ -1048,17 +1059,23 @@ function setItemTypeDropFrontDistanceCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -1).join(" "));
-	let dropFrontDistance = splitParams.slice(-1);
+	let dropFrontDistance = splitParams.slice(-1) || 0.0;
 
 	if (!getItemTypeData(itemTypeIndex)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
 		return false;
 	}
 
+	if (isNaN(dropFrontDistance)) {
+		messagePlayerError(client, `The distance must be a number!`);
+		return false;
+	}
+
 	getItemTypeData(itemTypeIndex).dropFrontDistance = dropFrontDistance;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} drop front distance to {ALTCOLOUR}${dropFrontDistance}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} drop front distance to {ALTCOLOUR}${dropFrontDistance.toFixed(2)}`, true);
 }
 
 // ===========================================================================
@@ -1078,6 +1095,7 @@ function setItemTypeDropPositionCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -3).join(" "));
 	let x = splitParams.slice(-3, -2) || 0.0;
 	let y = splitParams.slice(-2, -1) || 0.0;
@@ -1088,11 +1106,16 @@ function setItemTypeDropPositionCommand(command, params, client) {
 		return false;
 	}
 
+	if (isNaN(x) || isNaN(y) || isNaN(z)) {
+		messagePlayerError(client, `The positions must be numbers!`);
+		return false;
+	}
+
 	let dropPosition = toVector3(x, y, z);
 
 	getItemTypeData(itemTypeIndex).dropPosition = dropPosition;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} drop position offset to {ALTCOLOUR}${dropPosition.x}, ${dropPosition.y}, ${dropPosition.z}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} drop position offset to {ALTCOLOUR}${dropPosition.x.toFixed(2)}, ${dropPosition.y.toFixed(2)}, ${dropPosition.z.toFixed(2)}`, true);
 }
 
 // ===========================================================================
@@ -1112,6 +1135,7 @@ function setItemTypeDropRotationCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -3).join(" "));
 	let x = splitParams.slice(-3, -2) || 0.0;
 	let y = splitParams.slice(-2, -1) || 0.0;
@@ -1122,11 +1146,16 @@ function setItemTypeDropRotationCommand(command, params, client) {
 		return false;
 	}
 
+	if (isNaN(x) || isNaN(y) || isNaN(z)) {
+		messagePlayerError(client, `The positions must be numbers!`);
+		return false;
+	}
+
 	let dropRotation = toVector3(x, y, z);
 
 	getItemTypeData(itemTypeIndex).dropRotation = dropRotation;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} drop rotation to {ALTCOLOUR}${dropRotation.x}, ${dropRotation.y}, ${dropRotation.z}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} drop rotation to {ALTCOLOUR}${dropRotation.x.toFixed(2)}, ${dropRotation.y.toFixed(2)}, ${dropRotation.z.toFixed(2)}`, true);
 }
 
 // ===========================================================================
@@ -1146,6 +1175,7 @@ function setItemTypeDropScaleCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -3).join(" "));
 	let x = splitParams.slice(-3, -2) || 1.0;
 	let y = splitParams.slice(-2, -1) || 1.0;
@@ -1156,11 +1186,16 @@ function setItemTypeDropScaleCommand(command, params, client) {
 		return false;
 	}
 
+	if (isNaN(x) || isNaN(y) || isNaN(z)) {
+		messagePlayerError(client, `The positions must be numbers!`);
+		return false;
+	}
+
 	let dropScale = toVector3(x, y, z);
 
 	getItemTypeData(itemTypeIndex).dropScale = dropScale;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} drop scale to {ALTCOLOUR}${dropScale.x}, ${dropScale.y}, ${dropScale.z}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} drop scale to {ALTCOLOUR}${dropScale.x.toFixed(2)}, ${dropScale.y.toFixed(2)}, ${dropScale.z.toFixed(2)}`, true);
 }
 
 // ===========================================================================
@@ -1180,6 +1215,7 @@ function setItemTypeDemandMultiplierCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -3).join(" "));
 	let demandMultiplier = splitParams.slice(-1) || 100;
 
@@ -1188,9 +1224,14 @@ function setItemTypeDemandMultiplierCommand(command, params, client) {
 		return false;
 	}
 
-	getItemTypeData(itemTypeIndex).demandMultiplier = demandMultiplayer / 100;
+	if (isNaN(demandMultiplier)) {
+		messagePlayerError(client, `The demand multiplier must be numbers!`);
+		return false;
+	}
+
+	getItemTypeData(itemTypeIndex).demandMultiplier = demandMultiplier / 100;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} demand multiplier to {ALTCOLOUR}${demandMultiplier}%`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} demand multiplier to {ALTCOLOUR}${demandMultiplier}%`, true);
 }
 
 // ===========================================================================
@@ -1210,6 +1251,7 @@ function setItemTypeMaxValueCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -3).join(" "));
 	let maxValue = splitParams.slice(-1) || 100;
 
@@ -1218,9 +1260,14 @@ function setItemTypeMaxValueCommand(command, params, client) {
 		return false;
 	}
 
+	if (isNaN(maxValue)) {
+		messagePlayerError(client, `The max value must be numbers!`);
+		return false;
+	}
+
 	getItemTypeData(itemTypeIndex).maxValue = maxValue;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} max value to {ALTCOLOUR}${maxValue}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} max value to {ALTCOLOUR}${maxValue}`, true);
 }
 
 // ===========================================================================
@@ -1240,6 +1287,7 @@ function setItemTypeSizeCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -3).join(" "));
 	let size = splitParams.slice(-1) || 100;
 
@@ -1248,9 +1296,14 @@ function setItemTypeSizeCommand(command, params, client) {
 		return false;
 	}
 
+	if (isNaN(size)) {
+		messagePlayerError(client, `The size must be numbers!`);
+		return false;
+	}
+
 	getItemTypeData(itemTypeIndex).size = size;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} size to {ALTCOLOUR}${size}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} size to {ALTCOLOUR}${size}`, true);
 }
 
 // ===========================================================================
@@ -1270,6 +1323,7 @@ function setItemTypeCapacityCommand(command, params, client) {
 		return false;
 	}
 
+	let splitParams = params.split(" ");
 	let itemTypeIndex = getItemTypeFromParams(splitParams.slice(0, -3).join(" "));
 	let capacity = splitParams.slice(-1) || 100;
 
@@ -1278,9 +1332,14 @@ function setItemTypeCapacityCommand(command, params, client) {
 		return false;
 	}
 
+	if (isNaN(capacity)) {
+		messagePlayerError(client, `The capacity must be numbers!`);
+		return false;
+	}
+
 	getItemTypeData(itemTypeIndex).capacity = capacity;
 	getItemTypeData(itemTypeIndex).needsSaved = true;
-	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} capacity to {ALTCOLOUR}${capacity}`);
+	messageAdmins(`{ALTCOLOUR}${getPlayerName(client)} set item type {ALTCOLOUR}${getItemTypeData(itemTypeIndex).name}{MAINCOLOUR} capacity to {ALTCOLOUR}${capacity}`, true);
 }
 
 // ===========================================================================
@@ -2076,7 +2135,7 @@ function cacheAllGroundItems() {
 
 function createAllGroundItemObjects() {
 	for (let i in getServerData().groundItemCache) {
-		createGroundItemObject(i);
+		createGroundItemObject(getServerData().groundItemCache[i]);
 	}
 }
 
@@ -2205,6 +2264,20 @@ function deleteItem(itemId, whoDeleted = -1) {
 function getBestNewOwnerToPutItem(client) {
 	let position = getPlayerPosition(client);
 
+	let possibleItem = getClosestItemOnGround(position);
+	if (possibleItem != -1) {
+		if (getDistance(getItemPosition(possibleItem), position) <= getGlobalConfig().itemContainerDistance) {
+			return [AGRP_ITEM_OWNER_ITEM, possibleItem];
+		}
+	}
+
+	let possibleVehicle = getClosestVehicle(position);
+	if (possibleVehicle != false) {
+		if (getVehicleData(possibleVehicle) != false && getDistance(getVehicleTrunkPosition(possibleVehicle), position) <= getGlobalConfig().vehicleTrunkDistance) {
+			return [AGRP_ITEM_OWNER_VEHTRUNK, possibleVehicle];
+		}
+	}
+
 	let possibleHouse = getPlayerHouse(client);
 	if (possibleHouse != -1) {
 		if (getHouseData(possibleHouse) != false) {
@@ -2219,20 +2292,6 @@ function getBestNewOwnerToPutItem(client) {
 		}
 	}
 
-	let possibleVehicle = getClosestVehicle(position);
-	if (possibleVehicle != false) {
-		if (getVehicleData(possibleVehicle) != false && getDistance(getVehicleTrunkPosition(possibleVehicle), position) <= getGlobalConfig().vehicleTrunkDistance) {
-			return [AGRP_ITEM_OWNER_VEHTRUNK, possibleVehicle];
-		}
-	}
-
-	let possibleItem = getClosestItemOnGround(position);
-	if (possibleItem != -1) {
-		if (getDistance(getItemPosition(possibleItem), position) <= getGlobalConfig().itemContainerDistance) {
-			return [AGRP_ITEM_OWNER_ITEM, possibleItem];
-		}
-	}
-
 	return [AGRP_ITEM_OWNER_NONE, 0];
 }
 
@@ -2244,6 +2303,15 @@ function getBestItemToTake(client, slot) {
 	let itemId = -1;
 	let ownerType = AGRP_ITEM_OWNER_NONE;
 	let ownerId = 0;
+
+	let possibleItem = getClosestItemOnGround(position);
+	if (getItemData(possibleItem)) {
+		if (typeof getItemData(possibleItem).itemCache[slot] != "undefined") {
+			itemId = getItemData(possibleItem).itemCache[slot]
+			ownerType = AGRP_ITEM_OWNER_ITEM;
+			ownerId = possibleItem;
+		}
+	}
 
 	let possibleHouse = getPlayerHouse(client);
 	if (getHouseData(possibleHouse)) {
@@ -3014,7 +3082,7 @@ function showBusinessStorageInventoryToPlayer(client, businessId) {
 		if (getBusinessData(businessId).storageItemCache == -1) {
 			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}{ALTCOLOUR}(Empty)`);
 		} else {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getBusinessData(businessId).storageItemCache[i]).itemTypeIndex).name}`);
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getBusinessData(businessId).storageItemCache[i]).itemTypeIndex).name} ${getItemValueDisplayForItem(getBusinessData(businessId).storageItemCache[i])}`);
 		}
 	}
 
@@ -3032,9 +3100,9 @@ function showItemInventoryToPlayer(client, itemId) {
 	let itemDisplay = [];
 	for (let i in getItemData(itemId).itemCache) {
 		if (getItemData(itemId).itemCache == -1) {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}{ALTCOLOUR}(Empty)`);
+			itemDisplay.push(`{businessBlue}${toInteger(i) + 1}{ALTCOLOUR}(Empty)`);
 		} else {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getItemData(itemId).itemCache[i]).itemTypeIndex).name}`);
+			itemDisplay.push(`{businessBlue}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getItemData(itemId).itemCache[i]).itemTypeIndex).name} ${getItemValueDisplayForItem(getItemData(itemId).itemCache[i])}`);
 		}
 	}
 
@@ -3057,13 +3125,13 @@ function showPlayerInventoryToPlayer(showToClient, targetClient) {
 			colour = "{yellow}";
 		}
 		if (getPlayerData(targetClient).hotBarItems[i] == -1) {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: ${colour}(Empty)`);
+			itemDisplay.push(`{businessBlue}${toInteger(i) + 1}: ${colour}(Empty)`);
 		} else {
 			let itemTypeData = getItemTypeData(getItemData(getPlayerData(targetClient).hotBarItems[i]).itemTypeIndex);
 			if (itemTypeData != false) {
-				itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: ${colour}${itemTypeData.name}`);
+				itemDisplay.push(`{businessBlue}${toInteger(i) + 1}: ${colour}${itemTypeData.name} ${getItemValueDisplayForItem(getPlayerData(targetClient).hotBarItems[i])}`);
 			} else {
-				itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: ${colour}(Empty)`);
+				itemDisplay.push(`{businessBlue}${toInteger(i) + 1}: ${colour}(Empty)`);
 			}
 		}
 	}
@@ -3088,7 +3156,7 @@ function showHouseInventoryToPlayer(client, houseId) {
 		if (getHouseData(houseId).itemCache == -1) {
 			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}{ALTCOLOUR}(Empty)`);
 		} else {
-			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getHouseData(houseId).itemCache[i]).itemTypeIndex).name}`);
+			itemDisplay.push(`{MAINCOLOUR}${toInteger(i) + 1}: {ALTCOLOUR}${getItemTypeData(getItemData(getHouseData(houseId).itemCache[i]).itemTypeIndex).name} ${getItemValueDisplayForItem(getHouseData(houseId).itemCache[i])}`);
 		}
 	}
 

@@ -11,8 +11,8 @@
 let itemActionDelayDuration = 0;
 let itemActionDelayStart = 0;
 let itemActionDelayEnabled = false;
-let itemActionDelayPosition = toVector2(0, game.height - 10);
-let itemActionDelaySize = toVector2(game.width, 10);
+let itemActionDelayPosition = toVector2(game.width / 2 - 100, game.height - 10);
+let itemActionDelaySize = toVector2(200, 5);
 
 // ===========================================================================
 
@@ -38,8 +38,8 @@ function processItemActionRendering() {
 				let width = Math.ceil(getPercentage(itemActionDelaySize.x, progressPercent));
 
 				let backgroundColour = toColour(0, 0, 0, 255);
-				graphics.drawRectangle(null, [itemActionDelayPosition.x - (itemActionDelaySize.x) - 1, itemActionDelayPosition.y - (itemActionDelaySize.y / 2) - 1], [itemActionDelaySize.x + 2, itemActionDelaySize.y + 2], backgroundColour, backgroundColour, backgroundColour, backgroundColour);
-				graphics.drawRectangle(null, [itemActionDelayPosition.x - (itemActionDelaySize.x), itemActionDelayPosition.y - (itemActionDelaySize.y / 2) - 2], [width, itemActionDelaySize.y], COLOUR_LIME, COLOUR_LIME, COLOUR_LIME, COLOUR_LIME);
+				graphics.drawRectangle(null, [itemActionDelayPosition.x - (itemActionDelaySize.x / 2) - 1, itemActionDelayPosition.y - (itemActionDelaySize.y / 2) - 1], [itemActionDelaySize.x + 2, itemActionDelaySize.y + 2], backgroundColour, backgroundColour, backgroundColour, backgroundColour);
+				graphics.drawRectangle(null, [itemActionDelayPosition.x - (itemActionDelaySize.x / 2), itemActionDelayPosition.y - (itemActionDelaySize.y / 2) - 2], [width, itemActionDelaySize.y], COLOUR_LIME, COLOUR_LIME, COLOUR_LIME, COLOUR_LIME);
 			}
 		}
 	}

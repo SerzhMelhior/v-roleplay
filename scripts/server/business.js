@@ -316,7 +316,7 @@ function createBusinessCommand(command, params, client) {
 		getPlayerDimension(client),
 		getPlayerData(client).interiorScene);
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created business: {businessBlue}${params}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created business: {businessBlue}${params}`, true);
 }
 
 // ===========================================================================
@@ -351,7 +351,7 @@ function createBusinessLocationCommand(command, params, client) {
 	let tempBusinessLocationData = createBusinessLocation(locationType, businessId);
 	getServerData().businesses[businessId].push(tempBusinessLocationData);
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created location {businessBlue}${params}{MAINCOLOUR} for business {businessBlue}${tempBusinessData.name}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created location {businessBlue}${params}{MAINCOLOUR} for business {businessBlue}${tempBusinessData.name}`, true);
 }
 
 // ===========================================================================
@@ -411,7 +411,7 @@ function deleteBusinessCommand(command, params, client) {
 	}
 
 	deleteBusiness(businessId, getPlayerData(client).accountData.databaseId);
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} deleted business {businessBlue}${getBusinessData(businessId).name}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} deleted business {businessBlue}${getBusinessData(businessId).name}`, true);
 }
 
 // ===========================================================================
@@ -461,7 +461,7 @@ function setBusinessNameCommand(command, params, client) {
 	getBusinessData(businessId).name = newBusinessName;
 	setEntityData(getBusinessData(businessId).entrancePickup, "agrp.label.name", getBusinessData(businessId).name, true);
 	getBusinessData(businessId).needsSaved = true;
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} renamed business {businessBlue}${oldBusinessName}{MAINCOLOUR} to {businessBlue}${newBusinessName}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} renamed business {businessBlue}${oldBusinessName}{MAINCOLOUR} to {businessBlue}${newBusinessName}`, true);
 }
 
 // ===========================================================================
@@ -545,7 +545,7 @@ function setBusinessJobCommand(command, params, client) {
 	getBusinessData(businessId).ownerId = getJobData(jobId).databaseId;
 	getBusinessData(businessId).needsSaved = true;
 
-	messagePlayerSuccess(client, `{MAINCOLOUR}You set the owner of business {businessBlue}${getBusinessData(businessId).name} {MAINCOLOUR}to the {jobYellow}${getJobData(jobId).name}`);
+	messagePlayerSuccess(client, `{MAINCOLOUR}You set the owner of business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} to the {jobYellow}${getJobData(jobId).name}`);
 }
 
 // ===========================================================================
@@ -584,8 +584,9 @@ function setBusinessClanCommand(command, params, client) {
 		return false;
 	}
 
+	// Use confirm prompt
 	showPlayerPrompt(client, getLocaleString(client, "SetBusinessClanConfirmMessage"), getLocaleString(client, "SetBusinessClanConfirmTitle"), getLocaleString(client, "Yes"), getLocaleString(client, "No"));
-	getPlayerData(client).promptType = AGRP_PROMPT_BIZGIVETOCLAN;
+	getPlayerData(client).promptType = AGRP_PROMPT_GIVEBIZTOCLAN;
 
 	//getBusinessData(businessId).ownerType = AGRP_BIZ_OWNER_CLAN;
 	//getBusinessData(businessId).ownerId = getClanData(clanId).databaseId;
@@ -1064,7 +1065,7 @@ function setBusinessPickupCommand(command, params, client) {
 
 	getBusinessData(businessId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} pickup display to {ALTCOLOUR}${typeParam}!`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} pickup to {ALTCOLOUR}${typeParam}!`, true);
 }
 
 // ===========================================================================
@@ -1102,7 +1103,7 @@ function setBusinessInteriorTypeCommand(command, params, client) {
 			getBusinessData(businessId).exitScene = "";
 			getBusinessData(businessId).exitPickupModel = -1;
 			getBusinessData(businessId).customInterior = false;
-			messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} removed business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} interior`);
+			messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} removed business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} interior`, true);
 			return false;
 		}
 
@@ -1143,7 +1144,7 @@ function setBusinessInteriorTypeCommand(command, params, client) {
 
 	getBusinessData(businessId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} interior type to {ALTCOLOUR}${typeParam}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} interior type to {ALTCOLOUR}${typeParam}`, true);
 }
 
 // ===========================================================================
@@ -1202,7 +1203,7 @@ function addBusinessPropertyTemplateEntities(command, params, client) {
 
 	getBusinessData(businessId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} interior type to {ALTCOLOUR}${typeParam}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} property template to {ALTCOLOUR}${typeParam}`, true);
 }
 
 // ===========================================================================
@@ -1247,7 +1248,7 @@ function setBusinessBlipCommand(command, params, client) {
 	resetBusinessBlips(businessId);
 	getBusinessData(businessId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} blip display to {ALTCOLOUR}${typeParam}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} blip to {ALTCOLOUR}${typeParam}`, true);
 }
 
 // ===========================================================================
@@ -1298,7 +1299,7 @@ function giveDefaultItemsToBusinessCommand(command, params, client) {
 
 	cacheBusinessItems(businessId);
 	updateBusinessPickupLabelData(businessId);
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} gave business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} the default items for ${toLowerCase(typeParam)}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} gave business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} the default items for ${typeParam}`, true);
 }
 
 // ===========================================================================
@@ -1323,7 +1324,7 @@ function setBusinessDealershipCommand(command, params, client) {
 	getBusinessData(businessId).labelHelpType == AGRP_PROPLABEL_INFO_ENTERVEHICLE;
 	getBusinessData(businessId).type = AGRP_BIZ_TYPE_DEALERSHIP;
 	updateBusinessPickupLabelData(businessId);
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set the business type of {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} to dealership`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set the type of business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} to dealership`, true);
 }
 
 // ===========================================================================
@@ -1352,7 +1353,7 @@ function deleteBusinessFloorItemsCommand(command, params, client) {
 
 	cacheBusinessItems(businessId);
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} deleted all on-sale items for business {businessBlue}${getBusinessData(businessId).name}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} deleted all on-sale items for business {businessBlue}${getBusinessData(businessId).name}`, true);
 }
 
 // ===========================================================================
@@ -1381,7 +1382,7 @@ function deleteBusinessStorageItemsCommand(command, params, client) {
 
 	cacheBusinessItems(businessId);
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} deleted all stored items for business {businessBlue}${getBusinessData(businessId).name}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} deleted all storage items for business {businessBlue}${getBusinessData(businessId).name}`, true);
 }
 
 // ===========================================================================
@@ -1539,17 +1540,17 @@ function orderItemForBusinessCommand(command, params, client) {
 	let itemType = getItemTypeFromParams(splitParams.slice(0, -2).join(" "));
 
 	if (!getItemTypeData(itemType)) {
-		messagePlayerError(client, `Invalid item type name or ID!`);
-		messagePlayerInfo(client, `Use {ALTCOLOUR}/itemtypes {MAINCOLOUR}for a list of items`);
+		messagePlayerError(client, getLocaleString(client, "InvalidItemType"));
+		messagePlayerInfo(client, `Use {ALTCOLOUR}/itemtypes{MAINCOLOUR} for a list of items`);
 		return false;
 	}
 	let pricePerItem = getOrderPriceForItemType(itemType);
 
 	let amount = toInteger(splitParams.slice(-2, -1)) || 1;
-	let value = toInteger(splitParams.slice(-1)) || getItemTypeData(itemType).capacity;
+	let value = getItemTypeData(itemType).orderValue;
 	let businessId = getPlayerBusiness(client);
 
-	logToConsole(LOG_DEBUG, `[AGRP.Business] ${getPlayerDisplayForConsole(client)} is ordering ${amount} ${splitParams.slice(0, -2).join(" ")} (${value})`);
+	logToConsole(LOG_DEBUG, `[AGRP.Business] ${getPlayerDisplayForConsole(client)} is ordering ${amount} ${splitParams.slice(0, -2).join(" ")}`);
 
 	if (!getBusinessData(businessId)) {
 		messagePlayerError(client, getLocaleString(client, "InvalidBusiness"));
@@ -1567,11 +1568,10 @@ function orderItemForBusinessCommand(command, params, client) {
 	getPlayerData(client).businessOrderAmount = amount;
 	getPlayerData(client).businessOrderBusiness = businessId;
 	getPlayerData(client).businessOrderItem = itemType;
-	getPlayerData(client).businessOrderValue = value;
 	getPlayerData(client).businessOrderCost = orderTotalCost;
 
 	getBusinessData(businessId).needsSaved = true;
-	showPlayerPrompt(client, `Ordering ${amount} ${getPluralForm(getItemTypeData(itemType).name)} (${getItemValueDisplay(itemType, value)}) at ${getCurrencyString(pricePerItem)} each will cost a total of ${getCurrencyString(orderTotalCost)}`, "Business Order Cost");
+	showPlayerPrompt(client, `Ordering ${amount} ${getPluralForm(getItemTypeData(itemType).name)} will cost a total of ${getCurrencyString(orderTotalCost)}`, "Business Order Cost");
 	getPlayerData(client).promptType = AGRP_PROMPT_BIZORDER;
 }
 
@@ -1659,7 +1659,7 @@ function buyBusinessCommand(command, params, client) {
 	}
 
 	showPlayerPrompt(client, getLocaleString(client, "BuyBusinessConfirmMessage"), getLocaleString(client, "BuyBusinessConfirmTitle"), getLocaleString(client, "Yes"), getLocaleString(client, "No"));
-	getPlayerData(client).promptType = AGRP_PROMPT_BIZBUY;
+	getPlayerData(client).promptType = AGRP_PROMPT_BUYBIZ;
 }
 
 // ===========================================================================
@@ -1699,7 +1699,7 @@ function moveBusinessEntranceCommand(command, params, client) {
 
 	getBusinessData(businessId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} moved business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} entrance to their position`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} moved business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} entrance to their position`, true);
 }
 
 // ===========================================================================
@@ -1737,7 +1737,7 @@ function moveBusinessExitCommand(command, params, client) {
 
 	getBusinessData(businessId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} moved business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR}exit to their position`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} moved business {businessBlue}${getBusinessData(businessId).name}{MAINCOLOUR} exit to their position`, true);
 }
 
 // ===========================================================================

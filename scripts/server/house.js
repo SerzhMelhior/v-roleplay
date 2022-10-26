@@ -217,7 +217,7 @@ function createHouseCommand(command, params, client) {
 	}
 
 	createHouse(params, getPlayerPosition(client), toVector3(0.0, 0.0, 0.0), getGameConfig().pickupModels[getGame()].House, -1, getPlayerInterior(client), getPlayerDimension(client), getPlayerData(client).interiorScene);
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created house: {houseGreen}${params}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} created house: {houseGreen}${params}`, true);
 }
 
 // ===========================================================================
@@ -275,7 +275,7 @@ function setHouseDescriptionCommand(command, params, client) {
 
 	getHouseData(houseId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} renamed house {houseGreen}${oldDescription}{MAINCOLOUR} to {houseGreen}${getHouseData(houseId).description}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} renamed house {houseGreen}${oldDescription}{MAINCOLOUR} to {houseGreen}${getHouseData(houseId).description}`, true);
 }
 
 // ===========================================================================
@@ -310,11 +310,12 @@ function setHouseOwnerCommand(command, params, client) {
 		}
 	}
 
-	getHouseData(houseId).needsSaved = true;
-
 	getHouseData(houseId).ownerType = AGRP_HOUSE_OWNER_PLAYER;
 	getHouseData(houseId).ownerId = getPlayerCurrentSubAccount(newHouseOwner).databaseId;
-	messagePlayerSuccess(`{MAINCOLOUR}You gave house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} to {ALTCOLOUR}${newHouseOwner.name}`);
+
+	getHouseData(houseId).needsSaved = true;
+
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} gave house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} to {ALTCOLOUR}${getCharacterFullName(newHouseOwner)}`);
 }
 
 /**
@@ -345,7 +346,7 @@ function removeHouseOwnerCommand(command, params, client) {
 	getHouseData(houseId).ownerId = -1;
 	getHouseData(houseId).needsSaved = true;
 
-	messagePlayerSuccess(client, `{MAINCOLOUR}You removed house {houseGreen}${getHouseData(houseId).description}'s{MAINCOLOUR} owner`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} removed house {houseGreen}${getHouseData(houseId).description}'s{MAINCOLOUR} owner`);
 }
 
 // ===========================================================================
@@ -385,7 +386,7 @@ function setHouseClanCommand(command, params, client) {
 	}
 
 	showPlayerPrompt(client, getLocaleString(client, "SetHouseClanConfirmMessage"), getLocaleString(client, "SetHouseClanConfirmTitle"), getLocaleString(client, "Yes"), getLocaleString(client, "No"));
-	getPlayerData(client).promptType = AGRP_PROMPT_HOUSEGIVETOCLAN;
+	getPlayerData(client).promptType = AGRP_PROMPT_GIVEHOUSETOCLAN;
 
 	//messagePlayerSuccess(`{MAINCOLOUR}You gave house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} to the {clanOrange}${getClanData(clanId).name} {MAINCOLOUR}clan!`);
 }
@@ -468,7 +469,7 @@ function setHousePickupCommand(command, params, client) {
 
 	getHouseData(houseId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} pickup display to {ALTCOLOUR}${toLowerCase(typeParam)}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} pickup to {ALTCOLOUR}${toLowerCase(typeParam)}`, true);
 }
 
 // ===========================================================================
@@ -504,7 +505,7 @@ function setHouseInteriorTypeCommand(command, params, client) {
 			tempHouseLocation.exitInterior = -1;
 			getHouseData(houseId).exitPickupModel = -1;
 			getHouseData(houseId).hasInterior = false;
-			messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} removed house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} interior`);
+			messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} removed house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} interior`, true);
 			return false;
 		}
 
@@ -534,7 +535,7 @@ function setHouseInteriorTypeCommand(command, params, client) {
 
 	getHouseData(houseId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} interior type to {ALTCOLOUR}${toLowerCase(typeParam)}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} interior type to {ALTCOLOUR}${typeParam}`, true);
 }
 
 // ===========================================================================
@@ -585,7 +586,7 @@ function setHouseBlipCommand(command, params, client) {
 	resetHouseBlips(houseId);
 	getHouseData(houseId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} blip display to {ALTCOLOUR}${toLowerCase(typeParam)}`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} set house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} blip to {ALTCOLOUR}${toLowerCase(typeParam)}`, true);
 }
 
 // ===========================================================================
@@ -621,7 +622,7 @@ function moveHouseEntranceCommand(command, params, client) {
 
 	getHouseData(houseId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} moved house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} entrance to their position`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} moved house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} entrance to their position`, true);
 }
 
 // ===========================================================================
@@ -661,7 +662,7 @@ function moveHouseExitCommand(command, params, client) {
 
 	getHouseData(houseId).needsSaved = true;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} moved house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} exit to their position`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} moved house {houseGreen}${getHouseData(houseId).description}{MAINCOLOUR} exit to their position`, true);
 }
 
 // ===========================================================================
@@ -1456,8 +1457,8 @@ function buyHouseCommand(command, params, client) {
 		return false;
 	}
 
+	getPlayerData(client).promptType = AGRP_PROMPT_BUYHOUSE;
 	showPlayerPrompt(client, getLocaleString(client, "BuyHouseConfirmMessage"), getLocaleString(client, "BuyHouseConfirmTitle"), getLocaleString(client, "Yes"), getLocaleString(client, "No"));
-	getPlayerData(client).promptType = AGRP_PROMPT_HOUSEBUY;
 }
 
 // ===========================================================================
@@ -1793,14 +1794,14 @@ function updateHousePickupLabelData(houseId) {
 		setEntityData(houseData.entrancePickup, "agrp.label.type", AGRP_LABEL_HOUSE, true);
 		setEntityData(houseData.entrancePickup, "agrp.label.name", houseData.description, true);
 		setEntityData(houseData.entrancePickup, "agrp.label.locked", houseData.locked, true);
+		setEntityData(houseData.entrancePickup, "agrp.label.price", houseData.buyPrice, true);
+		setEntityData(houseData.entrancePickup, "agrp.label.rentprice", houseData.rentPrice, true);
+		setEntityData(houseData.entrancePickup, "agrp.label.help", AGRP_PROPLABEL_INFO_ENTER, true);
+
 		if (houseData.buyPrice > 0) {
-			setEntityData(houseData.entrancePickup, "agrp.label.price", houseData.buyPrice, true);
 			setEntityData(houseData.entrancePickup, "agrp.label.help", AGRP_PROPLABEL_INFO_BUYHOUSE, true);
-		} else {
-			if (houseData.rentPrice > 0) {
-				setEntityData(houseData.entrancePickup, "agrp.label.rentprice", houseData.rentPrice, true);
-				setEntityData(houseData.entrancePickup, "agrp.label.help", AGRP_PROPLABEL_INFO_RENTHOUSE, true);
-			}
+		} else if (houseData.rentPrice > 0) {
+			setEntityData(houseData.entrancePickup, "agrp.label.help", AGRP_PROPLABEL_INFO_RENTHOUSE, true);
 		}
 	}
 

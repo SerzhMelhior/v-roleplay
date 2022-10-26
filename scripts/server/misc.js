@@ -211,11 +211,9 @@ function enterExitPropertyCommand(command, params, client) {
 		return false;
 	}
 
-	if (areServerElementsSupported() && getGame() != AGRP_GAME_MAFIA_ONE) {
-		if (!getPlayerData(client).currentPickup) {
-			return false;
-		}
-
+	// The player's currentPickup wasn't always being set. This prevented entering/exiting a property.
+	// Needs further testing and tweaks.
+	if (!getPlayerData(client).currentPickup) {
 		let ownerType = getEntityData(getPlayerData(client).currentPickup, "agrp.owner.type");
 		let ownerId = getEntityData(getPlayerData(client).currentPickup, "agrp.owner.id");
 
@@ -247,33 +245,43 @@ function enterExitPropertyCommand(command, params, client) {
 			default:
 				return false;
 		}
-	} else {
-		for (let i in getServerData().businesses) {
-			if (getPlayerDimension(client) == getGameConfig().mainWorldDimension[getGame()] && getPlayerInterior(client) == getGameConfig().mainWorldInterior[getGame()]) {
-				let businessId = getClosestBusinessEntrance(getPlayerPosition(client), getPlayerDimension(client));
-				isBusiness = true;
-				isEntrance = true;
-				closestProperty = getServerData().businesses[businessId];
-			} else {
-				let businessId = getClosestBusinessExit(getPlayerPosition(client), getPlayerDimension(client));
-				isBusiness = true;
-				isEntrance = false;
-				closestProperty = getServerData().businesses[businessId];
-			}
-		}
+	}
 
-		for (let j in getServerData().houses) {
-			if (getPlayerDimension(client) == getGameConfig().mainWorldDimension[getGame()] && getPlayerInterior(client) == getGameConfig().mainWorldInterior[getGame()]) {
-				let houseId = getClosestHouseEntrance(getPlayerPosition(client), getPlayerDimension(client));
-				isBusiness = false;
-				isEntrance = true;
-				closestProperty = getServerData().businesses[houseId];
-			} else {
-				let houseId = getClosestHouseExit(getPlayerPosition(client), getPlayerDimension(client));
-				isBusiness = false;
-				isEntrance = false;
-				closestProperty = getServerData().businesses[houseId];
-			}
+	// Check businesses first
+	if (closestProperty == null) {
+		let businessIndex = getClosestBusinessEntrance(getPlayerPosition(client), getPlayerDimension(client));
+		if (getDistance(getBusinessData(businessIndex).entrancePosition, getPlayerPosition(client)) <= 1.5) {
+			isBusiness = true;
+			isEntrance = true;
+			closestProperty = getServerData().businesses[businessIndex];
+		}
+	}
+
+	if (closestProperty == null) {
+		let businessIndex = getClosestBusinessExit(getPlayerPosition(client), getPlayerDimension(client));
+		if (getDistance(getBusinessData(businessIndex).exitPosition, getPlayerPosition(client)) <= 1.5) {
+			isBusiness = true;
+			isEntrance = false;
+			closestProperty = getServerData().businesses[businessIndex];
+		}
+	}
+
+	// Check houses second
+	if (closestProperty == null) {
+		let houseIndex = getClosestHouseEntrance(getPlayerPosition(client), getPlayerDimension(client));
+		if (getDistance(getHouseData(houseIndex).entrancePosition, getPlayerPosition(client)) <= 1.5) {
+			isBusiness = false;
+			isEntrance = true;
+			closestProperty = getServerData().houses[houseIndex];
+		}
+	}
+
+	if (closestProperty == null) {
+		let houseIndex = getClosestHouseExit(getPlayerPosition(client), getPlayerDimension(client));
+		if (getDistance(getHouseData(houseIndex).exitPosition, getPlayerPosition(client)) <= 1.5) {
+			isBusiness = false;
+			isEntrance = false;
+			closestProperty = getServerData().houses[houseIndex];
 		}
 	}
 
@@ -461,10 +469,10 @@ function checkPlayerSpawning() {
 // ===========================================================================
 
 function showPlayerPrompt(client, promptMessage, promptTitle, yesButtonText, noButtonText) {
-	if (canPlayerUseGUI(client)) {
+	if (doesPlayerUseGUI(client)) {
 		showPlayerPromptGUI(client, promptMessage, promptTitle, yesButtonText, noButtonText);
 	} else {
-		messagePlayerNormal(client, `❓ ${promptMessage} `);
+		messagePlayerNormal(client, `🛎️ ${promptMessage} `);
 		messagePlayerInfo(client, getLocaleString(client, "PromptResponseTip", `{ALTCOLOUR}/yes{MAINCOLOUR}`, `{ALTCOLOUR}/no{MAINCOLOUR}`));
 	}
 }

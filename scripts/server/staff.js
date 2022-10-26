@@ -390,11 +390,20 @@ function getVehicleCommand(command, params, client) {
 
 	let vehicle = getServerData().vehicles[toInteger(params) - 1].vehicle;
 
+	let oldStreamInDistance = getElementStreamInDistance(vehicle);
+	let oldStreamOutDistance = getElementStreamOutDistance(vehicle);
+
+	setElementStreamInDistance(vehicle, 9999999);
+	setElementStreamOutDistance(vehicle, 9999999 + 1);
+
 	setElementPosition(vehicle, getPosInFrontOfPos(getPlayerPosition(client), fixAngle(getPlayerHeading(client)), 5.0));
 	setElementInterior(vehicle, getPlayerInterior(client));
 	setElementDimension(vehicle, getPlayerDimension(client));
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} teleported a {vehiclePurple}${getVehicleName(vehicle)}{ALTCOLOUR} (ID ${vehicle.id}){MAINCOLOUR} to their position`);
+	setElementStreamInDistance(vehicle, oldStreamInDistance);
+	setElementStreamOutDistance(vehicle, oldStreamOutDistance);
+
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} teleported a {vehiclePurple}${getVehicleName(vehicle)}{ALTCOLOUR} (ID ${vehicle.id}){MAINCOLOUR} to their position`, true);
 }
 
 // ===========================================================================
@@ -888,7 +897,7 @@ function getPlayerCommand(command, params, client) {
 	setPlayerInterior(targetClient, getPlayerInterior(client));
 	setPlayerDimension(targetClient, getPlayerDimension(client));
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} teleported {ALTCOLOUR}${getPlayerName(targetClient)}{MAINCOLOUR} to their position.`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} teleported {ALTCOLOUR}${getPlayerName(targetClient)}{MAINCOLOUR} to their position.`, true);
 	messagePlayerAlert(targetClient, `An admin has teleported you to their location`);
 }
 
@@ -935,7 +944,7 @@ function returnPlayerCommand(command, params, client) {
 	getPlayerData(targetClient).returnToBusiness = null;
 	getPlayerData(targetClient).returnToType = AGRP_RETURNTO_TYPE_NONE;
 
-	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} returned {ALTCOLOUR}${getPlayerName(targetClient)}{MAINCOLOUR} to their previous position.`);
+	messageAdmins(`{adminOrange}${getPlayerName(client)}{MAINCOLOUR} returned {ALTCOLOUR}${getPlayerName(targetClient)}{MAINCOLOUR} to their previous position.`, true);
 	messagePlayerAlert(targetClient, `An admin has returned you to your previous location`);
 }
 

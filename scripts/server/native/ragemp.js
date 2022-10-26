@@ -1201,32 +1201,32 @@ function bindServerEventHandler(eventName, bindTo, handlerFunction) {
 // ===========================================================================
 
 function setElementName(element, name) {
-	element.name = name;
+	//element.name = name;
 }
 
 // ===========================================================================
 
 function hideElementForPlayer(element, client) {
-	element.setExistsFor(client, false);
+	//element.setExistsFor(client, false);
 }
 
 // ===========================================================================
 
 function showElementForPlayer(element, client) {
-	element.setExistsFor(client, true);
+	//element.setExistsFor(client, true);
 }
 
 // ===========================================================================
 
 function setElementShownByDefault(element, state) {
-	element.netFlags.defaultExistance = state;
+	//element.netFlags.defaultExistance = state;
 }
 
 // ===========================================================================
 
 function createAttachedGameBlip(element, type, size, colour = toColour(255, 255, 255, 255)) {
 	if (isGameFeatureSupported("attachedBlip")) {
-		return game.createBlipAttachedTo(element, type, size, colour, true, false);
+		//	return game.createBlipAttachedTo(element, type, size, colour, true, false);
 	}
 }
 
@@ -1238,6 +1238,11 @@ function deletePlayerPed(client) {
 	} else {
 		sendNetworkEventToPlayer("agrp.deleteLocalPlayerPed", client);
 	}
+	//if (areServerElementsSupported()) {
+	//	destroyElement(client.player);
+	//} else {
+	//	sendNetworkEventToPlayer("agrp.deleteLocalPlayerPed", client);
+	//}
 }
 
 // ===========================================================================
@@ -1256,6 +1261,12 @@ function setServerName(name) {
 
 function setServerPassword(password) {
 	//server.setPassword(password);
+}
+
+// ===========================================================================
+
+function setServerRule(ruleName, ruleValue) {
+	//server.setRule(ruleName, ruleValue);
 }
 
 // ===========================================================================
