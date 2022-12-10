@@ -222,10 +222,10 @@ function syncPlayerProperties(client) {
 
 // ===========================================================================
 
-function updatePlayerSnowState(client) {
+function updatePlayerSnowState(client, forceGroundSnow = false) {
 	if (isSnowSupported(getGame())) {
 		logToConsole(LOG_DEBUG, `[AGRP.Client] Setting ${getPlayerDisplayForConsole(client)}'s snow state (Falling: ${toUpperCase(getOnOffFromBool(getServerConfig().fallingSnow))}, Ground: ${toUpperCase(getOnOffFromBool(getServerConfig().groundSnow))})`);
-		sendNetworkEventToPlayer("agrp.snow", client, getServerConfig().fallingSnow, getServerConfig().groundSnow);
+		sendNetworkEventToPlayer("agrp.snow", client, getServerConfig().fallingSnow, getServerConfig().groundSnow, forceGroundSnow);
 	}
 }
 
@@ -1315,6 +1315,12 @@ function setMapChangeWarningForPlayer(client, isChanging) {
 
 function fadePlayerCamera(client, fadeIn, time, colour = toColour(0, 0, 0, 255)) {
 	sendNetworkEventToPlayer("agrp.fadeCamera", client, fadeIn, time, colour);
+}
+
+// ==========================================================================
+
+function sendClientVariablesToClient(client) {
+	sendNetworkEventToPlayer("agrp.cvar", client, JSON.stringify(clientVariables));
 }
 
 // ==========================================================================

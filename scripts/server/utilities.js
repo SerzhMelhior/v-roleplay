@@ -101,8 +101,8 @@ function updateServerRules() {
 
 	if (isWeatherSupported()) {
 		if (getServerConfig() != false) {
-			if (typeof getGameConfig().weatherNames[getGame()] != "undefined") {
-				let tempText = getGameConfig().weatherNames[getGame()][getServerConfig().weather];
+			if (getWeatherData(getServerConfig().weather) != false) {
+				let tempText = getWeatherData(getServerConfig().weather).name;
 				timeWeatherRule.push(tempText);
 			}
 		}
@@ -124,14 +124,16 @@ function updateServerRules() {
 
 function getWeatherFromParams(params) {
 	if (isNaN(params)) {
-		for (let i in getGameConfig().weatherNames[getGame()]) {
-			if (toLowerCase(getGameConfig().weatherNames[getGame()][i]).indexOf(toLowerCase(params)) != -1) {
+		for (let i in getGameConfig().weather[getGame()]) {
+			if (toLowerCase(getGameConfig().weather[getGame()][i].name).indexOf(toLowerCase(params)) != -1) {
 				return i;
 			}
 		}
 	} else {
-		if (typeof getGameConfig().weatherNames[getGame()][params] != "undefined") {
-			return toInteger(params);
+		for (let i in getGameConfig().weather[getGame()]) {
+			if (typeof getGameConfig().weather[getGame()][i].weatherId != "undefined") {
+				return toInteger(i);
+			}
 		}
 	}
 
@@ -439,11 +441,13 @@ function isClientInitialized(client) {
 // ===========================================================================
 
 function getPedForNetworkEvent(ped) {
-	if (getGame() == AGRP_GAME_GTA_IV) {
-		return ped;
-	} else {
-		return ped.id;
-	}
+	//if (getGame() == AGRP_GAME_GTA_IV) {
+	//	return ped;
+	//} else {
+	//	return ped.id;
+	//}
+
+	return ped.id;
 }
 
 // ===========================================================================
@@ -638,6 +642,10 @@ function processPlayerEnteringExitingProperty(client) {
 // ===========================================================================
 
 function getPlayerCountryISOCode(client) {
+	if (getPlayerIP(client) == "127.0.0.1" || getPlayerIP(client).indexOf("192.168.") != -1) {
+		return "US";
+	}
+
 	return module.geoip.getCountryISO(getGlobalConfig().geoIPCountryDatabaseFilePath, getPlayerIP(client));
 }
 

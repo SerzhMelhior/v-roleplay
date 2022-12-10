@@ -224,13 +224,16 @@ function setLocalPlayerInterior(interior) {
 
 // ===========================================================================
 
-function setSnowState(falling, ground) {
+function setSnowState(falling, ground, forceGround) {
 	logToConsole(LOG_DEBUG, `[AGRP.Utilities] Setting falling snow to ${falling} and ground snow to ${ground}`);
 	snowing = falling;
-	if (ground) {
-		forceSnowing(false);
-		forceSnowing(ground);
-	}
+	//snow.force = ground;
+	//if (forceGround == true) {
+	//	forceSnowing(forceGround);
+	//	groundSnow.flush();
+	//} else {
+	//	snow.enabled = ground;
+	//}
 }
 
 // ===========================================================================
@@ -602,7 +605,7 @@ function updateLocalPlayerMoney() {
 	}
 
 	if (getGame() == AGRP_GAME_GTA_IV) {
-		natives.setMultiplayerHudCash(amount);
+		natives.setMultiplayerHudCash(localPlayerMoney);
 	}
 }
 

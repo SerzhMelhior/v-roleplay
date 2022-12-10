@@ -81,6 +81,8 @@ function loadCommands() {
 			new CommandData("chatfilter", toggleAccountProfanityFilterCommand, "", getStaffFlagValue("None"), true, false, "Turns on/off profanity filter"),
 			new CommandData("chatemoji", toggleAccountReplaceEmojiCommand, "", getStaffFlagValue("None"), true, false, "Turns on/off automatic emoji"),
 			new CommandData("emoji", toggleAccountReplaceEmojiCommand, "", getStaffFlagValue("None"), true, false, "Turns on/off automatic emoji"),
+			//new CommandData("resetkeybinds", resetKeyBindsCommand, "", getStaffFlagValue("None"), true, false, "Resets all your keybinds to default"),
+			//new CommandData("copykeybinds", copyKeyBindsToServerCommand, "<server id>", getStaffFlagValue("None"), true, false, "Copies all your current keybinds to another server"),
 			//new CommandData("noblood", toggleAccountHideBloodCommand, "", getStaffFlagValue("None"), true, false, "Turns on/off blood in-game"),
 		],
 		ammunation: [],
@@ -593,6 +595,7 @@ function loadCommands() {
 			new CommandData("biz", getPlayerCurrentBusinessCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Gets which business a player is at/in"),
 			new CommandData("business", getPlayerCurrentBusinessCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Gets which business a player is at/in"),
 			new CommandData("house", getPlayerCurrentHouseCommand, "<player name/id>", getStaffFlagValue("BasicModeration"), true, true, "Gets which house a player is at/in"),
+			//new CommandData("clearchat", clearChatCommand, "", getStaffFlagValue("None"), true, true, "Clears the chat"),
 		],
 		startup: [],
 		subAccount: [
@@ -719,6 +722,9 @@ function addAllCommandHandlers() {
 
 // ===========================================================================
 
+/**
+ * @return {CommandData} command
+ */
 function getCommand(command) {
 	let commandGroups = getCommands()
 	for (let i in commandGroups) {
@@ -735,6 +741,9 @@ function getCommand(command) {
 
 // ===========================================================================
 
+/**
+ * @return {CommandData} command
+ */
 function getCommandData(command) {
 	return getCommand(command);
 }
@@ -1029,10 +1038,10 @@ function cacheAllCommandsAliases() {
 
 // ===========================================================================
 
-function getCommandAliasesNames(command) {
+function getCommandAliasesNames(commandData) {
 	let commandAliases = [];
-	for (let i in command.aliases) {
-		commandAliases.push(command.aliases[i].name);
+	for (let i in commandData.aliases) {
+		commandAliases.push(commandData.aliases[i].name);
 	}
 
 	return commandAliases;

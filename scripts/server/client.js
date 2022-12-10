@@ -115,7 +115,7 @@ class ClientData {
 
 		// Misc
 		this.changingCharacterName = false;
-		this.currentPickup = false;
+		this.currentPickup = null;
 		this.usingSkinSelect = false;
 		this.keyBinds = [];
 		this.incomingDamageMultiplier = 1;
@@ -228,7 +228,7 @@ function initClient(client) {
 	sendPlayerCurrencyString(client);
 	sendPlayerGUIColours(client);
 	sendPlayerGUIInit(client);
-	updatePlayerSnowState(client);
+	updatePlayerSnowState(client, getServerConfig().groundSnow);
 
 	//logToConsole(LOG_DEBUG, `[AGRP.Account] Showing connect camera to ${getPlayerDisplayForConsole(client)} ...`);
 	//showConnectCameraToPlayer(client);

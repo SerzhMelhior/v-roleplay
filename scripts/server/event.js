@@ -205,12 +205,6 @@ function onPedExitingVehicle(event, ped, vehicle) {
 		let client = getClientFromPlayerElement(ped);
 		getPlayerData(client).pedState = AGRP_PEDSTATE_EXITINGVEHICLE;
 	}
-
-	if (!getVehicleData(vehicle).spawnLocked) {
-		getVehicleData(vehicle).spawnPosition = getVehiclePosition(vehicle);
-		getVehicleData(vehicle).spawnRotation = getVehicleHeading(vehicle);
-		getVehicleData(vehicle).needsSaved = true;
-	}
 }
 
 // ===========================================================================
@@ -247,16 +241,16 @@ function onResourceStop(event, resource) {
 
 function onPedEnteredSphere(event, ped, sphere) {
 	logToConsole(LOG_WARN | LOG_DEBUG, `[AGRP.Event] Ped ${ped.id} entered sphere ${sphere.id}!`);
-	if (ped.isType(ELEMENT_PLAYER)) {
-		let client = getClientFromPlayerElement(ped);
+	//if (ped.isType(ELEMENT_PLAYER)) {
+	//	let client = getClientFromPlayerElement(ped);
 
-		// Handled client-side since server spheres aren't showing on GTAC atm (bug)
-		//if (isPlayerOnJobRoute(client)) {
-		//	if (sphere == getJobRouteLocationData(getPlayerJob(client), getPlayerJobRoute(client), getPlayerJobRouteLocation(client)).marker) {
-		//		playerArrivedAtJobRouteLocation(client);
-		//	}
-		//}
-	}
+	// Handled client-side since server spheres aren't showing on GTAC atm (bug)
+	//if (isPlayerOnJobRoute(client)) {
+	//	if (sphere == getJobRouteLocationData(getPlayerJob(client), getPlayerJobRoute(client), getPlayerJobRouteLocation(client)).marker) {
+	//		playerArrivedAtJobRouteLocation(client);
+	//	}
+	//}
+	//}
 }
 
 // ===========================================================================
@@ -286,6 +280,7 @@ function onPedPickupPickedUp(event, ped, pickup) {
 
 // ===========================================================================
 
+/*
 function onPedWasted(event, ped, killerPed, weapon, pedPiece) {
 	logToConsole(LOG_WARN | LOG_DEBUG, `[AGRP.Event] Ped ${ped.id} wasted by ped ${killerPed.id}!`);
 
@@ -297,6 +292,7 @@ function onPedWasted(event, ped, killerPed, weapon, pedPiece) {
 		onPlayerWasted(getClientFromPlayerElement(ped), killerClient, weapon, pedPiece);
 	}
 }
+*/
 
 // ===========================================================================
 
@@ -396,12 +392,12 @@ function onPlayerDeath(client, killer, weapon, pedPiece) {
 function onPedSpawn(ped) {
 	logToConsole(LOG_WARN | LOG_DEBUG, `[AGRP.Event] Ped ${ped.id} spawned!`);
 
-	if (ped.type == ELEMENT_PLAYER) {
-		if (getGame() != AGRP_GAME_MAFIA_ONE && getGame() != AGRP_GAME_GTA_IV) {
-			//setTimeout(onPlayerSpawn, 250, ped);
-			//onPlayerSpawn();
-		}
-	}
+	//if (ped.type == ELEMENT_PLAYER) {
+	//	if (getGame() != AGRP_GAME_MAFIA_ONE) {
+	//		//setTimeout(onPlayerSpawn, 250, getClientFromPlayerElement(ped));
+	//		//onPlayerSpawn(getClientFromPlayerElement(ped));
+	//	}
+	//}
 }
 
 // ===========================================================================
@@ -458,7 +454,7 @@ async function onPlayerSpawn(client) {
 	//	return false;
 	//}
 
-	if (isCustomCameraSupported() && getGame() != AGRP_GAME_GTA_IV && getGame() != AGRP_GAME_GTA_IV_EFLC) {
+	if (isCustomCameraSupported()) {
 		logToConsole(LOG_DEBUG, `[AGRP.Event] Restoring ${getPlayerDisplayForConsole(client)}'s camera`);
 		restorePlayerCamera(client);
 	}
@@ -509,10 +505,10 @@ async function onPlayerSpawn(client) {
 		setPlayer2DRendering(client, true, true, true, true, true, true);
 	}
 
-	if (isGameFeatureSupported("snow")) {
-		logToConsole(LOG_DEBUG, `[AGRP.Event] Sending snow states to ${getPlayerDisplayForConsole(client)}`);
-		updatePlayerSnowState(client);
-	}
+	//if (isGameFeatureSupported("snow")) {
+	//	logToConsole(LOG_DEBUG, `[AGRP.Event] Sending snow states to ${getPlayerDisplayForConsole(client)}`);
+	//	updatePlayerSnowState(client, true);
+	//}
 
 	if (areServerElementsSupported() && isGameFeatureSupported("walkStyle")) {
 		logToConsole(LOG_DEBUG, `[AGRP.Event] Setting player walking style for ${getPlayerDisplayForConsole(client)}`);
@@ -589,11 +585,13 @@ async function onPlayerSpawn(client) {
 		sendNameTagDistanceToClient(client, getServerConfig().nameTagDistance);
 	}
 
-	if (!areServerElementsSupported() || getGame() == AGRP_GAME_MAFIA_ONE) {
+	if (!areServerElementsSupported() || getGame() == AGRP_GAME_MAFIA_ONE || getGame() == AGRP_GAME_GTA_IV) {
 		logToConsole(LOG_DEBUG, `[AGRP.Event] Sending properties, jobs, and vehicles to ${getPlayerDisplayForConsole(client)} (no server elements)`);
 		sendAllBusinessesToPlayer(client);
 		sendAllHousesToPlayer(client);
-		sendAllJobsToPlayer(client);
+		if (getGame() != AGRP_GAME_GTA_IV) {
+			sendAllJobsToPlayer(client);
+		}
 		requestPlayerPedNetworkId(client);
 	}
 
@@ -629,7 +627,9 @@ async function onPlayerSpawn(client) {
 
 	if (areServerElementsSupported()) {
 		if (getGlobalConfig().playerStreamInDistance == -1 || getGlobalConfig().playerStreamOutDistance == -1) {
-			getPlayerPed(client).netFlags.distanceStreaming = false;
+			//getPlayerPed(client).netFlags.distanceStreaming = false;
+			setElementStreamInDistance(getPlayerPed(client), 99999);
+			setElementStreamOutDistance(getPlayerPed(client), 99999);
 		} else {
 			setElementStreamInDistance(getPlayerPed(client), getServerConfig().playerStreamInDistance);
 			setElementStreamOutDistance(getPlayerPed(client), getServerConfig().playerStreamOutDistance);
@@ -676,10 +676,20 @@ function onPlayerCommand(event, client, command, params) {
 function onPedExitedVehicle(event, ped, vehicle, seat) {
 	logToConsole(LOG_WARN | LOG_DEBUG, `[AGRP.Event] Ped ${ped.id} exited vehicle ${vehicle.id} from seat ${seat}!`);
 
+	if (getVehicleData(vehicle) == false) {
+		return false;
+	}
+
 	if (ped.isType(ELEMENT_PLAYER)) {
 		let client = getClientFromPlayerElement(ped);
 		if (client != null) {
 			getPlayerData(client).pedState = AGRP_PEDSTATE_READY;
+
+			if (getVehicleData(vehicle).spawnLocked == false && canPlayerManageVehicle(client, vehicle) == true) {
+				getVehicleData(vehicle).spawnPosition = getVehiclePosition(vehicle);
+				getVehicleData(vehicle).spawnRotation = getVehicleHeading(vehicle);
+				getVehicleData(vehicle).needsSaved = true;
+			}
 
 			stopRadioStreamForPlayer(client);
 
@@ -712,10 +722,6 @@ function onPedEnteredVehicle(event, ped, vehicle, seat) {
 		if (client != null) {
 			if (getPlayerData(client) == false) {
 				return false;
-			}
-
-			if (getGame() == AGRP_GAME_GTA_IV) {
-				vehicle = getVehicleFromIVNetworkId(clientVehicle);
 			}
 
 			if (!getVehicleData(vehicle)) {
