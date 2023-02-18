@@ -705,6 +705,10 @@ function loadCommands() {
 // ===========================================================================
 
 function addAllCommandHandlers() {
+	if (!isGameFeatureSupported("commandHandler")) {
+		return false;
+	}
+
 	let commandCount = 0;
 	let commands = getCommands();
 	for (let i in commands) {
@@ -715,8 +719,8 @@ function addAllCommandHandlers() {
 		}
 	}
 
-	removeCommandHandler("help");
-	addCommandHandler("help", helpCommand);
+	//removeCommandHandler("help");
+	//addCommandHandler("help", helpCommand);
 
 	logToConsole(LOG_INFO, `[V.RP.Command] ${commandCount} command handlers added!`);
 }
